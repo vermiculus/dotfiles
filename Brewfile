@@ -1,3 +1,10 @@
+#!/usr/bin/env brew bundle
+# -*- mode: sh; fill-column: 72 -*-
+
+tap caskroom/cask
+tap homebrew/dupes
+tap homebrew/science
+
 install autoconf
 install automake
 install brew-cask
