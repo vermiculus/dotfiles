@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# install homebrew
+ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+
+# run brewfile
+brew bundle
