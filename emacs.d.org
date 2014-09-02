@@ -1,0 +1,36 @@
+#+Title: Emacs Customizations
+#+Author: Sean Allred
+#+Date: [2014-09-02 Tue]
+
+* Introduction
+This file holds the relevant portion of my =.emacs.d=.  This includes
+many different types of customizations:
+- standard initialization file,
+- customizations (via [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html#Easy-Customization][Custom]]), and
+- download and installation procedures for custom packages.
+Of course this list isn't comprehensive; this directory will hold
+/everything/ that has to do with Emacs aside from the actual
+distribution.
+
+** Creating the Directory
+This directory is maintained both as an [[http://orgmode.org][Org]] file and its tangled
+output.  Everything in the directory will be obtainable through this
+file, whether it be from embedded shell scripts or standard, tangled
+output.  With a recent Emacs installed, use =M-x org-babel-tangle= to
+tangle the file.  This will create a Makefile and all of the necessary
+Lisp files needed to fully reproduce this installation.
+
+* Initialization File
+:PROPERTIES:
+:tangle:   "init.el"
+:END:
+
+* Custom File
+:PROPERTIES:
+:tangle:   ".custom.el"
+:END:
+
+* COMMENT File Local Variables
+# Local Variables:
+# org-edit-src-content-indentation: 0
+# End:
