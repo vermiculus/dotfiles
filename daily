@@ -1,0 +1,15 @@
+#!/bin/sh
+
+sudo -v
+
+# update brews
+brew update
+brew upgrade
+
+# update gems
+sudo gem update --system
+sudo gem update
+
+# update tex distribution
+sudo tlmgr update --self
+sudo tlmgr update --all
