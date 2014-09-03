@@ -1,7 +1,15 @@
 #!/bin/sh
 
+sudo -v
+
 # install homebrew
 ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
 
 # run brewfile
 brew bundle
+
+# update rubygems
+sudo gem update --system
+
+# install gems
+gem install $(tr '\n' ' ' < Gemfile)
