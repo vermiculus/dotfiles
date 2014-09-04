@@ -47,6 +47,7 @@ install python
 install python3
 install ruby
 install saxon
+install terminal-notifier
 install texinfo
 install the_silver_searcher
 install tidyp
