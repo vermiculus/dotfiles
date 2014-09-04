@@ -2,6 +2,9 @@
 #+Author: Sean Allred
 #+Date: [2014-09-02 Tue]
 
+#+PROPERTY: tangle ".emacs.d/init.el"
+#+PROPERTY: mkdirp t
+
 * Introduction
 This file holds the relevant portion of my =.emacs.d=.  This includes
 many different types of customizations:
@@ -20,15 +23,49 @@ output.  With a recent Emacs installed, use =M-x org-babel-tangle= to
 tangle the file.  This will create a Makefile and all of the necessary
 Lisp files needed to fully reproduce this installation.
 
-* Initialization File
-:PROPERTIES:
-:tangle:   "init.el"
-:END:
+** Byte Compilation
+#+BEGIN_SRC elisp :tangle no
+(add-hook 'org-babel-post-tangle-hook
+          (lambda () (interactive)
+            (mapc 'byte-compile-file
+                  '("init.el"))))
+#+END_SRC
+* File Management
+** Creating Temporary Files
+#+BEGIN_SRC elisp
+(defun create-temporary-file (ext)
+  "Creates a temporary file with EXT as the extension."
+  (interactive "sExtension: ")
+  (find-file
+   (make-temp-file
+    "" nil
+    (concat "." ext))))
+
+(global-set-key (kbd "C-x t") 'create-temporary-file)
+#+END_SRC
 
 * Custom File
-:PROPERTIES:
-:tangle:   ".custom.el"
-:END:
+** Setting a Custom Custom File
+Emacs is famous for its customizability.  There are many, many
+variables that directly support being customized with =custom.el=.
+All of these variables can visually clog up the initialization file if
+they are included there.
+
+Fortunately, Emacs supports the customization of where all of these
+customizations are stored.  (A little nuts, right?)
+#+BEGIN_SRC elisp
+  (load
+   (setq custom-file ".emacs-custom.el"))
+#+END_SRC
+Remember: the ~set~ family of functions returns the value that the
+variable was set to.
+
+** Customizations
+Since it would be unreasonable to set up a system by which =custom.el=
+would edit the Org source file for its customizations, I've decided to
+track these customizations in its own file.  Sorry to disappoint!
+
+If anything interesting comes up, explanations will be placed here.
 
 * COMMENT File Local Variables
 # Local Variables:
