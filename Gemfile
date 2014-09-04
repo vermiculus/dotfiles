@@ -7,3 +7,4 @@ rake
 rdoc
 sass
 test-unit
+ronn
