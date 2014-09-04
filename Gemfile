@@ -8,3 +8,4 @@ rdoc
 sass
 test-unit
 ronn
+github
