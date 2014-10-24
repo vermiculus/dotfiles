@@ -8,9 +8,13 @@ tap homebrew/science
 install autoconf
 install automake
 install brew-cask
+install boost
+install cedet
 install clisp
 install cmake
+install ctags
 install coreutils
+install doxymacs
 install emacs
 install fish
 install fortune
@@ -21,6 +25,7 @@ install gmp
 install gnupg
 install gnupg2
 install gnutls
+install gource
 install haskell-platform
 install help2man
 install imagemagick
@@ -28,6 +33,7 @@ install ispell
 install libpng
 install librsvg
 install libtiff
+install libxml2
 install lilypond
 install lua
 install m4
@@ -47,6 +53,9 @@ install python
 install python3
 install ruby
 install saxon
+install scala
+install sublime-text
+install terminal-notifier
 install texinfo
 install the_silver_searcher
 install tidyp

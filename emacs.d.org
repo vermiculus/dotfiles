@@ -7,13 +7,17 @@
 
 * Introduction
 This file holds the relevant portion of my =.emacs.d=.  This includes
-many different types of customizations:
-- standard initialization file,
-- customizations (via [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html#Easy-Customization][Custom]]), and
-- download and installation procedures for custom packages.
+many different types of customizations, including
+- my standardized, cross-platform initialization file and
+- download and installation procedures for custom packages (those not
+  on any ELPA).
 Of course this list isn't comprehensive; this directory will hold
 /everything/ that has to do with Emacs aside from the actual
-distribution.
+distribution.  This /file/ will include everything it reasonably can.
+
+All variables and functions that I introduce are prefixed with ~*-~ if
+they are intended to be customized and ~*--~ if they are not so
+intended.
 
 ** Creating the Directory
 This directory is maintained both as an [[http://orgmode.org][Org]] file and its tangled
@@ -24,28 +28,165 @@ tangle the file.  This will create a Makefile and all of the necessary
 Lisp files needed to fully reproduce this installation.
 
 ** Byte Compilation
-#+BEGIN_SRC elisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (add-hook 'org-babel-post-tangle-hook
           (lambda () (interactive)
             (mapc 'byte-compile-file
                   '("init.el"))))
-#+END_SRC
+#+end_src
+
+* A Multi-Platform Configuration
+One of the things I like about Emacs is its consistent availability on
+a variety of platforms---far more even than I've ever heard of.  I
+mainly use
+- Max OS X,
+- Windows 7+, and
+- Red Hat.
+Do effect this, I use the variable ~system-type~.  These variables are
+simply introduced to make code more readable.
+#+begin_src emacs-lisp
+(setq
+ ,*--windows-p (equal system-type 'windows-nt)
+ ,*--osx-p (equal system-type 'darwin)
+ ,*--redhat-p (equal system-type 'gnu/linux))
+#+end_src
+
+If there ever is an occasion to toggle configuration based on the
+current window system (or lack thereof), there is ~window-system~.
+
 * File Management
 ** Creating Temporary Files
-#+BEGIN_SRC elisp
-(defun create-temporary-file (ext)
+#+begin_src emacs-lisp
+(defun *-create-temporary-file (ext &optional prefix)
   "Creates a temporary file with EXT as the extension."
   (interactive "sExtension: ")
-  (find-file
    (make-temp-file
-    "" nil
-    (concat "." ext))))
+    (concat "temp-file--" prefix) nil
+    (concat "." ext)))
 
-(global-set-key (kbd "C-x t") 'create-temporary-file)
+(defun *-find-temporary-file (ext &optional prefix)
+  (interactive "sExtension: ")
+  (find-file (*-create-temporary-file ext prefix)))
+
+(global-set-key (kbd "C-x t") '*find--temporary-file)
+#+end_src
+
+* Package Management
+#+begin_src elisp
+(require 'package)
+(add-to-list 'package-archives
+  '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives
+  '("melpa" . "http://melpa.melpa.org/packages/") t)
+#+end_src
+* Customize
+#+begin_src elisp
+(setq custom-file (concat user-emacs-directory ".custom.el"))
+#+end_src
+** Fonts
+#+BEGIN_SRC elisp
+(set-default-font "Source Code Pro")
 #+END_SRC
+*** TODO add download instructions
+* Magit
+#+begin_src elisp
+(global-set-key (kbd "M-?") #'magit-status)
+#+end_src
+* [[https://github.com/capitaomorte/yasnippet][Snippets]]
+=yasnippet= is a great way to manage mode-specific code snippets.
+Since =yasnippet= has its own snippet creation workflow from within
+emacs, they are not created here.
 
+* [[https://github.com/chrisdone/god-mode][God Mode]]
+Modal-editing the emacs way.  When in this minor mode, modifier keys
+are more-or-less stripped away.  See [[https://github.com/chrisdone/god-mode][upstream]] for details.
+
+These are the recommended settings.
+#+BEGIN_SRC elisp
+(require 'god-mode)
+(global-set-key (kbd "<escape>") 'god-local-mode)
+
+(defcustom *-god-mode-update-cursor-affected-forms
+  '(god-local-mode buffer-read-only)
+  "If any of these forms evaluate to non-nil, the cursor will change.")
+
+(defcustom *-god-mode-update-cursor-cursor
+  'hbar
+  "The cursor to use")
+
+(eval-when-compile (require 'cl))
+(defun *--god-mode-update-cursor ()
+  (setq cursor-type
+        (if (some #'eval *-god-mode-update-cursor-affected-forms)
+            ,*-god-mode-update-cursor-cursor t)))
+
+(mapcar
+ (lambda (hook)
+   (add-hook hook #'*--god-mode-update-cursor))
+ '(god-mode-enabled-hook god-mode-disabled-hook))
+
+(define-key god-local-mode-map (kbd ".") 'repeat)
+
+(global-set-key (kbd "C-x C-1") 'delete-other-windows)
+(global-set-key (kbd "C-x C-2") 'split-window-below)
+(global-set-key (kbd "C-x C-3") 'split-window-right)
+(global-set-key (kbd "C-x C-0") 'delete-window)
+#+END_SRC
+* TeX
+TeX is a typesetting system that produces documents of high quality
+and typographical consistency.  I'm a heavy user of this system under
+AUCTeX and RefTeX, two of the most indispensible resources available
+for TeX under emacs.
+
+** Finding Documentation with TeXdoc
+=texdoc= is an application that comes with most TeX distributions.
+This function brings them up within emacs.
+#+begin_src elisp
+(defvar *-TeX-find-texdoc-temp-file-format
+  "TeX-find-texdoc--%s--")
+
+(defun *-TeX-find-texdoc (texdoc-query)
+  (interactive "sPackage: ")
+  (if (string-equal texdoc-query "")
+      (error "Cannot query texdoc against an empty string")
+    (let ((texdoc-output (shell-command-to-string
+                          (format "texdoc -l -M %s"
+                                  texdoc-query))))
+      (if (string-match "no documentation found" texdoc-output)
+          (error "Sorry, no documentation found for %s" texdoc-query)
+        (let ((texdoc-file (nth 2 (split-string texdoc-output))))
+          (if (file-readable-p texdoc-file)
+              (let ((new-file (*-create-temporary-file
+                               ".pdf"
+                               (format *-TeX-find-texdoc-temp-file-format
+                                       texdoc-query
+                                       texdoc-file))))
+                (copy-file texdoc-file new-file t)
+                (find-file-other-window new-file))
+            (error "Sorry, the file returned by texdoc for %s isn't readable"
+                   texdoc-query)))))))
+#+end_src
+* C Modes
+#+BEGIN_SRC elisp
+(require 'find-file)
+(require 'cc-mode)
+(define-key c-mode-base-map (kbd "C-c RET") #'ff-find-related-file)
+(define-key c-mode-base-map (kbd "C-c C-'") #'compile)
+#+END_SRC
+* M4
+#+begin_src emacs-lisp
+(require 'm4-mode)
+(setq m4-font-lock-keywords
+      '(("\\(\\b\\(m4_\\)?dnl\\b\\).*$" . font-lock-comment-face)
+        ("\\$#" . font-lock-variable-name-face)
+        ("\\$\\@" . font-lock-variable-name-face)
+        ("\\$\\*" . font-lock-variable-name-face)
+        ("\\b\\(builtin\\|change\\(com\\|quote\\|word\\)\\|d\\(e\\(bug\\(file\\|mode\\)\\|cr\\|f\\(ine\\|n\\)\\)\\|iv\\(ert\\|num\\)\\|nl\\|umpdef\\)\\|e\\(rrprint\\|syscmd\\|val\\)\\|f\\(ile\\|ormat\\)\\|gnu\\|i\\(f\\(def\\|else\\)\\|n\\(c\\(lude\\|r\\)\\|d\\(ex\\|ir\\)\\)\\)\\|l\\(en\\|ine\\)\\|m\\(4\\(exit\\|wrap\\)\\|aketemp\\)\\|p\\(atsubst\\|opdef\\|ushdef\\)\\|regexp\\|s\\(hift\\|include\\|ubstr\\|ys\\(cmd\\|val\\)\\)\\|tra\\(ceo\\(ff\\|n\\)\\|nslit\\)\\|un\\(d\\(efine\\|ivert\\)\\|ix\\)\\)\\b" . font-lock-keyword-face)
+        ("\\b\\(m4_\\(builtin\\|change\\(com\\|quote\\|word\\)\\|d\\(e\\(bug\\(file\\|mode\\)\\|cr\\|f\\(ine\\|n\\)\\)\\|iv\\(ert\\|num\\)\\|nl\\|umpdef\\)\\|e\\(rrprint\\|syscmd\\|val\\)\\|f\\(ile\\|ormat\\)\\|i\\(f\\(def\\|else\\)\\|n\\(c\\(lude\\|r\\)\\|d\\(ex\\|ir\\)\\)\\)\\|l\\(en\\|ine\\)\\|m\\(4\\(_undefine\\|exit\\|wrap\\)\\|aketemp\\)\\|p\\(atsubst\\|opdef\\|ushdef\\)\\|regexp\\|s\\(hift\\|include\\|ubstr\\|ys\\(cmd\\|val\\)\\)\\|tra\\(ceo\\(ff\\|n\\)\\|nslit\\)\\|undivert\\)\\)\\b" . font-lock-keyword-face)))
+(modify-syntax-entry ?# "@" m4-mode-syntax-table)
+#+end_src
 * Custom File
-** Setting a Custom Custom File
+** TODO Setting a Custom Custom File
 Emacs is famous for its customizability.  There are many, many
 variables that directly support being customized with =custom.el=.
 All of these variables can visually clog up the initialization file if
@@ -53,10 +194,10 @@ they are included there.
 
 Fortunately, Emacs supports the customization of where all of these
 customizations are stored.  (A little nuts, right?)
-#+BEGIN_SRC elisp
-  (load
-   (setq custom-file ".emacs-custom.el"))
-#+END_SRC
+#+begin_src emacs-lisp
+;(load
+ (setq custom-file ".emacs-custom.el");)
+#+end_src
 Remember: the ~set~ family of functions returns the value that the
 variable was set to.
 
@@ -70,4 +211,5 @@ If anything interesting comes up, explanations will be placed here.
 * COMMENT File Local Variables
 # Local Variables:
 # org-edit-src-content-indentation: 0
+# eval: (add-hook 'org-babel-post-tangle-hook (lambda nil (byte-compile-file "~/dotfiles/.emacs.d/init.el") (load-file "~/dotfiles/.emacs.d/init.elc")))
 # End:
