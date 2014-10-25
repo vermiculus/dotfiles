@@ -1,9 +1,11 @@
 #+Title: Emacs Customizations
 #+Author: Sean Allred
-#+Date: [2014-09-02 Tue]
+#+Date: [2014-10-24 Fri]
+#+Macro: version 0.1
 
 #+PROPERTY: tangle ".emacs.d/init.el"
 #+PROPERTY: mkdirp t
+#+OPTIONS: tasks:nil toc:1
 
 * Introduction
 This file holds the relevant portion of my =.emacs.d=.  This includes
@@ -47,8 +49,8 @@ simply introduced to make code more readable.
 #+begin_src emacs-lisp
 (setq
  ,*--windows-p (equal system-type 'windows-nt)
- ,*--osx-p (equal system-type 'darwin)
- ,*--redhat-p (equal system-type 'gnu/linux))
+ ,*--osx-p     (equal system-type 'darwin)
+ ,*--redhat-p  (equal system-type 'gnu/linux))
 #+end_src
 
 If there ever is an occasion to toggle configuration based on the
@@ -67,19 +69,11 @@ current window system (or lack thereof), there is ~window-system~.
 (defun *-find-temporary-file (ext &optional prefix)
   (interactive "sExtension: ")
   (find-file (*-create-temporary-file ext prefix)))
-
-(global-set-key (kbd "C-x t") '*find--temporary-file)
 #+end_src
 
 * Package Management
 #+begin_src elisp
 (require 'package)
-(add-to-list 'package-archives
-  '("melpa-stable" . "http://stable.melpa.org/packages/") t)
-(add-to-list 'package-archives
-  '("melpa" . "http://melpa.melpa.org/packages/") t)
-#+end_src
-#+begin_src elisp
 (defun *-require-package (pkg)
   (let ((pkg (if (consp pkg) (car pkg) pkg))
         (ftr (if (consp pkg) (cdr pkg) pkg)))
@@ -114,33 +108,6 @@ current window system (or lack thereof), there is ~window-system~.
         yasnippet
         ))
 #+end_src
-* Customize
-#+begin_src elisp
-(setq custom-file (concat user-emacs-directory ".custom.el"))
-#+end_src
-** Fonts
-These are default fonts.  The fonts I /use/ are properly customized.
-#+BEGIN_SRC elisp
-(defcustom *-text-sans-type
-  "Arial"
-  "The type to use for sans-serif body text."
-  :group '*-fonts)
-
-(defcustom *-text-serif-type
-  "Georgia"
-  "The type to use for sans-serif body text."
-  :group '*-fonts)
-
-(defcustom *-text-mono-type
-  "Courier"
-  "The type to use for sans-serif body text."
-  :group '*-fonts)
-
-(set-frame-font *-text-mono-type)
-#+END_SRC
-*** TODO add download instructions
-*** TODO Use faces instead of strings
-- then I'll be able to use different faces for text and ~code~.
 * Keybindings
 #+begin_src elisp
 (defun *-with-map-bind-keys-to-functions (map ft-k-f)
@@ -154,26 +121,40 @@ These are default fonts.  The fonts I /use/ are properly customized.
 
 (defun *-after-feature-set-keys-to-functions (feature k-f)
   (when k-f
-    (eval-after-load (if (and feature (not (booleanp feature)))
+    (eval-after-load (if (not (booleanp feature))
                          feature 'emacs)
       (prog1 t
         (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
     (*-after-feature-set-keys-to-functions feature (rest k-f))))
 #+end_src
+
 ** Global
 #+begin_src emacs-lisp
 (*-with-map-bind-keys-to-functions
  global-map
  '((magit "M-?" #'magit-status)
-   ("C-M->" #'mc/mark-next-like-this)
-   ("C-M-S-r" #'mc/mark-all-like-this-dwim)))
+   (multiple-cursors "C-M->" #'mc/mark-next-like-this)
+   (multiple-cursors "C-M-S-r" #'mc/mark-all-like-this-dwim)
+   (t "C-x t" #'*-find-temporary-file)
+   (t "<escape>" #'god-local-mode)
+   (t "C-x C-1" #'delete-other-windows)
+   (t "C-x C-2" #'split-window-below)
+   (t "C-x C-3" #'split-window-right)
+   (t "C-x C-0" #'delete-window)))
 #+end_src
+
+** TODO Enable God-Mode globally
+Neither of these seem to work, but figure it out.
+- =god-mode-all=
+- =god-mode=
+
 ** AUCTeX
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
  '((latex "C-c t" #'*-TeX-find-texdoc)))
 #+end_src
+
 ** C Modes
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
@@ -181,17 +162,21 @@ These are default fonts.  The fonts I /use/ are properly customized.
  '((find-file "C-c RET" #'ff-find-related-file)
    (cc-mode "C-c C-'" #'compile)))
 #+end_src
+
 ** Isearch
-#+begin_src emacs-lisp
-(defun *-isearch-yank-thing-at-point ()
-  (interactive)
-  (isearch-yank-string (thing-at-point 'symbol)))
-#+end_src
 #+begin_src emacs-lisp
 (*-with-map-bind-keys-to-functions
  isearch-mode-map
  '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
 #+end_src
+
+** God
+#+begin_src emacs-lisp
+(*-with-map-bind-keys-to-functions
+ god-local-mode-map
+ '((god-mode "." #'repeat)))
+#+end_src
+
 * [[https://github.com/magit/magit][Magit]]
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
@@ -203,7 +188,7 @@ Modal-editing the emacs way.  When in this minor mode, modifier keys
 are more-or-less stripped away.  See [[https://github.com/chrisdone/god-mode][upstream]] for details.
 
 These are the recommended settings.
-#+BEGIN_SRC elisp
+#+begin_src elisp
 (require 'god-mode)
 (global-set-key (kbd "<escape>") 'god-local-mode)
 
@@ -229,11 +214,8 @@ These are the recommended settings.
 
 (define-key god-local-mode-map (kbd ".") 'repeat)
 
-(global-set-key (kbd "C-x C-1") 'delete-other-windows)
-(global-set-key (kbd "C-x C-2") 'split-window-below)
-(global-set-key (kbd "C-x C-3") 'split-window-right)
-(global-set-key (kbd "C-x C-0") 'delete-window)
-#+END_SRC
+#+end_src
+
 * TeX
 TeX is a typesetting system that produces documents of high quality
 and typographical consistency.  I'm a heavy user of this system under
@@ -271,13 +253,21 @@ This function brings them up within emacs.
                    texdoc-query)))))))
 #+end_src
 * C Modes
+* Incremental Search (=isearch=)
+#+begin_src emacs-lisp
+(defun *-isearch-yank-thing-at-point ()
+  (interactive)
+  (isearch-yank-string (thing-at-point 'symbol)))
+#+end_src
+
 * M4
 #+begin_src emacs-lisp
 (eval-after-load 'm4-mode
  (modify-syntax-entry ?# "@" m4-mode-syntax-table))
 #+end_src
+
 * Custom File
-** TODO Setting a Custom Custom File
+** Setting a Custom Custom File
 Emacs is famous for its customizability.  There are many, many
 variables that directly support being customized with =custom.el=.
 All of these variables can visually clog up the initialization file if
@@ -286,18 +276,45 @@ they are included there.
 Fortunately, Emacs supports the customization of where all of these
 customizations are stored.  (A little nuts, right?)
 #+begin_src emacs-lisp
-;(load
- (setq custom-file ".emacs-custom.el");)
+(load
+ (setq custom-file
+       (concat user-emacs-directory
+               ".custom.el")))
 #+end_src
 Remember: the ~set~ family of functions returns the value that the
 variable was set to.
 
-** Customizations
+** Variable Customizations
 Since it would be unreasonable to set up a system by which =custom.el=
 would edit the Org source file for its customizations, I've decided to
 track these customizations in its own file.  Sorry to disappoint!
 
 If anything interesting comes up, explanations will be placed here.
+
+*** Fonts
+These are default fonts.  The fonts I /use/ are properly customized.
+#+BEGIN_SRC elisp
+(defcustom *-text-sans-type
+  "Arial"
+  "The type to use for sans-serif body text."
+  :group '*-fonts)
+
+(defcustom *-text-serif-type
+  "Georgia"
+  "The type to use for sans-serif body text."
+  :group '*-fonts)
+
+(defcustom *-text-mono-type
+  "Courier"
+  "The type to use for sans-serif body text."
+  :group '*-fonts)
+
+(set-frame-font *-text-mono-type)
+#+END_SRC
+
+**** TODO add download instructions
+**** TODO Use faces instead of strings
+- then I'll be able to use different faces for text and ~code~.
 
 * COMMENT File Local Variables
 # Local Variables:
