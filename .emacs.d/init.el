@@ -119,8 +119,7 @@
 
 (*--after-feature-set-keys-to-functions
  'multiple-cursors
- '(("C-M->" #'mc/mark-next-like-this)
-   ("M->" #'mc/mark-next-lines)))
+ '(("C-M->" #'mc/mark-next-like-this)))
 
 (require 'god-mode)
 (global-set-key (kbd "<escape>") 'god-local-mode)
@@ -128,12 +127,12 @@
 (defcustom *-god-mode-update-cursor-affected-forms
   '(god-local-mode buffer-read-only)
   "If any of these forms evaluate to non-nil, the cursor will change."
-  :group 'vermiculus-god)
+  :group '*-god)
 
 (defcustom *-god-mode-update-cursor-cursor
   'hbar
   "The cursor to use"
-  :group 'vermiculus-god)
+  :group '*-god)
 
 (defun *--god-mode-update-cursor ()
   (setq cursor-type
@@ -155,7 +154,7 @@
 (defcustom *-TeX-find-texdoc-temp-file-format
   "TeX-find-texdoc--%s--"
   "The prefix for temporary files created with `*-TeX-find-texdoc'"
-  :group 'vermiculus-tex)
+  :group '*-tex)
 
 (defun *-TeX-find-texdoc (texdoc-query)
   (interactive "sPackage: ")
@@ -178,5 +177,4 @@
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
 
-(require 'find-file)
-(require 'cc-mode)
+

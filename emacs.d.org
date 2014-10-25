@@ -181,8 +181,7 @@ These are default fonts.  The fonts I /use/ are properly customized.
 #+begin_src elisp
 (*--after-feature-set-keys-to-functions
  'multiple-cursors
- '(("C-M->" #'mc/mark-next-like-this)
-   ("M->" #'mc/mark-next-lines)))
+ '(("C-M->" #'mc/mark-next-like-this)))
 #+end_src
 * Magit
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
@@ -202,12 +201,12 @@ These are the recommended settings.
 (defcustom *-god-mode-update-cursor-affected-forms
   '(god-local-mode buffer-read-only)
   "If any of these forms evaluate to non-nil, the cursor will change."
-  :group 'vermiculus-god)
+  :group '*-god)
 
 (defcustom *-god-mode-update-cursor-cursor
   'hbar
   "The cursor to use"
-  :group 'vermiculus-god)
+  :group '*-god)
 
 (defun *--god-mode-update-cursor ()
   (setq cursor-type
@@ -239,7 +238,7 @@ This function brings them up within emacs.
 (defcustom *-TeX-find-texdoc-temp-file-format
   "TeX-find-texdoc--%s--"
   "The prefix for temporary files created with `*-TeX-find-texdoc'"
-  :group 'vermiculus-tex)
+  :group '*-tex)
 
 (defun *-TeX-find-texdoc (texdoc-query)
   (interactive "sPackage: ")
@@ -264,8 +263,7 @@ This function brings them up within emacs.
 #+end_src
 * C Modes
 #+BEGIN_SRC elisp
-(require 'find-file)
-(require 'cc-mode)
+
 #+END_SRC
 * M4
 #+begin_src emacs-lisp
