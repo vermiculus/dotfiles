@@ -1,0 +1,11 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: ddef
+# key: ddef
+# --
+dnl
+dnl
+dnl MACRO: ${1:M_Macro}
+dnl
+dnl $2
+dnl
+define(\`$1\', \`$0\')dnl

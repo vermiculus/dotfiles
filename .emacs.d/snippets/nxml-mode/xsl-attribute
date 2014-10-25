@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: xsl attribute
+# key: xattr
+# binding: direct-keybinding
+# --
+<xsl:attribute name="$1">
+xslval$0
+</xsl:attribute>

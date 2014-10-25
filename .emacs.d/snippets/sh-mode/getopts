@@ -1,0 +1,23 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: getopts
+# key: getopts
+# binding: direct-keybinding
+# --
+while getopts "${1::ab:}" opt; do
+    case $opt in
+    a)
+        echo "-a triggered"
+        ;;
+    b)
+        echo "-b triggered with arg $OPTARG
+        ;;
+    \?)
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+    :)
+        echo "Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    done
+done

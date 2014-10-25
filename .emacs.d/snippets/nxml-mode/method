@@ -1,0 +1,16 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: method
+# key: method
+# binding: direct-keybinding
+# --
+<method version="${1:1.0}"
+        shortdoc="$2"
+        return="$3"
+        return-list="${4:false}">
+  <call>$5</call>
+  <description summary="${6:$2}" />
+  <sorts type="$7" default="$8">
+    <sort name="$8" field="$9" />
+    sort$0
+  </sorts>
+</method>

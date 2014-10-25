@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: sort
+# key: sort
+# binding: direct-keybinding
+# --
+<sort name="$1" field="$2" />
+sort$0

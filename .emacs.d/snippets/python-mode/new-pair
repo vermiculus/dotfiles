@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: new-pair
+# key: newpair
+# binding: direct-keybinding
+# --
+('$1', '$2'),
+newpair$0
