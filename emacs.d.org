@@ -148,7 +148,6 @@ These are default fonts.  The fonts I /use/ are properly customized.
     (let ((feature (caar ft-k-f))
           (keys (cadar ft-k-f))
           (func (caddar ft-k-f)))
- (mapc #'print (list feature keys func))
       (eval-after-load feature
         '(define-key map (kbd keys) (eval func)))
       (*-with-map-bind-keys-to-functions map (rest ft-k-f)))))
@@ -161,11 +160,15 @@ These are default fonts.  The fonts I /use/ are properly customized.
         (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
     (*-after-feature-set-keys-to-functions feature (rest k-f))))
 #+end_src
-** Magit
-#+begin_src elisp
-(global-set-key (kbd "M-?") #'magit-status)
+** Global
+#+begin_src emacs-lisp
+(*-with-map-bind-keys-to-functions
+ global-map
+ '((magit "M-?" #'magit-status)
+   ("C-M->" #'mc/mark-next-like-this)
+   ("C-M-S-r" #'mc/mark-all-like-this-dwim)))
 #+end_src
-** TeX
+** AUCTeX
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
@@ -178,13 +181,6 @@ These are default fonts.  The fonts I /use/ are properly customized.
  '((find-file "C-c RET" #'ff-find-related-file)
    (cc-mode "C-c C-'" #'compile)))
 #+end_src
-** Multiple Cursors
-#+begin_src elisp
-(*-after-feature-set-keys-to-functions
- 'multiple-cursors
- '(("C-M->" #'mc/mark-next-like-this)
-   ("C-M-S-r" #'mc/mark-all-like-this-dwim)))
-#+end_src
 ** Isearch
 #+begin_src emacs-lisp
 (defun *-isearch-yank-thing-at-point ()
@@ -196,7 +192,8 @@ These are default fonts.  The fonts I /use/ are properly customized.
  isearch-mode-map
  '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
 #+end_src
-* Magit
+* [[http://www.gnu.org/s/auctex/][AUCTeX]]
+* [[https://github.com/magit/magit][Magit]]
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
 Since =yasnippet= has its own snippet creation workflow from within
