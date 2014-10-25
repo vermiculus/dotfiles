@@ -79,19 +79,112 @@ current window system (or lack thereof), there is ~window-system~.
 (add-to-list 'package-archives
   '("melpa" . "http://melpa.melpa.org/packages/") t)
 #+end_src
+#+begin_src elisp
+(defun *-require-package (pkg)
+  (let ((pkg (if (consp pkg) (car pkg) pkg))
+        (ftr (if (consp pkg) (cdr pkg) pkg)))
+    (when (not (package-installed-p pkg))
+      (package-install pkg))
+    (require ftr)))
+      
+(mapc #'*-require-package
+      '(
+        (auctex . latex)
+        bbdb
+        bf-mode
+        coffee-mode
+        color-theme-sanityinc-solarized
+        color-theme-sanityinc-tomorrow
+        csv-mode
+        evil
+        fish-mode
+        github-clone
+        god-mode
+        helm
+        helm-ag
+        htmlize
+        magit
+        monokai-theme
+        multiple-cursors
+        nose
+        org
+        slime
+        twittering-mode
+        yaml-mode
+        yasnippet
+        ))
+#+end_src
 * Customize
 #+begin_src elisp
 (setq custom-file (concat user-emacs-directory ".custom.el"))
 #+end_src
 ** Fonts
+These are default fonts.  The fonts I /use/ are properly customized.
 #+BEGIN_SRC elisp
-(set-default-font "Source Code Pro")
+(defcustom *-text-sans-type
+  "Arial"
+  "The type to use for sans-serif body text."
+  :group '*-fonts)
+
+(defcustom *-text-serif-type
+  "Georgia"
+  "The type to use for sans-serif body text."
+  :group '*-fonts)
+
+(defcustom *-text-mono-type
+  "Courier"
+  "The type to use for sans-serif body text."
+  :group '*-fonts)
+
+(set-frame-font *-text-mono-type)
 #+END_SRC
 *** TODO add download instructions
-* Magit
+*** TODO Use faces instead of strings
+- then I'll be able to use different faces for text and ~code~.
+* Keybindings
+#+begin_src elisp
+(defun *--with-map-bind-keys-to-functions (map ft-k-f)
+  (when ft-k-f
+    (let ((feature (caar ft-k-f))
+          (keys (cadar ft-k-f))
+          (func (caddar ft-k-f)))
+ (mapc #'print (list feature keys func))
+      (eval-after-load feature
+        '(define-key map (kbd keys) (eval func)))
+      (*--with-map-bind-keys-to-functions map (rest ft-k-f)))))
+
+(defun *--after-feature-set-keys-to-functions (feature k-f)
+  (when k-f
+    (eval-after-load feature
+      (prog1 t
+        (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
+    (*--after-feature-set-keys-to-functions feature (rest k-f))))
+#+end_src
+** Magit
 #+begin_src elisp
 (global-set-key (kbd "M-?") #'magit-status)
 #+end_src
+** TeX
+#+begin_src elisp
+(*--with-map-bind-keys-to-functions
+ TeX-mode-map
+ '((latex "C-c t" #'*-TeX-find-texdoc)))
+#+end_src
+** C Modes
+#+begin_src elisp
+(*--with-map-bind-keys-to-functions
+ c-mode-base-map
+ '((find-file "C-c RET" #'ff-find-related-file)
+   (cc-mode "C-c C-'" #'compile)))
+#+end_src
+** Multiple Cursors
+#+begin_src elisp
+(*--after-feature-set-keys-to-functions
+ 'multiple-cursors
+ '(("C-M->" #'mc/mark-next-like-this)
+   ("M->" #'mc/mark-next-lines)))
+#+end_src
+* Magit
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
 Since =yasnippet= has its own snippet creation workflow from within
@@ -108,19 +201,20 @@ These are the recommended settings.
 
 (defcustom *-god-mode-update-cursor-affected-forms
   '(god-local-mode buffer-read-only)
-  "If any of these forms evaluate to non-nil, the cursor will change.")
+  "If any of these forms evaluate to non-nil, the cursor will change."
+  :group 'vermiculus-god)
 
 (defcustom *-god-mode-update-cursor-cursor
   'hbar
-  "The cursor to use")
+  "The cursor to use"
+  :group 'vermiculus-god)
 
-(eval-when-compile (require 'cl))
 (defun *--god-mode-update-cursor ()
   (setq cursor-type
-        (if (some #'eval *-god-mode-update-cursor-affected-forms)
+        (if (member t (mapcar #'eval *-god-mode-update-cursor-affected-forms))
             ,*-god-mode-update-cursor-cursor t)))
 
-(mapcar
+(mapc
  (lambda (hook)
    (add-hook hook #'*--god-mode-update-cursor))
  '(god-mode-enabled-hook god-mode-disabled-hook))
@@ -142,8 +236,10 @@ for TeX under emacs.
 =texdoc= is an application that comes with most TeX distributions.
 This function brings them up within emacs.
 #+begin_src elisp
-(defvar *-TeX-find-texdoc-temp-file-format
-  "TeX-find-texdoc--%s--")
+(defcustom *-TeX-find-texdoc-temp-file-format
+  "TeX-find-texdoc--%s--"
+  "The prefix for temporary files created with `*-TeX-find-texdoc'"
+  :group 'vermiculus-tex)
 
 (defun *-TeX-find-texdoc (texdoc-query)
   (interactive "sPackage: ")
@@ -152,12 +248,12 @@ This function brings them up within emacs.
     (let ((texdoc-output (shell-command-to-string
                           (format "texdoc -l -M %s"
                                   texdoc-query))))
-      (if (string-match "no documentation found" texdoc-output)
+      (if (string-match texdoc-output "")
           (error "Sorry, no documentation found for %s" texdoc-query)
         (let ((texdoc-file (nth 2 (split-string texdoc-output))))
           (if (file-readable-p texdoc-file)
               (let ((new-file (*-create-temporary-file
-                               ".pdf"
+                               "pdf"
                                (format *-TeX-find-texdoc-temp-file-format
                                        texdoc-query
                                        texdoc-file))))
@@ -170,8 +266,6 @@ This function brings them up within emacs.
 #+BEGIN_SRC elisp
 (require 'find-file)
 (require 'cc-mode)
-(define-key c-mode-base-map (kbd "C-c RET") #'ff-find-related-file)
-(define-key c-mode-base-map (kbd "C-c C-'") #'compile)
 #+END_SRC
 * M4
 #+begin_src emacs-lisp
