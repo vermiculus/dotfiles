@@ -212,6 +212,9 @@
  '(desktop-save-mode t)
  '(display-time-mode t)
  '(doc-view-mode-hook (quote (auto-revert-mode)) t)
+ '(emacs-lisp-mode-hook
+   (quote
+    (eldoc-mode imenu-add-menubar-index checkdoc-minor-mode show-paren-mode)))
  '(find-file-hook
    (quote
     (auto-insert enable-minor-mode-based-on-extension yas-global-mode-check-buffers global-undo-tree-mode-check-buffers undo-tree-load-history-hook mode-local-post-major-mode-change url-handlers-set-buffer-mode global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
@@ -221,6 +224,7 @@
  '(indent-tabs-mode nil)
  '(inferior-lisp-program "clisp" t)
  '(inhibit-startup-screen t)
+ '(lisp-mode-hook (quote (show-paren-mode slime-lisp-mode-hook)))
  '(m4-font-lock-keywords
    (quote
     (("\\(\\b\\(m4_\\)?dnl\\b\\).*$" . font-lock-comment-face)
