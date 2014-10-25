@@ -1,4 +1,51 @@
 
+(defconst *--windows-p
+  (equal system-type 'windows-nt)
+  "Predicate indicating if this is a Windows environment.")
+(defconst *--osx-p
+  (equal system-type 'darwin)
+  "Predicate indicating if this is a OS X environment.")
+(defconst *--redhat-p
+  (equal system-type 'gnu/linux)
+  "Predicate indicating if this is a Redhat environment.")
+
+;; Prepare a list of conses - see docstring
+;; http://stackoverflow.com/a/13946304/1443496
+(defvar auto-minor-mode-alist ()
+  "Alist of filename patterns vs correpsonding minor mode functions,
+      see `auto-mode-alist'. All elements of this alist are checked,
+      meaning you can enable multiple minor modes for the same regexp.")
+
+;; Create a hook
+(defun enable-minor-mode-based-on-extension ()
+  "check file name against auto-minor-mode-alist to enable minor modes
+       the checking happens for all pairs in auto-minor-mode-alist"
+  (when buffer-file-name
+    (let ((name buffer-file-name)
+          (remote-id (file-remote-p buffer-file-name))
+          (alist auto-minor-mode-alist))
+      ;; Remove backup-suffixes from file name.
+      (setq name (file-name-sans-versions name))
+      ;; Remove remote file name identification.
+      (when (and (stringp remote-id)
+                 (string-match-p (regexp-quote remote-id) name))
+        (setq name (substring name (match-end 0))))
+      (while (and alist (caar alist) (cdar alist))
+        (if (string-match (caar alist) name)
+            (funcall (cdar alist) 1))
+        (setq alist (cdr alist))))))
+
+(defun *-create-temporary-file (ext &optional prefix)
+  "Creates a temporary file with EXT as the extension."
+  (interactive "sExtension: ")
+   (make-temp-file
+    (concat "temp-file--" prefix) nil
+    (concat "." ext)))
+
+(defun *-find-temporary-file (ext &optional prefix)
+  (interactive "sExtension: ")
+  (find-file (*-create-temporary-file ext prefix)))
+
 (require 'package)
 (defun *-require-package (pkg)
   (let ((pkg (if (consp pkg) (car pkg) pkg))
@@ -168,6 +215,24 @@
                      ,(getenv "PATH"))
                    path-separator))
 
+(*-with-map-bind-keys-to-functions
+ markdown-mode-map
+ '((markdown-mode "M-<left>" backward-word)
+   (markdown-mode "M-<right>" forward-word)))
+
+(defun *-isearch-yank-thing-at-point ()
+  (interactive)
+  (isearch-yank-string (thing-at-point 'symbol)))
+
+(defvar m4-mode-syntax-table)
+(eval-after-load 'm4-mode
+ '(modify-syntax-entry ?# "@" m4-mode-syntax-table))
+
+(load
+ (setq custom-file
+       (concat user-emacs-directory
+               ".custom.el")))
+
 (defcustom *-text-sans-type
   "Arial"
   "The type to use for sans-serif body text."
@@ -184,63 +249,3 @@
   :group '*-fonts)
 
 (set-frame-font *-text-mono-type)
-
-(defconst *--windows-p
-  (equal system-type 'windows-nt)
-  "Predicate indicating if this is a Windows environment.")
-(defconst *--osx-p
-  (equal system-type 'darwin)
-  "Predicate indicating if this is a OS X environment.")
-(defconst *--redhat-p
-  (equal system-type 'gnu/linux)
-  "Predicate indicating if this is a Redhat environment.")
-
-;; Prepare a list of conses - see docstring
-;; http://stackoverflow.com/a/13946304/1443496
-(defvar auto-minor-mode-alist ()
-  "Alist of filename patterns vs correpsonding minor mode functions,
-      see `auto-mode-alist'. All elements of this alist are checked,
-      meaning you can enable multiple minor modes for the same regexp.")
-
-;; Create a hook
-(defun enable-minor-mode-based-on-extension ()
-  "check file name against auto-minor-mode-alist to enable minor modes
-       the checking happens for all pairs in auto-minor-mode-alist"
-  (when buffer-file-name
-    (let ((name buffer-file-name)
-          (remote-id (file-remote-p buffer-file-name))
-          (alist auto-minor-mode-alist))
-      ;; Remove backup-suffixes from file name.
-      (setq name (file-name-sans-versions name))
-      ;; Remove remote file name identification.
-      (when (and (stringp remote-id)
-                 (string-match-p (regexp-quote remote-id) name))
-        (setq name (substring name (match-end 0))))
-      (while (and alist (caar alist) (cdar alist))
-        (if (string-match (caar alist) name)
-            (funcall (cdar alist) 1))
-        (setq alist (cdr alist))))))
-
-(defun *-create-temporary-file (ext &optional prefix)
-  "Creates a temporary file with EXT as the extension."
-  (interactive "sExtension: ")
-   (make-temp-file
-    (concat "temp-file--" prefix) nil
-    (concat "." ext)))
-
-(defun *-find-temporary-file (ext &optional prefix)
-  (interactive "sExtension: ")
-  (find-file (*-create-temporary-file ext prefix)))
-
-(defun *-isearch-yank-thing-at-point ()
-  (interactive)
-  (isearch-yank-string (thing-at-point 'symbol)))
-
-(defvar m4-mode-syntax-table)
-(eval-after-load 'm4-mode
- '(modify-syntax-entry ?# "@" m4-mode-syntax-table))
-
-(load
- (setq custom-file
-       (concat user-emacs-directory
-               ".custom.el")))

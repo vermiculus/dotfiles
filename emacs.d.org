@@ -1258,14 +1258,12 @@ When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or 
      (lambda (ff) (change-file-line-ending ff nlStyle))
      fileList)))
 #+end_src
-* COMMENT Markdown
-:PROPERTIES:
-:tangle: no
-:END:
+* Markdown
 #+begin_src elisp
-(require 'markdown-mode)
-(define-key markdown-mode-map (kbd "M-<left>") 'backward-word)
-(define-key markdown-mode-map (kbd "M-<right>") 'forward-word)
+(*-with-map-bind-keys-to-functions
+ markdown-mode-map
+ '((markdown-mode "M-<left>" backward-word)
+   (markdown-mode "M-<right>" forward-word)))
 #+end_src
 * Incremental Search (=isearch=)
 #+begin_src elisp
@@ -1283,7 +1281,7 @@ When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or 
 
 ** TODO Fix defvar
 
-* Custom File
+* Customize
 ** Setting a Custom Custom File
 Emacs is famous for its customizability.  There are many, many
 variables that directly support being customized with =custom.el=.
