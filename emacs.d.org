@@ -56,6 +56,35 @@ simply introduced to make code more readable.
 If there ever is an occasion to toggle configuration based on the
 current window system (or lack thereof), there is ~window-system~.
 
+* Extending Emacs Lisp
+#+begin_src emacs-lisp
+;; Prepare a list of conses - see docstring
+;; http://stackoverflow.com/a/13946304/1443496
+(defvar auto-minor-mode-alist ()
+  "Alist of filename patterns vs correpsonding minor mode functions,
+      see `auto-mode-alist'. All elements of this alist are checked,
+      meaning you can enable multiple minor modes for the same regexp.")
+
+;; Create a hook
+(defun enable-minor-mode-based-on-extension ()
+  "check file name against auto-minor-mode-alist to enable minor modes
+       the checking happens for all pairs in auto-minor-mode-alist"
+  (when buffer-file-name
+    (let ((name buffer-file-name)
+	  (remote-id (file-remote-p buffer-file-name))
+	  (alist auto-minor-mode-alist))
+      ;; Remove backup-suffixes from file name.
+      (setq name (file-name-sans-versions name))
+      ;; Remove remote file name identification.
+      (when (and (stringp remote-id)
+		 (string-match-p (regexp-quote remote-id) name))
+	(setq name (substring name (match-end 0))))
+      (while (and alist (caar alist) (cdar alist))
+	(if (string-match (caar alist) name)
+	    (funcall (cdar alist) 1))
+	(setq alist (cdr alist))))))
+#+end_src
+
 * File Management
 ** Creating Temporary Files
 #+begin_src emacs-lisp
