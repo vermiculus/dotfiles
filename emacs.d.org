@@ -192,7 +192,6 @@ These are default fonts.  The fonts I /use/ are properly customized.
  isearch-mode-map
  '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
 #+end_src
-* [[http://www.gnu.org/s/auctex/][AUCTeX]]
 * [[https://github.com/magit/magit][Magit]]
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
@@ -238,7 +237,7 @@ These are the recommended settings.
 * TeX
 TeX is a typesetting system that produces documents of high quality
 and typographical consistency.  I'm a heavy user of this system under
-AUCTeX and RefTeX, two of the most indispensible resources available
+[[http://www.gnu.org/s/auctex][AUCTeX]] and [[http://www.gnu.org/s/auctex/reftex.html][RefTeX]], two of the most indispensible resources available
 for TeX under emacs.
 
 ** Finding Documentation with TeXdoc
