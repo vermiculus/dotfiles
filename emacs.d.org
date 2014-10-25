@@ -143,7 +143,7 @@ These are default fonts.  The fonts I /use/ are properly customized.
 - then I'll be able to use different faces for text and ~code~.
 * Keybindings
 #+begin_src elisp
-(defun *--with-map-bind-keys-to-functions (map ft-k-f)
+(defun *-with-map-bind-keys-to-functions (map ft-k-f)
   (when ft-k-f
     (let ((feature (caar ft-k-f))
           (keys (cadar ft-k-f))
@@ -151,14 +151,15 @@ These are default fonts.  The fonts I /use/ are properly customized.
  (mapc #'print (list feature keys func))
       (eval-after-load feature
         '(define-key map (kbd keys) (eval func)))
-      (*--with-map-bind-keys-to-functions map (rest ft-k-f)))))
+      (*-with-map-bind-keys-to-functions map (rest ft-k-f)))))
 
-(defun *--after-feature-set-keys-to-functions (feature k-f)
+(defun *-after-feature-set-keys-to-functions (feature k-f)
   (when k-f
-    (eval-after-load feature
+    (eval-after-load (if (and feature (not (booleanp feature)))
+                         feature 'emacs)
       (prog1 t
         (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
-    (*--after-feature-set-keys-to-functions feature (rest k-f))))
+    (*-after-feature-set-keys-to-functions feature (rest k-f))))
 #+end_src
 ** Magit
 #+begin_src elisp
@@ -166,22 +167,34 @@ These are default fonts.  The fonts I /use/ are properly customized.
 #+end_src
 ** TeX
 #+begin_src elisp
-(*--with-map-bind-keys-to-functions
+(*-with-map-bind-keys-to-functions
  TeX-mode-map
  '((latex "C-c t" #'*-TeX-find-texdoc)))
 #+end_src
 ** C Modes
 #+begin_src elisp
-(*--with-map-bind-keys-to-functions
+(*-with-map-bind-keys-to-functions
  c-mode-base-map
  '((find-file "C-c RET" #'ff-find-related-file)
    (cc-mode "C-c C-'" #'compile)))
 #+end_src
 ** Multiple Cursors
 #+begin_src elisp
-(*--after-feature-set-keys-to-functions
+(*-after-feature-set-keys-to-functions
  'multiple-cursors
- '(("C-M->" #'mc/mark-next-like-this)))
+ '(("C-M->" #'mc/mark-next-like-this)
+   ("C-M-S-r" #'mc/mark-all-like-this-dwim)))
+#+end_src
+** Isearch
+#+begin_src emacs-lisp
+(defun *-isearch-yank-thing-at-point ()
+  (interactive)
+  (isearch-yank-string (thing-at-point 'symbol)))
+#+end_src
+#+begin_src emacs-lisp
+(*-with-map-bind-keys-to-functions
+ isearch-mode-map
+ '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
 #+end_src
 * Magit
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]

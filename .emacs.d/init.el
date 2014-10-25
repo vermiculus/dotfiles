@@ -17,15 +17,16 @@
 
 (global-set-key (kbd "C-x t") '*find--temporary-file)
 
-(require 'm4-mode)
-(setq m4-font-lock-keywords
-      '(("\\(\\b\\(m4_\\)?dnl\\b\\).*$" . font-lock-comment-face)
-        ("\\$#" . font-lock-variable-name-face)
-        ("\\$\\@" . font-lock-variable-name-face)
-        ("\\$\\*" . font-lock-variable-name-face)
-        ("\\b\\(builtin\\|change\\(com\\|quote\\|word\\)\\|d\\(e\\(bug\\(file\\|mode\\)\\|cr\\|f\\(ine\\|n\\)\\)\\|iv\\(ert\\|num\\)\\|nl\\|umpdef\\)\\|e\\(rrprint\\|syscmd\\|val\\)\\|f\\(ile\\|ormat\\)\\|gnu\\|i\\(f\\(def\\|else\\)\\|n\\(c\\(lude\\|r\\)\\|d\\(ex\\|ir\\)\\)\\)\\|l\\(en\\|ine\\)\\|m\\(4\\(exit\\|wrap\\)\\|aketemp\\)\\|p\\(atsubst\\|opdef\\|ushdef\\)\\|regexp\\|s\\(hift\\|include\\|ubstr\\|ys\\(cmd\\|val\\)\\)\\|tra\\(ceo\\(ff\\|n\\)\\|nslit\\)\\|un\\(d\\(efine\\|ivert\\)\\|ix\\)\\)\\b" . font-lock-keyword-face)
-        ("\\b\\(m4_\\(builtin\\|change\\(com\\|quote\\|word\\)\\|d\\(e\\(bug\\(file\\|mode\\)\\|cr\\|f\\(ine\\|n\\)\\)\\|iv\\(ert\\|num\\)\\|nl\\|umpdef\\)\\|e\\(rrprint\\|syscmd\\|val\\)\\|f\\(ile\\|ormat\\)\\|i\\(f\\(def\\|else\\)\\|n\\(c\\(lude\\|r\\)\\|d\\(ex\\|ir\\)\\)\\)\\|l\\(en\\|ine\\)\\|m\\(4\\(_undefine\\|exit\\|wrap\\)\\|aketemp\\)\\|p\\(atsubst\\|opdef\\|ushdef\\)\\|regexp\\|s\\(hift\\|include\\|ubstr\\|ys\\(cmd\\|val\\)\\)\\|tra\\(ceo\\(ff\\|n\\)\\|nslit\\)\\|undivert\\)\\)\\b" . font-lock-keyword-face)))
-(modify-syntax-entry ?# "@" m4-mode-syntax-table)
+(defun *-isearch-yank-thing-at-point ()
+  (interactive)
+  (isearch-yank-string (thing-at-point 'symbol)))
+
+(*-with-map-bind-keys-to-functions
+ isearch-mode-map
+ '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
+
+(eval-after-load 'm4-mode
+ (modify-syntax-entry ?# "@" m4-mode-syntax-table))
 
 ;(load
  (setq custom-file ".emacs-custom.el");)
@@ -89,7 +90,7 @@
 
 (set-frame-font *-text-mono-type)
 
-(defun *--with-map-bind-keys-to-functions (map ft-k-f)
+(defun *-with-map-bind-keys-to-functions (map ft-k-f)
   (when ft-k-f
     (let ((feature (caar ft-k-f))
           (keys (cadar ft-k-f))
@@ -97,29 +98,31 @@
  (mapc #'print (list feature keys func))
       (eval-after-load feature
         '(define-key map (kbd keys) (eval func)))
-      (*--with-map-bind-keys-to-functions map (rest ft-k-f)))))
+      (*-with-map-bind-keys-to-functions map (rest ft-k-f)))))
 
-(defun *--after-feature-set-keys-to-functions (feature k-f)
+(defun *-after-feature-set-keys-to-functions (feature k-f)
   (when k-f
-    (eval-after-load feature
+    (eval-after-load (if (and feature (not (booleanp feature)))
+                         feature 'emacs)
       (prog1 t
         (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
-    (*--after-feature-set-keys-to-functions feature (rest k-f))))
+    (*-after-feature-set-keys-to-functions feature (rest k-f))))
 
 (global-set-key (kbd "M-?") #'magit-status)
 
-(*--with-map-bind-keys-to-functions
+(*-with-map-bind-keys-to-functions
  TeX-mode-map
  '((latex "C-c t" #'*-TeX-find-texdoc)))
 
-(*--with-map-bind-keys-to-functions
+(*-with-map-bind-keys-to-functions
  c-mode-base-map
  '((find-file "C-c RET" #'ff-find-related-file)
    (cc-mode "C-c C-'" #'compile)))
 
-(*--after-feature-set-keys-to-functions
+(*-after-feature-set-keys-to-functions
  'multiple-cursors
- '(("C-M->" #'mc/mark-next-like-this)))
+ '(("C-M->" #'mc/mark-next-like-this)
+   ("C-M-S-r" #'mc/mark-all-like-this-dwim)))
 
 (require 'god-mode)
 (global-set-key (kbd "<escape>") 'god-local-mode)
@@ -176,5 +179,3 @@
                 (find-file-other-window new-file))
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
-
-
