@@ -216,9 +216,17 @@
  '(emacs-lisp-mode-hook
    (quote
     (eldoc-mode imenu-add-menubar-index checkdoc-minor-mode show-paren-mode)))
+ '(exec-path
+   (quote
+    ("/usr/local/bin" "/usr/texbin" "/usr/bin" "/bin" "/usr/sbin" "/sbin" "/Applications/Emacs.app/Contents/MacOS/bin-x86_64-10_9" "/Applications/Emacs.app/Contents/MacOS/libexec-x86_64-10_9" "/Applications/Emacs.app/Contents/MacOS/libexec" "/Applications/Emacs.app/Contents/MacOS/bin")))
  '(find-file-hook
    (quote
-    (auto-insert enable-minor-mode-based-on-extension yas-global-mode-check-buffers global-undo-tree-mode-check-buffers undo-tree-load-history-hook mode-local-post-major-mode-change url-handlers-set-buffer-mode global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
+    (auto-insert yas-global-mode-check-buffers
+                 #[nil "\302\301!\210\303\304!8\211\207"
+                       [buffer-file-name auto-revert-tail-pos make-local-variable 7 file-attributes]
+                       3]
+                 global-undo-tree-mode-check-buffers undo-tree-load-history-hook global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
+ '(flx-ido-mode t)
  '(ido-enable-dot-prefix t)
  '(ido-enable-flex-matching t)
  '(ido-mode (quote both) nil (ido))
@@ -239,7 +247,6 @@
  '(package-archives
    (quote
     (("gnu" . "http://elpa.gnu.org/packages/")
-     ("melpa-stable" . "http://stable.melpa.org/packages/")
      ("melpa" . "http://melpa.melpa.org/packages/"))))
  '(scroll-bar-mode nil)
  '(show-paren-mode t)

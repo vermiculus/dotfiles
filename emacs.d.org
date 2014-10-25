@@ -47,10 +47,15 @@ mainly use
 Do effect this, I use the variable ~system-type~.  These variables are
 simply introduced to make code more readable.
 #+begin_src emacs-lisp
-(setq
- ,*--windows-p (equal system-type 'windows-nt)
- ,*--osx-p     (equal system-type 'darwin)
- ,*--redhat-p  (equal system-type 'gnu/linux))
+(defconst *--windows-p
+  (equal system-type 'windows-nt)
+  "Predicate indicating if this is a Windows environment.")
+(defconst *--osx-p
+  (equal system-type 'darwin)
+  "Predicate indicating if this is a OS X environment.")
+(defconst *--redhat-p
+  (equal system-type 'gnu/linux)
+  "Predicate indicating if this is a Redhat environment.")
 #+end_src
 
 If there ever is an occasion to toggle configuration based on the
@@ -109,7 +114,8 @@ current window system (or lack thereof), there is ~window-system~.
     (when (not (package-installed-p pkg))
       (package-install pkg))
     (require ftr)))
-      
+
+(package-initialize)      
 (mapc #'*-require-package
       '(
         (auctex . latex)
@@ -121,6 +127,7 @@ current window system (or lack thereof), there is ~window-system~.
         csv-mode
         evil
         fish-mode
+        flx-ido
         github-clone
         god-mode
         helm
@@ -132,26 +139,44 @@ current window system (or lack thereof), there is ~window-system~.
         nose
         org
         slime
+        smex
         twittering-mode
         yaml-mode
         yasnippet
         ))
 #+end_src
+* Ido
+** Smex
+#+begin_src emacs-lisp
+(defun *-smex-smart-smex ()
+  (interactive)
+  (or (boundp 'smex-cache)
+      (smex-initialize))
+  (global-set-key (kbd "M-x") 'smex)
+  (smex))
+
+(defun *-smex-smart-smex-major-mode-commands ()
+  (interactive)
+  (or (boundp 'smex-cache)
+      (smex-initialize))
+  (global-set-key (kbd "M-S-x") 'smex-major-mode-commands)
+  (smex-major-mode-commands))
+#+end_src
+** Flx
 * Keybindings
 #+begin_src elisp
 (defun *-with-map-bind-keys-to-functions (map ft-k-f)
   (when ft-k-f
     (let ((feature (caar ft-k-f))
-          (keys (cadar ft-k-f))
-          (func (caddar ft-k-f)))
-      (eval-after-load feature
-        '(define-key map (kbd keys) (eval func)))
+          (keys   (cadar ft-k-f))
+          (func  (caddar ft-k-f)))
+      (eval-after-load (if (not (booleanp feature)) feature 'emacs)
+        `(define-key map ,(kbd keys) (function ,func)))
       (*-with-map-bind-keys-to-functions map (rest ft-k-f)))))
 
 (defun *-after-feature-set-keys-to-functions (feature k-f)
   (when k-f
-    (eval-after-load (if (not (booleanp feature))
-                         feature 'emacs)
+    (eval-after-load (if (not (booleanp feature)) feature 'emacs)
       (prog1 t
         (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
     (*-after-feature-set-keys-to-functions feature (rest k-f))))
@@ -161,16 +186,18 @@ current window system (or lack thereof), there is ~window-system~.
 #+begin_src emacs-lisp
 (*-with-map-bind-keys-to-functions
  global-map
- '((magit "M-?" #'magit-status)
-   (multiple-cursors "C-M->" #'mc/mark-next-like-this)
-   (multiple-cursors "C-M-S-r" #'mc/mark-all-like-this-dwim)
-   (t "C-x t" #'*-find-temporary-file)
-   (t "C-c C-SPC" #'speedbar-get-focus)
-   (t "<escape>" #'god-local-mode)
-   (t "C-x C-1" #'delete-other-windows)
-   (t "C-x C-2" #'split-window-below)
-   (t "C-x C-3" #'split-window-right)
-   (t "C-x C-0" #'delete-window)))
+ '((magit "M-?" magit-status)
+   (multiple-cursors "C-M->" mc/mark-next-like-this)
+   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
+   (t "C-x t" *-find-temporary-file)
+   (t "C-c C-SPC" speedbar-get-focus)
+   (t "<escape>" god-local-mode)
+   (t "C-x C-1" delete-other-windows)
+   (t "C-x C-2" split-window-below)
+   (t "C-x C-3" split-window-right)
+   (t "M-x" *-smex-smart-smex)
+   (t "M-S-x" *-smex-smart-smex-major-mode-commands)
+   (t "C-x C-0" delete-window)))
 #+end_src
 
 ** TODO Enable God-Mode globally
@@ -182,29 +209,32 @@ Neither of these seem to work, but figure it out.
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
- '((latex "C-c t" #'*-TeX-find-texdoc)))
+ '((latex "C-c t" *-TeX-find-texdoc)))
 #+end_src
 
 ** C Modes
 #+begin_src elisp
-(*-with-map-bind-keys-to-functions
- c-mode-base-map
- '((find-file "C-c RET" #'ff-find-related-file)
-   (cc-mode "C-c C-'" #'compile)))
+(defvar c-mode-base-map)
+(eval-after-load 'cc-mode
+  '(*-with-map-bind-keys-to-functions
+    c-mode-base-map
+    '((find-file "C-c RET" ff-find-related-file)
+      (cc-mode "C-c C-'" compile))))
 #+end_src
 
+** TODO Fix defvar
 ** Isearch
 #+begin_src emacs-lisp
 (*-with-map-bind-keys-to-functions
  isearch-mode-map
- '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
+ '((t "C-SPC" *-isearch-yank-thing-at-point)))
 #+end_src
 
 ** God
 #+begin_src emacs-lisp
 (*-with-map-bind-keys-to-functions
  god-local-mode-map
- '((god-mode "." #'repeat)))
+ '((god-mode "." repeat)))
 #+end_src
 
 * COMMENT [[https://github.com/magit/magit][Magit]]
@@ -1362,9 +1392,12 @@ When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or 
 
 * M4
 #+begin_src emacs-lisp
+(defvar m4-mode-syntax-table)
 (eval-after-load 'm4-mode
- (modify-syntax-entry ?# "@" m4-mode-syntax-table))
+ '(modify-syntax-entry ?# "@" m4-mode-syntax-table))
 #+end_src
+
+** TODO Fix defvar
 
 * Custom File
 ** Setting a Custom Custom File

@@ -6,7 +6,8 @@
     (when (not (package-installed-p pkg))
       (package-install pkg))
     (require ftr)))
-      
+
+(package-initialize)      
 (mapc #'*-require-package
       '(
         (auctex . latex)
@@ -18,6 +19,7 @@
         csv-mode
         evil
         fish-mode
+        flx-ido
         github-clone
         god-mode
         helm
@@ -29,6 +31,7 @@
         nose
         org
         slime
+        smex
         twittering-mode
         yaml-mode
         yasnippet
@@ -37,28 +40,29 @@
 (defun *-with-map-bind-keys-to-functions (map ft-k-f)
   (when ft-k-f
     (let ((feature (caar ft-k-f))
-          (keys (cadar ft-k-f))
-          (func (caddar ft-k-f)))
-      (eval-after-load feature
-        '(define-key map (kbd keys) (eval func)))
+          (keys   (cadar ft-k-f))
+          (func  (caddar ft-k-f)))
+      (eval-after-load (if (not (booleanp feature)) feature 'emacs)
+        `(define-key map ,(kbd keys) (function ,func)))
       (*-with-map-bind-keys-to-functions map (rest ft-k-f)))))
 
 (defun *-after-feature-set-keys-to-functions (feature k-f)
   (when k-f
-    (eval-after-load (if (not (booleanp feature))
-                         feature 'emacs)
+    (eval-after-load (if (not (booleanp feature)) feature 'emacs)
       (prog1 t
         (global-set-key (kbd (caar k-f)) (eval (cadar k-f)))))
     (*-after-feature-set-keys-to-functions feature (rest k-f))))
 
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
- '((latex "C-c t" #'*-TeX-find-texdoc)))
+ '((latex "C-c t" *-TeX-find-texdoc)))
 
-(*-with-map-bind-keys-to-functions
- c-mode-base-map
- '((find-file "C-c RET" #'ff-find-related-file)
-   (cc-mode "C-c C-'" #'compile)))
+(defvar c-mode-base-map)
+(eval-after-load 'cc-mode
+  '(*-with-map-bind-keys-to-functions
+    c-mode-base-map
+    '((find-file "C-c RET" ff-find-related-file)
+      (cc-mode "C-c C-'" compile))))
 
 (require 'god-mode)
 (global-set-key (kbd "<escape>") 'god-local-mode)
@@ -128,10 +132,15 @@
 
 (set-frame-font *-text-mono-type)
 
-(setq
- *--windows-p (equal system-type 'windows-nt)
- *--osx-p     (equal system-type 'darwin)
- *--redhat-p  (equal system-type 'gnu/linux))
+(defconst *--windows-p
+  (equal system-type 'windows-nt)
+  "Predicate indicating if this is a Windows environment.")
+(defconst *--osx-p
+  (equal system-type 'darwin)
+  "Predicate indicating if this is a OS X environment.")
+(defconst *--redhat-p
+  (equal system-type 'gnu/linux)
+  "Predicate indicating if this is a Redhat environment.")
 
 ;; Prepare a list of conses - see docstring
 ;; http://stackoverflow.com/a/13946304/1443496
@@ -170,33 +179,50 @@
   (interactive "sExtension: ")
   (find-file (*-create-temporary-file ext prefix)))
 
+(defun *-smex-smart-smex ()
+  (interactive)
+  (or (boundp 'smex-cache)
+      (smex-initialize))
+  (global-set-key (kbd "M-x") 'smex)
+  (smex))
+
+(defun *-smex-smart-smex-major-mode-commands ()
+  (interactive)
+  (or (boundp 'smex-cache)
+      (smex-initialize))
+  (global-set-key (kbd "M-S-x") 'smex-major-mode-commands)
+  (smex-major-mode-commands))
+
 (*-with-map-bind-keys-to-functions
  global-map
- '((magit "M-?" #'magit-status)
-   (multiple-cursors "C-M->" #'mc/mark-next-like-this)
-   (multiple-cursors "C-M-S-r" #'mc/mark-all-like-this-dwim)
-   (t "C-x t" #'*-find-temporary-file)
-   (t "C-c C-SPC" #'speedbar-get-focus)
-   (t "<escape>" #'god-local-mode)
-   (t "C-x C-1" #'delete-other-windows)
-   (t "C-x C-2" #'split-window-below)
-   (t "C-x C-3" #'split-window-right)
-   (t "C-x C-0" #'delete-window)))
+ '((magit "M-?" magit-status)
+   (multiple-cursors "C-M->" mc/mark-next-like-this)
+   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
+   (t "C-x t" *-find-temporary-file)
+   (t "C-c C-SPC" speedbar-get-focus)
+   (t "<escape>" god-local-mode)
+   (t "C-x C-1" delete-other-windows)
+   (t "C-x C-2" split-window-below)
+   (t "C-x C-3" split-window-right)
+   (t "M-x" *-smex-smart-smex)
+   (t "M-S-x" *-smex-smart-smex-major-mode-commands)
+   (t "C-x C-0" delete-window)))
 
 (*-with-map-bind-keys-to-functions
  isearch-mode-map
- '((t "C-SPC" #'*-isearch-yank-thing-at-point)))
+ '((t "C-SPC" *-isearch-yank-thing-at-point)))
 
 (*-with-map-bind-keys-to-functions
  god-local-mode-map
- '((god-mode "." #'repeat)))
+ '((god-mode "." repeat)))
 
 (defun *-isearch-yank-thing-at-point ()
   (interactive)
   (isearch-yank-string (thing-at-point 'symbol)))
 
+(defvar m4-mode-syntax-table)
 (eval-after-load 'm4-mode
- (modify-syntax-entry ?# "@" m4-mode-syntax-table))
+ '(modify-syntax-entry ?# "@" m4-mode-syntax-table))
 
 (load
  (setq custom-file
