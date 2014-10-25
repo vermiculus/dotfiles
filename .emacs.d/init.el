@@ -150,6 +150,7 @@
    (multiple-cursors "C-M->" #'mc/mark-next-like-this)
    (multiple-cursors "C-M-S-r" #'mc/mark-all-like-this-dwim)
    (t "C-x t" #'*-find-temporary-file)
+   (t "C-c C-SPC" #'speedbar-get-focus)
    (t "<escape>" #'god-local-mode)
    (t "C-x C-1" #'delete-other-windows)
    (t "C-x C-2" #'split-window-below)
