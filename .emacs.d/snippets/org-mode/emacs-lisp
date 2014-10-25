@@ -1,7 +1,6 @@
 # -*- mode: snippet; require-final-newline: nil -*-
 # name: emacs-lisp
 # key: el
-# binding: direct-keybinding
 # --
 #+begin_src emacs-lisp
 $0
