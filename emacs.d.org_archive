@@ -1,0 +1,61 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /Users/sean/dotfiles/emacs.d.org
+
+
+* Octomacs
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2014-10-25 Sat 19:03
+  :ARCHIVE_FILE: ~/dotfiles/emacs.d.org
+  :ARCHIVE_CATEGORY: emacs.d
+  :END:
+#+begin_src emacs-lisp
+(setq org-octopress-directory-top       "~/github/octopress/source"
+      org-octopress-directory-posts     "~/github/octopress/source/_posts"
+      org-octopress-directory-org-top   "~/github/octopress/source"
+      org-octopress-directory-org-posts "~/github/octopress/source/blog"
+      org-octopress-setup-file          "~/Dropbox/.emacs.d/org-octopress-setup.org"
+)
+#+end_src
+#+begin_src elisp
+(defvar octopress-root
+  "~/github/vermiculus/octopress")
+
+(defvar octopress-new-post-command
+  "bundle exec rake new_post[\"%s\"]")
+
+(defvar octopress-preview-command
+  "bundle exec rake preview")
+
+(defvar octopress-preview-uri
+  "http://localhost:4000")
+
+(define-prefix-command 'octopress-map)
+(global-set-key (kbd "C-c o") 'octopress-map)
+(global-set-key (kbd "C-c C-o") 'octopress-map)
+
+(defun octopress-new-post (title)
+  (interactive "MTitle: ")
+  (find-file (format "%s/%s"
+		     octopress-root
+		     (first (last (split-string
+				   (shell-command-to-string
+				    (format
+				     (format "cd %s && %s"
+					     octopress-root
+					     octopress-new-post-command)
+				     title))))))))
+
+(defun octopress-preview ()
+  (interactive)
+  (shell-command
+   (format "open http://localhost:4000 ; cd %s && %s &"
+	   octopress-root
+	   octopress-preview-command))
+  (make-directory))
+
+(define-key octopress-map (kbd "n") 'octopress-new-post)
+(define-key octopress-map (kbd "p") 'octopress-preview)
+#+end_src
+

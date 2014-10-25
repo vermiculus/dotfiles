@@ -5,7 +5,7 @@
         (ftr (if (consp pkg) (cdr pkg) pkg)))
     (when (not (package-installed-p pkg))
       (package-install pkg))
-    (require ftr)))
+    (if ftr (require ftr))))
 
 (package-initialize)      
 (mapc #'*-require-package
@@ -26,6 +26,7 @@
         helm-ag
         htmlize
         magit
+        markdown-mode
         monokai-theme
         multiple-cursors
         nose
@@ -36,6 +37,20 @@
         yaml-mode
         yasnippet
         ))
+
+(defun *-smex-smart-smex ()
+  (interactive)
+  (or (boundp 'smex-cache)
+      (smex-initialize))
+  (global-set-key (kbd "M-x") 'smex)
+  (smex))
+
+(defun *-smex-smart-smex-major-mode-commands ()
+  (interactive)
+  (or (boundp 'smex-cache)
+      (smex-initialize))
+  (global-set-key (kbd "M-S-x") 'smex-major-mode-commands)
+  (smex-major-mode-commands))
 
 (defun *-with-map-bind-keys-to-functions (map ft-k-f)
   (when ft-k-f
@@ -54,6 +69,23 @@
     (*-after-feature-set-keys-to-functions feature (rest k-f))))
 
 (*-with-map-bind-keys-to-functions
+ global-map
+ `((magit "M-?" magit-status)
+   (multiple-cursors "C-M->" mc/mark-next-like-this)
+   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
+   (t "C-x t" *-find-temporary-file)
+   (speedbar "C-c C-SPC" speedbar-get-focus)
+   (god-mode "<escape>" god-local-mode)
+   (t "C-x C-1" delete-other-windows)
+   (t "C-x C-2" split-window-below)
+   (t "C-x C-3" split-window-right)
+   (smex "M-x" *-smex-smart-smex)
+   (smex "M-S-x" *-smex-smart-smex-major-mode-commands)
+   (twittering-mode "C-c n" twittering-update-status-interactive)
+   (twittering-mode "C-c m" ,(lambda () (interactive) (twittering-update-status-from-minibuffer)))
+   (t "C-x C-0" delete-window)))
+
+(*-with-map-bind-keys-to-functions
  TeX-mode-map
  '((latex "C-c t" *-TeX-find-texdoc)))
 
@@ -63,6 +95,14 @@
     c-mode-base-map
     '((find-file "C-c RET" ff-find-related-file)
       (cc-mode "C-c C-'" compile))))
+
+(*-with-map-bind-keys-to-functions
+ isearch-mode-map
+ '((t "C-SPC" *-isearch-yank-thing-at-point)))
+
+(*-with-map-bind-keys-to-functions
+ god-local-mode-map
+ '((god-mode "." repeat)))
 
 (require 'god-mode)
 (global-set-key (kbd "<escape>") 'god-local-mode)
@@ -114,6 +154,19 @@
                 (find-file-other-window new-file))
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
+
+(*-with-map-bind-keys-to-functions
+ twittering-mode-map
+ '((twittering-mode ">" twittering-reply-to-user)
+   (twittering-mode "F" twittering-follow)
+   (twittering-mode "B" twittering-block)))
+
+(setenv "PATH"
+        (mapconcat #'identity
+                   `("/usr/texbin"
+                     "/usr/local/bin"
+                     ,(getenv "PATH"))
+                   path-separator))
 
 (defcustom *-text-sans-type
   "Arial"
@@ -178,43 +231,6 @@
 (defun *-find-temporary-file (ext &optional prefix)
   (interactive "sExtension: ")
   (find-file (*-create-temporary-file ext prefix)))
-
-(defun *-smex-smart-smex ()
-  (interactive)
-  (or (boundp 'smex-cache)
-      (smex-initialize))
-  (global-set-key (kbd "M-x") 'smex)
-  (smex))
-
-(defun *-smex-smart-smex-major-mode-commands ()
-  (interactive)
-  (or (boundp 'smex-cache)
-      (smex-initialize))
-  (global-set-key (kbd "M-S-x") 'smex-major-mode-commands)
-  (smex-major-mode-commands))
-
-(*-with-map-bind-keys-to-functions
- global-map
- '((magit "M-?" magit-status)
-   (multiple-cursors "C-M->" mc/mark-next-like-this)
-   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
-   (t "C-x t" *-find-temporary-file)
-   (t "C-c C-SPC" speedbar-get-focus)
-   (t "<escape>" god-local-mode)
-   (t "C-x C-1" delete-other-windows)
-   (t "C-x C-2" split-window-below)
-   (t "C-x C-3" split-window-right)
-   (t "M-x" *-smex-smart-smex)
-   (t "M-S-x" *-smex-smart-smex-major-mode-commands)
-   (t "C-x C-0" delete-window)))
-
-(*-with-map-bind-keys-to-functions
- isearch-mode-map
- '((t "C-SPC" *-isearch-yank-thing-at-point)))
-
-(*-with-map-bind-keys-to-functions
- god-local-mode-map
- '((god-mode "." repeat)))
 
 (defun *-isearch-yank-thing-at-point ()
   (interactive)

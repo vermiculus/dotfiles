@@ -113,7 +113,7 @@ current window system (or lack thereof), there is ~window-system~.
         (ftr (if (consp pkg) (cdr pkg) pkg)))
     (when (not (package-installed-p pkg))
       (package-install pkg))
-    (require ftr)))
+    (if ftr (require ftr))))
 
 (package-initialize)      
 (mapc #'*-require-package
@@ -134,6 +134,7 @@ current window system (or lack thereof), there is ~window-system~.
         helm-ag
         htmlize
         magit
+        markdown-mode
         monokai-theme
         multiple-cursors
         nose
@@ -173,7 +174,8 @@ current window system (or lack thereof), there is ~window-system~.
       (eval-after-load (if (not (booleanp feature)) feature 'emacs)
         `(define-key map ,(kbd keys) (function ,func)))
       (*-with-map-bind-keys-to-functions map (rest ft-k-f)))))
-
+#+end_src
+#+begin_src elisp
 (defun *-after-feature-set-keys-to-functions (feature k-f)
   (when k-f
     (eval-after-load (if (not (booleanp feature)) feature 'emacs)
@@ -186,17 +188,19 @@ current window system (or lack thereof), there is ~window-system~.
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  global-map
- '((magit "M-?" magit-status)
+ `((magit "M-?" magit-status)
    (multiple-cursors "C-M->" mc/mark-next-like-this)
    (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
    (t "C-x t" *-find-temporary-file)
-   (t "C-c C-SPC" speedbar-get-focus)
-   (t "<escape>" god-local-mode)
+   (speedbar "C-c C-SPC" speedbar-get-focus)
+   (god-mode "<escape>" god-local-mode)
    (t "C-x C-1" delete-other-windows)
    (t "C-x C-2" split-window-below)
    (t "C-x C-3" split-window-right)
-   (t "M-x" *-smex-smart-smex)
-   (t "M-S-x" *-smex-smart-smex-major-mode-commands)
+   (smex "M-x" *-smex-smart-smex)
+   (smex "M-S-x" *-smex-smart-smex-major-mode-commands)
+   (twittering-mode "C-c n" twittering-update-status-interactive)
+   (twittering-mode "C-c m" ,(lambda () (interactive) (twittering-update-status-from-minibuffer)))
    (t "C-x C-0" delete-window)))
 #+end_src
 
@@ -369,64 +373,29 @@ This node is still a work in progress.
     "xeCJK"      "xetex"      "xfrac"      "xparse"
     "xpatch"     "xpeek"      "xpinyin"    "xtemplate"
     "zhnum"      "zxjt")
-  "Special LaTeX3 types.")
+  "Special LaTeX3 types."
+  :group '*-LaTeX3)
 
-;; (defface font-latex-expl3-function-face
-;;   (let ((font (cond ((assq :inherit custom-face-attributes) '(:inherit italic))
-;;                  ((assq :slant custom-face-attributes) '(:slant italic))
-;;                  (t '(:italic t)))))
-;;     `((((class grayscale) (background light))
-;;        (:foreground "DimGray" ,@font))
-;;       (((class grayscale) (background dark))
-;;        (:foreground "LightGray" ,@font))
-;;       (((class color) (background light))
-;;        (:foreground "DarkOliveGreen" ,@font))
-;;       (((class color) (background dark))
-;;        (:foreground "OliveDrab" ,@font))
-;;       (t (,@font))))
-;;   "Face used to highlight expl3 functions."
-;;   :group 'font-latex-highlighting-faces)
+(let ((types  (regexp-opt-group *-LaTeX3-special-types t))
+      (general "\\([A-z_:]+\\)")
+      (camel   "\\([A-z@]+\\)")
+      (nocamel "\\(?:[^A-z@_:]\\)")
+      (command "\\\\")))
 
-;; (defface font-latex-expl3-variable-face
-;;   (let ((font (cond ((assq :inherit custom-face-attributes) '(:inherit italic))
-;;                  ((assq :slant custom-face-attributes) '(:slant italic))
-;;                  (t '(:italic t)))))
-;;     `((((class grayscale) (background light))
-;;        (:foreground "DimGray" ,@font))
-;;       (((class grayscale) (background dark))
-;;        (:foreground "LightGray" ,@font))
-;;       (((class color) (background light))
-;;        (:foreground "DarkOliveGreen" ,@font))
-;;       (((class color) (background dark))
-;;        (:foreground "OliveDrab" ,@font))
-;;       (t (,@font))))
-;;   "Face used to highlight expl3 variables."
-;;   :group 'font-latex-highlighting-faces)
+(defcustom LaTeX-expl3-syntax-mode nil
+  "Controls keybindings for expl3 syntax"
+  :group '*-LaTeX3)
 
-
-;;(let ((types (concat
-;;            (regex-group (join-string-list
-;;                          special-types "\\|"))
-;;            "_[A-z_:]+"))
-;;      (general (regex-group "[A-z_:]+"))
-;;      (camel (regex-group "[A-z@]+"))
-;;      (nocamel (regex-group "?:[^A-z@_:]"))
-;;      (command "\\\\"))
-
-(defvar LaTeX-expl3-syntax-mode nil
-  "Controls keybindings for expl3 syntax")
-
-;(defun LaTeX-insert-space ()
-;  (interactive)
-;  (insert (if LaTeX-expl3-syntax-mode " ~ " " ")))
+(defun LaTeX-insert-space ()
+  (interactive)
+  (insert (if LaTeX-expl3-syntax-mode " ~ " " ")))
 
 (defun LaTeX-toggle-expl3-syntax ()
   (interactive)
   (message "LaTeX3 space mode is now %s."
-           (if (setq LaTeX-expl3-syntax-mode (not LaTeX-expl3-syntax-mode))
+           (if (setq LaTeX-expl3-syntax-mode
+                     (not LaTeX-expl3-syntax-mode))
                "on" "off")))
-
-;;; expl3.el ends here
 #+end_src
 
 ** COMMENT TeX Setup
@@ -448,22 +417,21 @@ oh lord
 ;; auctex is loaded only when editing tex files. 
 ;(eval-after-load "tex-mode" 
 ;  '(progn
-;     (load "auctex.el"	nil nil t)
+;     (load "auctex.el" nil nil t)
 ;     (load "preview-latex.el" nil nil t)
 ;     )
 ;  )
 
 ;; AUCTeX replaces latex-mode-hook with LaTeX-mode-hook
 ;(add-hook 'LaTeX-mode-hook
-;	  (lambda ()
-;	    (setq TeX-auto-save t)
-;	    (setq TeX-parse-self t)
-;	    ;; (setq-default TeX-master nil)
-;	    (reftex-mode t)
-;	    (TeX-fold-mode t)))
+;         (lambda ()
+;           (setq TeX-auto-save t)
+;           (setq TeX-parse-self t)
+;           ;; (setq-default TeX-master nil)
+;           (reftex-mode t)
+;           (TeX-fold-mode t)))
 
 (require 'tex-mode nil t)
-(setq TeX-parse-self t)
 (setq TeX-view-program-selection
       '((output-dvi "Emacs")
         (output-pdf "PDF Viewer")
@@ -471,13 +439,13 @@ oh lord
 ;; this example is good for OS X only
 (if currently-using-windows
     (setq TeX-view-program-list
-	  '(("DVI Viewer" "start \"\" %o")
-	    ("PDF Viewer" "start \"\" %o")
-	    ("HTML Viewer" "start \"\" %o")))
+          '(("DVI Viewer" "start \"\" %o")
+            ("PDF Viewer" "start \"\" %o")
+            ("HTML Viewer" "start \"\" %o")))
   (setq TeX-view-program-list
-	'(("DVI Viewer" "open %o")
-	  ("PDF Viewer" "open %o")
-	  ("HTML Viewer" "open %o")
+        '(("DVI Viewer" "open %o")
+          ("PDF Viewer" "open %o")
+          ("HTML Viewer" "open %o")
           ("Emacs" "(message \"%o\")"))))
 
 ;; TODO
@@ -511,12 +479,12 @@ oh lord
 ;
 ;  (cond
 ;   ((save-excursion (forward-line -1)
-;		    (let ((p (string-match-p "^\\s-*$" (thing-at-point 'line))))
-;		      (forward-line -1)
-;		      (and p (string-match-p "^\\s-*$" (thing-at-point 'line)))))
+;                   (let ((p (string-match-p "^\\s-*$" (thing-at-point 'line))))
+;                     (forward-line -1)
+;                     (and p (string-match-p "^\\s-*$" (thing-at-point 'line)))))
 ;    (TeX-newline))
 ;   ((save-excursion (forward-line -1)
-;		    (string-match-p "^\\s-*$" (thing-at-point 'line)))
+;                   (string-match-p "^\\s-*$" (thing-at-point 'line)))
 ;    (move-beginning-of-line)
 ;    (kill-line)
 ;    (insert "%")
@@ -542,21 +510,21 @@ oh lord
   '(progn
      ; Add Biber to the list of document processors
 ;     (add-to-list 'TeX-command-list
-;		  '("Biber"
-;		    "biber %s"
-;		    TeX-run-BibTeX
-;		    t
-;		    t
-;		    :help "Run the document through Biber"))
+;                 '("Biber"
+;                   "biber %s"
+;                   TeX-run-BibTeX
+;                   t
+;                   t
+;                   :help "Run the document through Biber"))
 ;     ; Hide BibTeX
 ;     (setcar (assoc "BibTeX" TeX-command-list) ".BibTeX")
      (add-to-list 'TeX-command-list
-		  '("arara"
-		    "arara %s"
-		    TeX-run-command
-		    t
-		    t
-		    :help "Run Arara"))))
+                  '("arara"
+                    "arara %s"
+                    TeX-run-command
+                    t
+                    t
+                    :help "Run Arara"))))
 
 (require 'reftex)
 
@@ -564,9 +532,9 @@ oh lord
 (setq reftex-plug-into-AUCTeX t)
 
 ;; (add-hook 'LaTeX-mode-hook
-;; 	  (lambda ()
-;; 	    (push '("LaTeXmk"
-;; 		    "latexmk -pdf %s"
+;;        (lambda ()
+;;          (push '("LaTeXmk"
+;;                  "latexmk -pdf %s"
 
 (setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
 (setq reftex-toc-split-windows-horizontally t)
@@ -574,9 +542,9 @@ oh lord
 ;(require 'latex)
 (eval-after-load "latex"
   '(mapc (lambda (ext)
-	  (add-to-list 'LaTeX-clean-intermediate-suffixes
-		       (format "\\.%s" ext)))
-	'("tdo" "run\\.xml" "bcf" "dvi")))
+          (add-to-list 'LaTeX-clean-intermediate-suffixes
+                       (format "\\.%s" ext)))
+        '("tdo" "run\\.xml" "bcf" "dvi")))
 
 (setq LaTeX-csquotes-close-quote "}"
       LaTeX-csquotes-open-quote "\\enquote{")
@@ -592,26 +560,26 @@ oh lord
   (interactive)
   (if (and (boundp 'TeX-fold-mode) TeX-fold-mode)
       (if (memq (LaTeX-current-environment) TeX-environments-with-arguments)
-	  (let ((env-end (save-excursion
-			   (LaTeX-find-matching-end)
-			   (point)))
-		env-start priority ov)
-	    (setq env-start (save-excursion
-			      (LaTeX-find-matching-begin)
-			      (looking-at (format "\\\\begin{%s}\\({[^}]*}\\)" (LaTeX-current-environment)))
-			      (point)))
-	    (if (and env-start env-end)
-		(progn
-		  (setq priority (TeX-overlay-prioritize env-start env-end))
-		  (setq ov (make-overlay env-start env-end
-					 (current-buffer) t nil))
-		  (overlay-put ov 'category 'TeX-fold)
-		  (overlay-put ov 'priority priority)
-		  (overlay-put ov 'evaporate t)
-		  (overlay-put ov 'TeX-fold-display-string-spec
-			       (concat (format "[%s]" (LaTeX-current-environment)) (match-string-no-properties 1)))
-		  (TeX-fold-hide-item ov))
-	      (message "No environment found"))))
+          (let ((env-end (save-excursion
+                           (LaTeX-find-matching-end)
+                           (point)))
+                env-start priority ov)
+            (setq env-start (save-excursion
+                              (LaTeX-find-matching-begin)
+                              (looking-at (format "\\\\begin{%s}\\({[^}]*}\\)" (LaTeX-current-environment)))
+                              (point)))
+            (if (and env-start env-end)
+                (progn
+                  (setq priority (TeX-overlay-prioritize env-start env-end))
+                  (setq ov (make-overlay env-start env-end
+                                         (current-buffer) t nil))
+                  (overlay-put ov 'category 'TeX-fold)
+                  (overlay-put ov 'priority priority)
+                  (overlay-put ov 'evaporate t)
+                  (overlay-put ov 'TeX-fold-display-string-spec
+                               (concat (format "[%s]" (LaTeX-current-environment)) (match-string-no-properties 1)))
+                  (TeX-fold-hide-item ov))
+              (message "No environment found"))))
     (message "TeX-fold-mode is not enabled.")))
 
 (defun dtx-newline ()
@@ -650,7 +618,7 @@ oh lord
   (interactive)
   (insert
    (substring (shell-command-to-string "grep edef.fmtversion $(kpsewhich latex.ltx)")
-	      -12 -2)))
+              -12 -2)))
 
 (fset 'LaTeX-newenvironment-to-NewDocumentEnvironment
    (lambda (&optional arg) "Keyboard
@@ -786,401 +754,328 @@ oh lord
     (mapconcat '(lambda (obj) (format "%s" obj)) list " "))
 #+end_src
 
-* COMMENT Twitter
-:PROPERTIES:
-:tangle: no
-:END:
-#+begin_src emacs-lisp
-(require 'twittering-mode)
-(setq twittering-use-master-password t)
-
-(global-set-key (kbd "C-c n") 'twittering-update-status-interactive)
-(global-set-key (kbd "C-c m")
-		(lambda () (interactive) (twittering-update-status-from-minibuffer)))
-
-(define-key twittering-mode-map (kbd ">") 'twittering-reply-to-user)
-(define-key twittering-mode-map (kbd "F") 'twittering-follow)
-(define-key twittering-mode-map (kbd "B") 'twittering-block)
+* Twitter
+Use ~twit~ (I believe) to set your account info.  This is also the
+entry point into the mode.
+#+begin_src elisp
+(*-with-map-bind-keys-to-functions
+ twittering-mode-map
+ '((twittering-mode ">" twittering-reply-to-user)
+   (twittering-mode "F" twittering-follow)
+   (twittering-mode "B" twittering-block)))
 #+end_src
 * C Modes
-* COMMENT TODO Smart Operators
-:PROPERTIES:
-:tangle: no
-:END:
-#+begin_src emacs-lisp
-(global-set-key "\M-+" 'smart-operator-mode)
-#+end_src
-* COMMENT ~$PATH~ Setup
-:PROPERTIES:
-:tangle: no
-:END:
-#+begin_src emacs-lisp
- ;; Adds stuff to my PATH (LaTeX, etc) 
+* ~$PATH~ Setup
+I don't know why I can't =M-x customize= this, but this form allows me
+to use programs that aren't in the standard path (=/usr/bin=,
+=/usr/sbin=, =/bin=, and =/sbin=).  In particular, TeX distributions
+on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
+=/usr/local/bin=.
+#+begin_src elisp
 (setenv "PATH"
-	(concat "/usr/local/bin" path-separator
-		"/usr/texbin" path-separator
-		"/usr/local" path-separator
-		"/usr/local/Cellar/ghostscript/9.06/bin" path-separator
-		"/usr/local/opt/ruby/bin" path-separator
-		(getenv "PATH")))
-
-(setq ispell-program-name
-      (if currently-using-windows
-	  "t:/#_Programs/Aspell/bin/aspell.exe"
-	"/usr/local/Cellar/ispell/3.3.02/bin/ispell"))
-
-(setq exec-path (cons "/usr/local/bin" exec-path))
+        (mapconcat #'identity
+                   `("/usr/texbin"
+                     "/usr/local/bin"
+                     ,(getenv "PATH"))
+                   path-separator))
 #+end_src
 * COMMENT Org
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-(global-set-key "\C-cd" 'org-indent-mode)
-(global-set-key (kbd "C-`") 'org-info)
-(setq org-agenda-include-diary nil)
-
-(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
-(setq org-directory (if currently-using-windows
-                        "t:/Dropbox/org"
-                      "~/Dropbox/org"))
-
-(defun org-file (s) (concat org-directory "/" s))
-
-(setq org-default-notes-file (org-file "notes.org"))
-
-(setq org-agenda-files (expand-file-name
-                        "org-agenda-files.list" user-emacs-directory))
-
-(setq org-capture-templates
-      '(("t" "Todo" entry
-         (file+headline (org-file "unfiled-tasks.org") "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry
-         (file+datetree (org-file "journal.org"))
-         "* %?\nEntered on %U\n  %i\n  %a")))
-
-(add-hook 'org-export-preprocess-final-hook
-          (lambda () (replace-string " --\n" " -- \n")))
-
-
-
-;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
-;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
-
-;; (defun org-meeting-place (meeting) (car (last meeting)))
-
-;; (defun org-any-meeting-meets-now (meeting-list)
-;;   (if meeting-list
-;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
-;; 	     (calendar-day-of-week date)) ; gets the dayname for today
-;; 	  ; If the first meeting of the list did not meet today,
-;; 	  ; move on to the others
-;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
-
-;; (defun org-flexi-class (start-year start-month start-day
-;;                           end-year   end-month   end-day
-;;                         meetings &rest skip-weeks)
-;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
-;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
-;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
-;; 	 (d (calendar-absolute-from-gregorian date))
-;;      (and
-;;       (<= date1 d) ; today is at least the start date
-;;       (<= d date2) ; today is at most the end date
-;;       (org-any-meeting-meets-today meetings)
-;; )
-
-;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
-
-;; (defun org-flexi-class-for-semester (semester-list meeting-times)
-;;   (apply 'org-flexi-class semester-list meeting-times))
-
-;; (org-flexi-class-for-semester (cons (org-meeting
-
-(defun org-ps-print-subtree (&optional prefix)
-  "Prints the current subtree.
-If the prefix is non-nil, it will not be printed with faces."
-  (interactive)
-  (if prefix
-      (progn
-	(org-mark-subtree)
-	(ps-print-region (point) (mark) "out.ps")
-	(shell-command "open out.ps")
-	(pop-mark))
-    (progn
-      (interactive)
-      (org-mark-subtree)
-      (ps-print-region-with-faces (point) (mark) "out.ps")
-      (shell-command "open out.ps")
-      (pop-mark))))
-
-(setq org-log-done 'note)
-(setq org-mobile-directory
-      (concat user-emacs-directory "../Apps/MobileOrg"))
-(setq org-mobile-inbox-for-pull
-      (concat user-emacs-directory "../org/from-mobile.org"))
-
-;(org-agenda  birthdays?
-
-(org-agenda-to-appt)
-(appt-activate t)
-
-;(define-key org-src-mode-map
-;  "\C-x\C-s" (lambda () (interactive)
-;	       (org-edit-src-exit) (save-buffer)))
-
-(setq org-structure-template-alist
-      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
-
-(require 'org2blog)
-
-(setq org2blog/wp-blog-alist
-      '(("wordpress"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus"
-	 
-	 :default-title "Hello World"
-	 :default-categories ("customization")
-	 :tags-as-categories nil)
-	("It's All Text"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus")))
-
-(setq org-id-link-to-org-use-id t)
-
-(setq org-publish-project-alist
-   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
-                 :base-extension "org"
-                 :publishing-directory "~/github/octopress/source/_posts/"
-                 :sub-superscript ""
-                 :recursive t
-                 :publishing-function org-html-publish-to-html
-                 :headline-levels 4
-                 :html-extension "markdown"
-                 :body-only t))))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((sh . t)
-   (python . t)
-   (R . t)
-   (ruby . t)
-   (perl . t)))
-
-(require 'ox-md)
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-(global-set-key "\C-cd" 'org-indent-mode)
-(global-set-key (kbd "C-`") 'org-info)
-(setq org-agenda-include-diary nil)
-
-(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
-(setq org-directory (if currently-using-windows
-                        "t:/Dropbox/org"
-                      "~/Dropbox/org"))
-
-(defun org-file (s) (concat org-directory "/" s))
-
-(setq org-default-notes-file (org-file "notes.org"))
-
-(setq org-agenda-files (expand-file-name
-                        "org-agenda-files.list" user-emacs-directory))
-
-(setq org-capture-templates
-      '(("t" "Todo" entry
-         (file+headline (org-file "unfiled-tasks.org") "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry
-         (file+datetree (org-file "journal.org"))
-         "* %?\nEntered on %U\n  %i\n  %a")))
-
-(add-hook 'org-export-preprocess-final-hook
-          (lambda () (replace-string " --\n" " -- \n")))
-
-
-
-;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
-;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
-
-;; (defun org-meeting-place (meeting) (car (last meeting)))
-
-;; (defun org-any-meeting-meets-now (meeting-list)
-;;   (if meeting-list
-;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
-;; 	     (calendar-day-of-week date)) ; gets the dayname for today
-;; 	  ; If the first meeting of the list did not meet today,
-;; 	  ; move on to the others
-;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
-
-;; (defun org-flexi-class (start-year start-month start-day
-;;                           end-year   end-month   end-day
-;;                         meetings &rest skip-weeks)
-;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
-;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
-;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
-;; 	 (d (calendar-absolute-from-gregorian date))
-;;      (and
-;;       (<= date1 d) ; today is at least the start date
-;;       (<= d date2) ; today is at most the end date
-;;       (org-any-meeting-meets-today meetings)
-;; )
-
-;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
-
-;; (defun org-flexi-class-for-semester (semester-list meeting-times)
-;;   (apply 'org-flexi-class semester-list meeting-times))
-
-;; (org-flexi-class-for-semester (cons (org-meeting
-
-(defun org-ps-print-subtree (&optional prefix)
-  "Prints the current subtree.
-If the prefix is non-nil, it will not be printed with faces."
-  (interactive)
-  (if prefix
-      (progn
-	(org-mark-subtree)
-	(ps-print-region (point) (mark) "out.ps")
-	(shell-command "open out.ps")
-	(pop-mark))
-    (progn
-      (interactive)
-      (org-mark-subtree)
-      (ps-print-region-with-faces (point) (mark) "out.ps")
-      (shell-command "open out.ps")
-      (pop-mark))))
-
-(setq org-log-done 'note)
-(setq org-mobile-directory
-      (concat user-emacs-directory "../Apps/MobileOrg"))
-(setq org-mobile-inbox-for-pull
-      (concat user-emacs-directory "../org/from-mobile.org"))
-
-;(org-agenda  birthdays?
-
-(org-agenda-to-appt)
-(appt-activate t)
-
-;(define-key org-src-mode-map
-;  "\C-x\C-s" (lambda () (interactive)
-;	       (org-edit-src-exit) (save-buffer)))
-
-(setq org-structure-template-alist
-      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
-
-(require 'org2blog)
-
-(setq org2blog/wp-blog-alist
-      '(("wordpress"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus"
-	 
-	 :default-title "Hello World"
-	 :default-categories ("customization")
-	 :tags-as-categories nil)
-	("It's All Text"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus")))
-
-(setq org-id-link-to-org-use-id t)
-
-(setq org-publish-project-alist
-   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
-                 :base-extension "org"
-                 :publishing-directory "~/github/octopress/source/_posts/"
-                 :sub-superscript ""
-                 :recursive t
-                 :publishing-function org-html-publish-to-html
-                 :headline-levels 4
-                 :html-extension "markdown"
-                 :body-only t))))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((sh . t)
-   (python . t)
-   (R . t)
-   (ruby . t)
-   (perl . t)))
-
-(require 'ox-md)
-#+end_src
-* COMMENT Octomacs
-:PROPERTIES:
-:tangle: no
-:END:
-#+begin_src emacs-lisp
-(setq org-octopress-directory-top       "~/github/octopress/source"
-      org-octopress-directory-posts     "~/github/octopress/source/_posts"
-      org-octopress-directory-org-top   "~/github/octopress/source"
-      org-octopress-directory-org-posts "~/github/octopress/source/blog"
-      org-octopress-setup-file          "~/Dropbox/.emacs.d/org-octopress-setup.org"
-)
-#+end_src
 #+begin_src elisp
-(defvar octopress-root
-  "~/github/vermiculus/octopress")
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-cd" 'org-indent-mode)
+(global-set-key (kbd "C-`") 'org-info)
+(setq org-agenda-include-diary nil)
 
-(defvar octopress-new-post-command
-  "bundle exec rake new_post[\"%s\"]")
+(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
+(setq org-directory (if currently-using-windows
+                        "t:/Dropbox/org"
+                      "~/Dropbox/org"))
 
-(defvar octopress-preview-command
-  "bundle exec rake preview")
+(defun org-file (s) (concat org-directory "/" s))
 
-(defvar octopress-preview-uri
-  "http://localhost:4000")
+(setq org-default-notes-file (org-file "notes.org"))
 
-(define-prefix-command 'octopress-map)
-(global-set-key (kbd "C-c o") 'octopress-map)
-(global-set-key (kbd "C-c C-o") 'octopress-map)
+(setq org-agenda-files (expand-file-name
+                        "org-agenda-files.list" user-emacs-directory))
 
-(defun octopress-new-post (title)
-  (interactive "MTitle: ")
-  (find-file (format "%s/%s"
-		     octopress-root
-		     (first (last (split-string
-				   (shell-command-to-string
-				    (format
-				     (format "cd %s && %s"
-					     octopress-root
-					     octopress-new-post-command)
-				     title))))))))
+(setq org-capture-templates
+      '(("t" "Todo" entry
+         (file+headline (org-file "unfiled-tasks.org") "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry
+         (file+datetree (org-file "journal.org"))
+         "* %?\nEntered on %U\n  %i\n  %a")))
 
-(defun octopress-preview ()
+(add-hook 'org-export-preprocess-final-hook
+          (lambda () (replace-string " --\n" " -- \n")))
+
+
+
+;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
+;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
+
+;; (defun org-meeting-place (meeting) (car (last meeting)))
+
+;; (defun org-any-meeting-meets-now (meeting-list)
+;;   (if meeting-list
+;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
+;; 	     (calendar-day-of-week date)) ; gets the dayname for today
+;; 	  ; If the first meeting of the list did not meet today,
+;; 	  ; move on to the others
+;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
+
+;; (defun org-flexi-class (start-year start-month start-day
+;;                           end-year   end-month   end-day
+;;                         meetings &rest skip-weeks)
+;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
+;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
+;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
+;; 	 (d (calendar-absolute-from-gregorian date))
+;;      (and
+;;       (<= date1 d) ; today is at least the start date
+;;       (<= d date2) ; today is at most the end date
+;;       (org-any-meeting-meets-today meetings)
+;; )
+
+;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
+
+;; (defun org-flexi-class-for-semester (semester-list meeting-times)
+;;   (apply 'org-flexi-class semester-list meeting-times))
+
+;; (org-flexi-class-for-semester (cons (org-meeting
+
+(defun org-ps-print-subtree (&optional prefix)
+  "Prints the current subtree.
+If the prefix is non-nil, it will not be printed with faces."
   (interactive)
-  (shell-command
-   (format "open http://localhost:4000 ; cd %s && %s &"
-	   octopress-root
-	   octopress-preview-command))
-  (make-directory))
+  (if prefix
+      (progn
+	(org-mark-subtree)
+	(ps-print-region (point) (mark) "out.ps")
+	(shell-command "open out.ps")
+	(pop-mark))
+    (progn
+      (interactive)
+      (org-mark-subtree)
+      (ps-print-region-with-faces (point) (mark) "out.ps")
+      (shell-command "open out.ps")
+      (pop-mark))))
 
-(define-key octopress-map (kbd "n") 'octopress-new-post)
-(define-key octopress-map (kbd "p") 'octopress-preview)
+(setq org-log-done 'note)
+(setq org-mobile-directory
+      (concat user-emacs-directory "../Apps/MobileOrg"))
+(setq org-mobile-inbox-for-pull
+      (concat user-emacs-directory "../org/from-mobile.org"))
+
+;(org-agenda  birthdays?
+
+(org-agenda-to-appt)
+(appt-activate t)
+
+;(define-key org-src-mode-map
+;  "\C-x\C-s" (lambda () (interactive)
+;	       (org-edit-src-exit) (save-buffer)))
+
+(setq org-structure-template-alist
+      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
+
+(require 'org2blog)
+
+(setq org2blog/wp-blog-alist
+      '(("wordpress"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus"
+	 
+	 :default-title "Hello World"
+	 :default-categories ("customization")
+	 :tags-as-categories nil)
+	("It's All Text"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus")))
+
+(setq org-id-link-to-org-use-id t)
+
+(setq org-publish-project-alist
+   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
+                 :base-extension "org"
+                 :publishing-directory "~/github/octopress/source/_posts/"
+                 :sub-superscript ""
+                 :recursive t
+                 :publishing-function org-html-publish-to-html
+                 :headline-levels 4
+                 :html-extension "markdown"
+                 :body-only t))))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sh . t)
+   (python . t)
+   (R . t)
+   (ruby . t)
+   (perl . t)))
+
+(require 'ox-md)
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-cd" 'org-indent-mode)
+(global-set-key (kbd "C-`") 'org-info)
+(setq org-agenda-include-diary nil)
+
+(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
+(setq org-directory (if currently-using-windows
+                        "t:/Dropbox/org"
+                      "~/Dropbox/org"))
+
+(defun org-file (s) (concat org-directory "/" s))
+
+(setq org-default-notes-file (org-file "notes.org"))
+
+(setq org-agenda-files (expand-file-name
+                        "org-agenda-files.list" user-emacs-directory))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry
+         (file+headline (org-file "unfiled-tasks.org") "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry
+         (file+datetree (org-file "journal.org"))
+         "* %?\nEntered on %U\n  %i\n  %a")))
+
+(add-hook 'org-export-preprocess-final-hook
+          (lambda () (replace-string " --\n" " -- \n")))
+
+
+
+;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
+;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
+
+;; (defun org-meeting-place (meeting) (car (last meeting)))
+
+;; (defun org-any-meeting-meets-now (meeting-list)
+;;   (if meeting-list
+;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
+;; 	     (calendar-day-of-week date)) ; gets the dayname for today
+;; 	  ; If the first meeting of the list did not meet today,
+;; 	  ; move on to the others
+;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
+
+;; (defun org-flexi-class (start-year start-month start-day
+;;                           end-year   end-month   end-day
+;;                         meetings &rest skip-weeks)
+;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
+;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
+;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
+;; 	 (d (calendar-absolute-from-gregorian date))
+;;      (and
+;;       (<= date1 d) ; today is at least the start date
+;;       (<= d date2) ; today is at most the end date
+;;       (org-any-meeting-meets-today meetings)
+;; )
+
+;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
+
+;; (defun org-flexi-class-for-semester (semester-list meeting-times)
+;;   (apply 'org-flexi-class semester-list meeting-times))
+
+;; (org-flexi-class-for-semester (cons (org-meeting
+
+(defun org-ps-print-subtree (&optional prefix)
+  "Prints the current subtree.
+If the prefix is non-nil, it will not be printed with faces."
+  (interactive)
+  (if prefix
+      (progn
+	(org-mark-subtree)
+	(ps-print-region (point) (mark) "out.ps")
+	(shell-command "open out.ps")
+	(pop-mark))
+    (progn
+      (interactive)
+      (org-mark-subtree)
+      (ps-print-region-with-faces (point) (mark) "out.ps")
+      (shell-command "open out.ps")
+      (pop-mark))))
+
+(setq org-log-done 'note)
+(setq org-mobile-directory
+      (concat user-emacs-directory "../Apps/MobileOrg"))
+(setq org-mobile-inbox-for-pull
+      (concat user-emacs-directory "../org/from-mobile.org"))
+
+;(org-agenda  birthdays?
+
+(org-agenda-to-appt)
+(appt-activate t)
+
+;(define-key org-src-mode-map
+;  "\C-x\C-s" (lambda () (interactive)
+;	       (org-edit-src-exit) (save-buffer)))
+
+(setq org-structure-template-alist
+      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
+
+(require 'org2blog)
+
+(setq org2blog/wp-blog-alist
+      '(("wordpress"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus"
+	 
+	 :default-title "Hello World"
+	 :default-categories ("customization")
+	 :tags-as-categories nil)
+	("It's All Text"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus")))
+
+(setq org-id-link-to-org-use-id t)
+
+(setq org-publish-project-alist
+   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
+                 :base-extension "org"
+                 :publishing-directory "~/github/octopress/source/_posts/"
+                 :sub-superscript ""
+                 :recursive t
+                 :publishing-function org-html-publish-to-html
+                 :headline-levels 4
+                 :html-extension "markdown"
+                 :body-only t))))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sh . t)
+   (python . t)
+   (R . t)
+   (ruby . t)
+   (perl . t)))
+
+(require 'ox-md)
 #+end_src
-
 * COMMENT Navigation
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (global-set-key (kbd "M-<down>")
 		(lambda () (interactive) (scroll-up 1)))
 (global-set-key (kbd "M-<up>")
