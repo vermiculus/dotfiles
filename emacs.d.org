@@ -188,20 +188,24 @@ current window system (or lack thereof), there is ~window-system~.
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  global-map
- `((magit "M-?" magit-status)
-   (multiple-cursors "C-M->" mc/mark-next-like-this)
-   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
-   (t "C-x t" *-find-temporary-file)
-   (speedbar "C-c C-SPC" speedbar-get-focus)
-   (god-mode "<escape>" god-local-mode)
+ `((t "C-x C-0" delete-window)
    (t "C-x C-1" delete-other-windows)
    (t "C-x C-2" split-window-below)
    (t "C-x C-3" split-window-right)
-   (smex "M-x" *-smex-smart-smex)
+   (t "C-x t" *-find-temporary-file)
+   (t "M-<down>" ,(lambda () (interactive) (scroll-up -1)))
+   (t "M-<up>" ,(lambda () (interactive) (scroll-up 1)))
+   (god-mode "<escape>" god-local-mode)
+   (magit "M-?" magit-status)
+   (multiple-cursors "C-M->" mc/mark-next-like-this)
+   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
+   (org "C-c a" org-agenda)
+   (org "C-c c" org-capture)
    (smex "M-S-x" *-smex-smart-smex-major-mode-commands)
-   (twittering-mode "C-c n" twittering-update-status-interactive)
+   (smex "M-x" *-smex-smart-smex)
+   (speedbar "C-c C-SPC" speedbar-get-focus)
    (twittering-mode "C-c m" ,(lambda () (interactive) (twittering-update-status-from-minibuffer)))
-   (t "C-x C-0" delete-window)))
+   (twittering-mode "C-c n" twittering-update-status-interactive)))
 #+end_src
 
 ** TODO Enable God-Mode globally
