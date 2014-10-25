@@ -209,6 +209,7 @@
    (quote
     ("06f0b439b62164c6f8f84fdda32b62fb50b6d00e8b01c2208e55543a6337433a" "57f8801351e8b7677923c9fe547f7e19f38c99b80d68c34da6fa9b94dc6d3297" default)))
  '(debug-on-error t)
+ '(default-input-method "TeX")
  '(desktop-save-mode t)
  '(display-time-mode t)
  '(doc-view-mode-hook (quote (auto-revert-mode)) t)

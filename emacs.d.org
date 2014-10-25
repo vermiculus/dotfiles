@@ -207,7 +207,28 @@ Neither of these seem to work, but figure it out.
  '((god-mode "." #'repeat)))
 #+end_src
 
-* [[https://github.com/magit/magit][Magit]]
+* COMMENT [[https://github.com/magit/magit][Magit]]
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(setq magit-emacsclient-executable nil)
+
+(defun *magit-delete-trailing-whitespace-from-file ()
+  "Removes whitespace from the current item."
+  (interactive)
+  (save-excursion
+    (magit-visit-item)
+    (delete-trailing-whitespace)
+    (save-buffer)
+    (kill-buffer))
+  (magit-refresh))
+
+; (add-hook 'magit-status-mode-hook
+; 	  (local-set-key
+; 	   (kbd "C-c w")
+; 	   '*magit-delete-trailing-whitespace-from-file))
+#+end_src
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
 Since =yasnippet= has its own snippet creation workflow from within
@@ -282,7 +303,1056 @@ This function brings them up within emacs.
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
 #+end_src
+
+** COMMENT LaTeX3 Support
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+;;; expl3.el - Special code for expl3.
+
+;; $Id: expl3.el,v 1.4 2013/08/22 06:50:33 sallred Exp $
+
+;;; Code:
+
+(defun join-string-list (string-list &optional separator)
+    "Concatenates a list of strings
+and puts spaces between the elements."
+    (let ((separator (if separator separator " ")))
+      (mapconcat 'identity string-list separator)))
+
+(defun regex-group (content)
+  (concat "\\(" content "\\)"))
+
+(defvar special-types
+  '("acro"       "alloc"      "array"      "bool"
+    "box"        "cctab"      "char"       "chemformula"
+    "chemmacros" "chemnum"    "chk"        "classics"
+    "clist"      "codedoc"    "coffin"     "color"
+    "conteq"     "cs"         "dim"        "driver"
+    "dry"        "dt"         "else"       "ENdiagram"
+    "enotez"     "etex"       "exp"        "expl"
+    "exsheets"   "fi"         "file"       "flag"
+    "fltr"       "fnpct"      "fontspec"   "fp"
+    "galley"     "ghsystem"   "group"      "GS"
+    "hbox"       "hcoffin"    "hobete"     "if"
+    "insert"     "int"        "ior"        "iow"
+    "kgl"        "kernel"     "keys"       "keyval"
+    "lltxmath"   "lua"        "luatex"     "mix"
+    "mode"       "MOdiagram"  "morewrites" "msg"
+    "muskip"     "notestobib" "or"         "pdftex"
+    "peek"       "prg"        "primargs"   "prop"
+    "quark"      "randomwalk" "regex"      "reverse"
+    "scan"       "seq"        "siunitx"    "skip"
+    "sort"       "substances" "str"        "tasks"
+    "tex"        "tl"         "token"      "um"
+    "use"        "vbox"       "vcoffin"    "with"
+    "xeCJK"      "xetex"      "xfrac"      "xparse"
+    "xpatch"     "xpeek"      "xpinyin"    "xtemplate"
+    "zhnum"      "zxjt")
+  "Special LaTeX3 types.")
+
+;; (defface font-latex-expl3-function-face
+;;   (let ((font (cond ((assq :inherit custom-face-attributes) '(:inherit italic))
+;;                  ((assq :slant custom-face-attributes) '(:slant italic))
+;;                  (t '(:italic t)))))
+;;     `((((class grayscale) (background light))
+;;        (:foreground "DimGray" ,@font))
+;;       (((class grayscale) (background dark))
+;;        (:foreground "LightGray" ,@font))
+;;       (((class color) (background light))
+;;        (:foreground "DarkOliveGreen" ,@font))
+;;       (((class color) (background dark))
+;;        (:foreground "OliveDrab" ,@font))
+;;       (t (,@font))))
+;;   "Face used to highlight expl3 functions."
+;;   :group 'font-latex-highlighting-faces)
+
+;; (defface font-latex-expl3-variable-face
+;;   (let ((font (cond ((assq :inherit custom-face-attributes) '(:inherit italic))
+;;                  ((assq :slant custom-face-attributes) '(:slant italic))
+;;                  (t '(:italic t)))))
+;;     `((((class grayscale) (background light))
+;;        (:foreground "DimGray" ,@font))
+;;       (((class grayscale) (background dark))
+;;        (:foreground "LightGray" ,@font))
+;;       (((class color) (background light))
+;;        (:foreground "DarkOliveGreen" ,@font))
+;;       (((class color) (background dark))
+;;        (:foreground "OliveDrab" ,@font))
+;;       (t (,@font))))
+;;   "Face used to highlight expl3 variables."
+;;   :group 'font-latex-highlighting-faces)
+
+
+;;(let ((types (concat
+;;            (regex-group (join-string-list
+;;                          special-types "\\|"))
+;;            "_[A-z_:]+"))
+;;      (general (regex-group "[A-z_:]+"))
+;;      (camel (regex-group "[A-z@]+"))
+;;      (nocamel (regex-group "?:[^A-z@_:]"))
+;;      (command "\\\\"))
+
+(defvar LaTeX-expl3-syntax-mode nil
+  "Controls keybindings for expl3 syntax")
+
+;(defun LaTeX-insert-space ()
+;  (interactive)
+;  (insert (if LaTeX-expl3-syntax-mode " ~ " " ")))
+
+(defun LaTeX-toggle-expl3-syntax ()
+  (interactive)
+  (message "LaTeX3 space mode is now %s."
+           (if (setq LaTeX-expl3-syntax-mode (not LaTeX-expl3-syntax-mode))
+               "on" "off")))
+
+;;; expl3.el ends here
+#+end_src
+
+** COMMENT TeX Setup
+:PROPERTIES:
+:tangle: no
+:END:
+oh lord
+#+begin_src emacs-lisp
+(message "in TeX setup")
+(require 'latex)
+ ;; Sets the default PDF viewer to, well, the default PDF viewer.
+;(setq TeX-view-program-list '(("Shell Default" "open %o")))
+;(setq TeX-view-program-selection '((output-pdf "Shell Default")))
+
+ ;; Set the default LaTeX exec to pdfTeX
+;(setq TeX-PDF-mode t)
+
+;; the wrapping up of the two loads make sure 
+;; auctex is loaded only when editing tex files. 
+;(eval-after-load "tex-mode" 
+;  '(progn
+;     (load "auctex.el"	nil nil t)
+;     (load "preview-latex.el" nil nil t)
+;     )
+;  )
+
+;; AUCTeX replaces latex-mode-hook with LaTeX-mode-hook
+;(add-hook 'LaTeX-mode-hook
+;	  (lambda ()
+;	    (setq TeX-auto-save t)
+;	    (setq TeX-parse-self t)
+;	    ;; (setq-default TeX-master nil)
+;	    (reftex-mode t)
+;	    (TeX-fold-mode t)))
+
+(require 'tex-mode nil t)
+(setq TeX-parse-self t)
+(setq TeX-view-program-selection
+      '((output-dvi "Emacs")
+        (output-pdf "PDF Viewer")
+        (output-html "HTML Viewer")))
+;; this example is good for OS X only
+(if currently-using-windows
+    (setq TeX-view-program-list
+	  '(("DVI Viewer" "start \"\" %o")
+	    ("PDF Viewer" "start \"\" %o")
+	    ("HTML Viewer" "start \"\" %o")))
+  (setq TeX-view-program-list
+	'(("DVI Viewer" "open %o")
+	  ("PDF Viewer" "open %o")
+	  ("HTML Viewer" "open %o")
+          ("Emacs" "(message \"%o\")"))))
+
+;; TODO
+;(defvar TeX-use-find-for-view t
+;  "Use `find-file' for viewing finished documents.  See
+;  `TeX-maybe-find-finished-document'.")
+;(defun TeX-maybe-find-finished-document-or-fallback (filepath fallback)
+;  "Checks `TeX-use-find-for-view' for truth and opens a finished
+;document appropriately."
+;  (funcall (if TeX-use-find-for-view 'find-file fallback)
+;           filepath))
+;(defun TeX-maybe-find-finished-document (filepath)
+;  (interactive)
+;  (TeX-maybe-find-finished-document-or-fallback
+;   filepath
+;   (lambda (fp)
+;     (shell-command (format "open %s" fp)))))
+
+(setq TeX-use-find-for-view nil)
+
+(setq TeX-PDF-mode t)
+
+(setq preview-gs-options '("-q" "-dNOSAFER" "-dNOPAUSE" "-DNOPLATFONTS" "-dPrinted" "-dTextAlphaBits=4" "-dGraphicsAlphaBits=4"))
+
+;(defun TeX-electric-return ()
+;  "if the previous line is whitespace, remove whitespace, insert comment and new line
+; if the char before the char before point is a new line, insert a new line
+; if the char before the char before point is a %, remove % and have it such that point is seperated from the last content by two blank lines
+; else insert new line and indent"
+;  (interactive)
+;
+;  (cond
+;   ((save-excursion (forward-line -1)
+;		    (let ((p (string-match-p "^\\s-*$" (thing-at-point 'line))))
+;		      (forward-line -1)
+;		      (and p (string-match-p "^\\s-*$" (thing-at-point 'line)))))
+;    (TeX-newline))
+;   ((save-excursion (forward-line -1)
+;		    (string-match-p "^\\s-*$" (thing-at-point 'line)))
+;    (move-beginning-of-line)
+;    (kill-line)
+;    (insert "%")
+;    (TeX-newline))
+;   ((= 37 (char-before (1- (point))))
+;    (delete-backward-char 2) (TeX-newline) (TeX-newline))
+
+
+; 
+
+
+;   (local-set-key (kbd "RET") 'TeX-newline)
+
+(add-to-list 'exec-path "/usr/texbin")
+
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+(setq-default TeX-master nil)
+
+
+
+(eval-after-load "tex"
+  '(progn
+     ; Add Biber to the list of document processors
+;     (add-to-list 'TeX-command-list
+;		  '("Biber"
+;		    "biber %s"
+;		    TeX-run-BibTeX
+;		    t
+;		    t
+;		    :help "Run the document through Biber"))
+;     ; Hide BibTeX
+;     (setcar (assoc "BibTeX" TeX-command-list) ".BibTeX")
+     (add-to-list 'TeX-command-list
+		  '("arara"
+		    "arara %s"
+		    TeX-run-command
+		    t
+		    t
+		    :help "Run Arara"))))
+
+(require 'reftex)
+
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
+(setq reftex-plug-into-AUCTeX t)
+
+;; (add-hook 'LaTeX-mode-hook
+;; 	  (lambda ()
+;; 	    (push '("LaTeXmk"
+;; 		    "latexmk -pdf %s"
+
+(setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
+(setq reftex-toc-split-windows-horizontally t)
+
+;(require 'latex)
+(eval-after-load "latex"
+  '(mapc (lambda (ext)
+	  (add-to-list 'LaTeX-clean-intermediate-suffixes
+		       (format "\\.%s" ext)))
+	'("tdo" "run\\.xml" "bcf" "dvi")))
+
+(setq LaTeX-csquotes-close-quote "}"
+      LaTeX-csquotes-open-quote "\\enquote{")
+
+(setq reftex-index-macros '(multind))
+
+(defcustom TeX-environments-with-arguments
+  (list "function" "variable" "macro" "enumerate")
+  "Environments that will continue to display their arguments when folded.")
+
+(defun mg-TeX-fold-environment-with-argument ()
+  "Hide the current environment with \"[environment]{argument}\"."
+  (interactive)
+  (if (and (boundp 'TeX-fold-mode) TeX-fold-mode)
+      (if (memq (LaTeX-current-environment) TeX-environments-with-arguments)
+	  (let ((env-end (save-excursion
+			   (LaTeX-find-matching-end)
+			   (point)))
+		env-start priority ov)
+	    (setq env-start (save-excursion
+			      (LaTeX-find-matching-begin)
+			      (looking-at (format "\\\\begin{%s}\\({[^}]*}\\)" (LaTeX-current-environment)))
+			      (point)))
+	    (if (and env-start env-end)
+		(progn
+		  (setq priority (TeX-overlay-prioritize env-start env-end))
+		  (setq ov (make-overlay env-start env-end
+					 (current-buffer) t nil))
+		  (overlay-put ov 'category 'TeX-fold)
+		  (overlay-put ov 'priority priority)
+		  (overlay-put ov 'evaporate t)
+		  (overlay-put ov 'TeX-fold-display-string-spec
+			       (concat (format "[%s]" (LaTeX-current-environment)) (match-string-no-properties 1)))
+		  (TeX-fold-hide-item ov))
+	      (message "No environment found"))))
+    (message "TeX-fold-mode is not enabled.")))
+
+(defun dtx-newline ()
+  (interactive)
+  (setq dtx-newline-is-sentence-end
+        (memq (char-before) '(?\. ?\! ?\?))
+  (if (not (= (current-column) 0))
+      (progn
+        (newline)
+        (insert "%   ")
+        (if dtx-newline-is-sentence-end
+            (indent-for-tab-command)))
+    (newline))
+  (if dtx-newline-is-sentence-end
+      (progn (move-to-column 2)
+             (kill-line)
+             (newline)
+             (left-char 1)))))
+
+(fset 'dtx-newline 'newline)
+
+(fset 'LaTeX-usepackage-to-requirepackage
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([11 25 1 37 1 return up 25 M-left left 67108896 C-M-left 4 123 24 24 backspace 67108911 backspace 125 1 M-right M-backspace 82 101 113 117 105 114 101 M-backspace 80 97 115 115 79 112 116 105 111 110 115 84 111 80 97 99 107 97 103 101 5 M-left M-right M-backspace 25 5 return 92 82 101 113 117 105 114 101 80 97 99 107 97 103 101 123 25 125] 0 "%d")) arg)))
+
+(defun LaTeX-new-comment-section (section-title)
+  (interactive "sSection: ")
+  (let ((comment (make-string 64 ?%)))
+    (insert (format "%s\n%s\n%s\n\n\n" comment comment comment))
+    (previous-line 4)
+    (right-char 3)
+    (insert (format " %s " section-title))
+    (delete-char (+ 2 (length section-title)))
+    (next-line 3)))
+
+(defun LaTeX-insert-current-format-version ()
+  (interactive)
+  (insert
+   (substring (shell-command-to-string "grep edef.fmtversion $(kpsewhich latex.ltx)")
+	      -12 -2)))
+
+(fset 'LaTeX-newenvironment-to-NewDocumentEnvironment
+   (lambda (&optional arg) "Keyboard
+   macro." (interactive "p") (kmacro-exec-ring-item (quote ([right
+   134217828 78 101 119 68 111 99 117 109 101 110 116 69 110 118
+   105 114 111 110 109 101 110 116 32 right 32 M-right 32 right
+   123 C-M-right 125 return 32 right return tab backspace 5
+   C-M-left left return 32 right return tab C-M-right left return
+   tab] 0 "%d")) arg)))
+
+;(setq LaTeX-expl3-syntax-mode nil)
+;(define-key LaTeX-mode-map
+;  (kbd "SPC")
+;  'LaTeX-insert-space)
+;(define-key LaTeX-mode-map
+;  (kbd "C-c C-SPC")
+;  'LaTeX-toggle-expl3-syntax)
+
+(define-key LaTeX-math-mode-map (kbd "` 4")
+  (lambda ()
+    (interactive)
+    (TeX-insert-dollar 2)
+    (backward-char)))
+(define-key LaTeX-math-mode-map (kbd "` ;")
+  (lambda ()
+    (interactive)
+    (TeX-insert-macro "ell")))
+(define-key LaTeX-math-mode-map (kbd "` ,")
+  (lambda ()
+    (interactive)
+    (TeX-insert-macro "ldots")))
+(define-key LaTeX-math-mode-map (kbd "` 1")
+  (lambda ()
+    (interactive)
+    (insert "^{-1}")))
+(define-key LaTeX-math-mode-map (kbd "` '")
+  (lambda ()
+    (interactive)
+    (insert "^")
+    (TeX-insert-macro "prime")))
+
+(add-hook
+ 'LaTeX-mode-hook
+ (lambda ()
+   (let ((math (reverse (append LaTeX-math-list LaTeX-math-default))))
+     (while math
+       (let ((entry (car math))
+         value)
+     (setq math (cdr math))
+     (if (listp (cdr entry))
+         (setq value (nth 1 entry))
+       (setq value (cdr entry)))
+     (if (stringp value)
+         (fset (intern (concat "LaTeX-math-" value))
+           (list 'lambda (list 'arg) (list 'interactive "*P")
+             (list 'LaTeX-math-insert value
+                   '(null (texmathp)))))))))))
+
+
+
+(define-key LaTeX-mode-map (kbd "M--")
+  (lambda ()
+    (interactive)
+    (just-one-space)
+    (insert "\\Dash ")))
+(define-key LaTeX-mode-map (kbd "M-_")
+  (lambda ()
+    (interactive)
+    (just-one-space)
+    (insert "\\textendash ")))
+(define-key LaTeX-mode-map (kbd "C-c r") 'reftex-parse-all)
+
+(setq-default TeX-command-default "arara")
+(setq LaTeX-command-style '(("" "%(PDF)%(latex) -file-line-error %S%(PDFout)")))
+
+;; comment in between \iffalse...\fi contstructs
+(add-hook 'TeX-mode-hook
+  (lambda nil
+    (font-lock-add-keywords nil '(
+      ("\\\\iffalse\\(\\(.\\|\n\\)*?\\)\\\\fi" 1 font-lock-comment-face)))))
+#+end_src
+
+* COMMENT Dired
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(require 'dired)
+(defun for-each-dired-marked-file (fn)
+  "Do stuff for each marked file, only works in dired window"
+  (interactive)
+  (if (eq major-mode 'dired-mode)
+      (let ((filenames (dired-get-marked-files)))
+	(mapcar fn filenames))
+    (error (format "Not a Dired buffer \(%s\)" major-mode))))
+
+(setq dired-listing-switches "-alh")
+(define-key dired-mode-map (kbd "b") 'bf-mode)
+#+end_src
+#+begin_src elisp
+(eval-after-load "dired-aux"
+   '(add-to-list 'dired-compress-file-suffixes 
+                 '("\\.zip\\'" ".zip" "unzip")))
+
+(eval-after-load "dired"
+  '(define-key dired-mode-map "z" 'dired-zip-files))
+(defun dired-zip-files (zip-file)
+  "Create an archive containing the marked files."
+  (interactive "sEnter name of zip file: ")
+
+  ;; create the zip file
+  (let ((zip-file (if (string-match ".zip$" zip-file) zip-file (concat zip-file ".zip"))))
+    (shell-command 
+     (concat "zip " 
+             zip-file
+             " "
+             (concat-string-list 
+              (mapcar
+               '(lambda (filename)
+                  (file-name-nondirectory filename))
+               (dired-get-marked-files))))))
+
+  (revert-buffer)
+
+  ;; remove the mark on all the files  "*" to " "
+  ;(dired-change-marks 42 ?\040)
+  ;; mark zip file
+  (dired-mark-files-regexp zip-file);;(filename-to-regexp zip-file))
+  )
+
+(defun concat-string-list (list) 
+   "Return a string which is a concatenation of all elements of the list separated by spaces" 
+    (mapconcat '(lambda (obj) (format "%s" obj)) list " "))
+#+end_src
+
+* COMMENT Twitter
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(require 'twittering-mode)
+(setq twittering-use-master-password t)
+
+(global-set-key (kbd "C-c n") 'twittering-update-status-interactive)
+(global-set-key (kbd "C-c m")
+		(lambda () (interactive) (twittering-update-status-from-minibuffer)))
+
+(define-key twittering-mode-map (kbd ">") 'twittering-reply-to-user)
+(define-key twittering-mode-map (kbd "F") 'twittering-follow)
+(define-key twittering-mode-map (kbd "B") 'twittering-block)
+#+end_src
 * C Modes
+* COMMENT TODO Smart Operators
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(global-set-key "\M-+" 'smart-operator-mode)
+#+end_src
+* COMMENT ~$PATH~ Setup
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+ ;; Adds stuff to my PATH (LaTeX, etc) 
+(setenv "PATH"
+	(concat "/usr/local/bin" path-separator
+		"/usr/texbin" path-separator
+		"/usr/local" path-separator
+		"/usr/local/Cellar/ghostscript/9.06/bin" path-separator
+		"/usr/local/opt/ruby/bin" path-separator
+		(getenv "PATH")))
+
+(setq ispell-program-name
+      (if currently-using-windows
+	  "t:/#_Programs/Aspell/bin/aspell.exe"
+	"/usr/local/Cellar/ispell/3.3.02/bin/ispell"))
+
+(setq exec-path (cons "/usr/local/bin" exec-path))
+#+end_src
+* COMMENT Org
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-cd" 'org-indent-mode)
+(global-set-key (kbd "C-`") 'org-info)
+(setq org-agenda-include-diary nil)
+
+(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
+(setq org-directory (if currently-using-windows
+                        "t:/Dropbox/org"
+                      "~/Dropbox/org"))
+
+(defun org-file (s) (concat org-directory "/" s))
+
+(setq org-default-notes-file (org-file "notes.org"))
+
+(setq org-agenda-files (expand-file-name
+                        "org-agenda-files.list" user-emacs-directory))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry
+         (file+headline (org-file "unfiled-tasks.org") "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry
+         (file+datetree (org-file "journal.org"))
+         "* %?\nEntered on %U\n  %i\n  %a")))
+
+(add-hook 'org-export-preprocess-final-hook
+          (lambda () (replace-string " --\n" " -- \n")))
+
+
+
+;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
+;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
+
+;; (defun org-meeting-place (meeting) (car (last meeting)))
+
+;; (defun org-any-meeting-meets-now (meeting-list)
+;;   (if meeting-list
+;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
+;; 	     (calendar-day-of-week date)) ; gets the dayname for today
+;; 	  ; If the first meeting of the list did not meet today,
+;; 	  ; move on to the others
+;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
+
+;; (defun org-flexi-class (start-year start-month start-day
+;;                           end-year   end-month   end-day
+;;                         meetings &rest skip-weeks)
+;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
+;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
+;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
+;; 	 (d (calendar-absolute-from-gregorian date))
+;;      (and
+;;       (<= date1 d) ; today is at least the start date
+;;       (<= d date2) ; today is at most the end date
+;;       (org-any-meeting-meets-today meetings)
+;; )
+
+;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
+
+;; (defun org-flexi-class-for-semester (semester-list meeting-times)
+;;   (apply 'org-flexi-class semester-list meeting-times))
+
+;; (org-flexi-class-for-semester (cons (org-meeting
+
+(defun org-ps-print-subtree (&optional prefix)
+  "Prints the current subtree.
+If the prefix is non-nil, it will not be printed with faces."
+  (interactive)
+  (if prefix
+      (progn
+	(org-mark-subtree)
+	(ps-print-region (point) (mark) "out.ps")
+	(shell-command "open out.ps")
+	(pop-mark))
+    (progn
+      (interactive)
+      (org-mark-subtree)
+      (ps-print-region-with-faces (point) (mark) "out.ps")
+      (shell-command "open out.ps")
+      (pop-mark))))
+
+(setq org-log-done 'note)
+(setq org-mobile-directory
+      (concat user-emacs-directory "../Apps/MobileOrg"))
+(setq org-mobile-inbox-for-pull
+      (concat user-emacs-directory "../org/from-mobile.org"))
+
+;(org-agenda  birthdays?
+
+(org-agenda-to-appt)
+(appt-activate t)
+
+;(define-key org-src-mode-map
+;  "\C-x\C-s" (lambda () (interactive)
+;	       (org-edit-src-exit) (save-buffer)))
+
+(setq org-structure-template-alist
+      (cons '("esf" "#+begin_src emacs-lisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("es" "#+begin_src emacs-lisp\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("nt" "#+name: ?\n#+begin_src emacs-lisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
+
+(require 'org2blog)
+
+(setq org2blog/wp-blog-alist
+      '(("wordpress"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus"
+	 
+	 :default-title "Hello World"
+	 :default-categories ("customization")
+	 :tags-as-categories nil)
+	("It's All Text"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus")))
+
+(setq org-id-link-to-org-use-id t)
+
+(setq org-publish-project-alist
+   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
+                 :base-extension "org"
+                 :publishing-directory "~/github/octopress/source/_posts/"
+                 :sub-superscript ""
+                 :recursive t
+                 :publishing-function org-html-publish-to-html
+                 :headline-levels 4
+                 :html-extension "markdown"
+                 :body-only t))))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sh . t)
+   (python . t)
+   (R . t)
+   (ruby . t)
+   (perl . t)))
+
+(require 'ox-md)
+(global-set-key "\C-cl" 'org-store-link)
+(global-set-key "\C-cc" 'org-capture)
+(global-set-key "\C-ca" 'org-agenda)
+(global-set-key "\C-cb" 'org-iswitchb)
+(global-set-key "\C-cd" 'org-indent-mode)
+(global-set-key (kbd "C-`") 'org-info)
+(setq org-agenda-include-diary nil)
+
+(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
+(setq org-directory (if currently-using-windows
+                        "t:/Dropbox/org"
+                      "~/Dropbox/org"))
+
+(defun org-file (s) (concat org-directory "/" s))
+
+(setq org-default-notes-file (org-file "notes.org"))
+
+(setq org-agenda-files (expand-file-name
+                        "org-agenda-files.list" user-emacs-directory))
+
+(setq org-capture-templates
+      '(("t" "Todo" entry
+         (file+headline (org-file "unfiled-tasks.org") "Tasks")
+         "* TODO %?\n  %i\n  %a")
+        ("j" "Journal" entry
+         (file+datetree (org-file "journal.org"))
+         "* %?\nEntered on %U\n  %i\n  %a")))
+
+(add-hook 'org-export-preprocess-final-hook
+          (lambda () (replace-string " --\n" " -- \n")))
+
+
+
+;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
+;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
+
+;; (defun org-meeting-place (meeting) (car (last meeting)))
+
+;; (defun org-any-meeting-meets-now (meeting-list)
+;;   (if meeting-list
+;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
+;; 	     (calendar-day-of-week date)) ; gets the dayname for today
+;; 	  ; If the first meeting of the list did not meet today,
+;; 	  ; move on to the others
+;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
+
+;; (defun org-flexi-class (start-year start-month start-day
+;;                           end-year   end-month   end-day
+;;                         meetings &rest skip-weeks)
+;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
+;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
+;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
+;; 	 (d (calendar-absolute-from-gregorian date))
+;;      (and
+;;       (<= date1 d) ; today is at least the start date
+;;       (<= d date2) ; today is at most the end date
+;;       (org-any-meeting-meets-today meetings)
+;; )
+
+;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
+
+;; (defun org-flexi-class-for-semester (semester-list meeting-times)
+;;   (apply 'org-flexi-class semester-list meeting-times))
+
+;; (org-flexi-class-for-semester (cons (org-meeting
+
+(defun org-ps-print-subtree (&optional prefix)
+  "Prints the current subtree.
+If the prefix is non-nil, it will not be printed with faces."
+  (interactive)
+  (if prefix
+      (progn
+	(org-mark-subtree)
+	(ps-print-region (point) (mark) "out.ps")
+	(shell-command "open out.ps")
+	(pop-mark))
+    (progn
+      (interactive)
+      (org-mark-subtree)
+      (ps-print-region-with-faces (point) (mark) "out.ps")
+      (shell-command "open out.ps")
+      (pop-mark))))
+
+(setq org-log-done 'note)
+(setq org-mobile-directory
+      (concat user-emacs-directory "../Apps/MobileOrg"))
+(setq org-mobile-inbox-for-pull
+      (concat user-emacs-directory "../org/from-mobile.org"))
+
+;(org-agenda  birthdays?
+
+(org-agenda-to-appt)
+(appt-activate t)
+
+;(define-key org-src-mode-map
+;  "\C-x\C-s" (lambda () (interactive)
+;	       (org-edit-src-exit) (save-buffer)))
+
+(setq org-structure-template-alist
+      (cons '("esf" "#+begin_src emacs-lisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("es" "#+begin_src emacs-lisp\n?\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
+(setq org-structure-template-alist
+      (cons '("nt" "#+name: ?\n#+begin_src emacs-lisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
+
+(require 'org2blog)
+
+(setq org2blog/wp-blog-alist
+      '(("wordpress"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus"
+	 
+	 :default-title "Hello World"
+	 :default-categories ("customization")
+	 :tags-as-categories nil)
+	("It's All Text"
+	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
+	 :username "vermiculus")))
+
+(setq org-id-link-to-org-use-id t)
+
+(setq org-publish-project-alist
+   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
+                 :base-extension "org"
+                 :publishing-directory "~/github/octopress/source/_posts/"
+                 :sub-superscript ""
+                 :recursive t
+                 :publishing-function org-html-publish-to-html
+                 :headline-levels 4
+                 :html-extension "markdown"
+                 :body-only t))))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sh . t)
+   (python . t)
+   (R . t)
+   (ruby . t)
+   (perl . t)))
+
+(require 'ox-md)
+#+end_src
+* COMMENT Octomacs
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(setq org-octopress-directory-top       "~/github/octopress/source"
+      org-octopress-directory-posts     "~/github/octopress/source/_posts"
+      org-octopress-directory-org-top   "~/github/octopress/source"
+      org-octopress-directory-org-posts "~/github/octopress/source/blog"
+      org-octopress-setup-file          "~/Dropbox/.emacs.d/org-octopress-setup.org"
+)
+#+end_src
+#+begin_src elisp
+(defvar octopress-root
+  "~/github/vermiculus/octopress")
+
+(defvar octopress-new-post-command
+  "bundle exec rake new_post[\"%s\"]")
+
+(defvar octopress-preview-command
+  "bundle exec rake preview")
+
+(defvar octopress-preview-uri
+  "http://localhost:4000")
+
+(define-prefix-command 'octopress-map)
+(global-set-key (kbd "C-c o") 'octopress-map)
+(global-set-key (kbd "C-c C-o") 'octopress-map)
+
+(defun octopress-new-post (title)
+  (interactive "MTitle: ")
+  (find-file (format "%s/%s"
+		     octopress-root
+		     (first (last (split-string
+				   (shell-command-to-string
+				    (format
+				     (format "cd %s && %s"
+					     octopress-root
+					     octopress-new-post-command)
+				     title))))))))
+
+(defun octopress-preview ()
+  (interactive)
+  (shell-command
+   (format "open http://localhost:4000 ; cd %s && %s &"
+	   octopress-root
+	   octopress-preview-command))
+  (make-directory))
+
+(define-key octopress-map (kbd "n") 'octopress-new-post)
+(define-key octopress-map (kbd "p") 'octopress-preview)
+#+end_src
+
+* COMMENT Navigation
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-<down>")
+		(lambda () (interactive) (scroll-up 1)))
+(global-set-key (kbd "M-<up>")
+		(lambda () (interactive) (scroll-up -1)))
+#+end_src
+* COMMENT Gnus
+:PROPERTIES:
+:tangle: no
+:END:
+** GMail
+#+begin_src emacs-lisp
+(setq message-directory  (concat user-emacs-directory "mail/"))
+(setq gnus-directory     (concat user-emacs-directory "news/"))
+(setq nnfolder-directory (concat user-emacs-directory "mail/archive"))
+#+end_src
+* COMMENT General
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(setq-default indent-tabs-mode t)
+
+; Fix server file stuff
+(setenv "EMACS_SERVER_FILE" (expand-file-name "server/server" user-emacs-directory))
+
+(global-set-key (kbd "C-M-<") 'mc/mark-next-lines)
+(global-set-key (kbd "C-M->") 'mc/mark-next-like-this)
+(global-set-key (kbd "  s-r") 'mc/mark-all-like-this-dwim)
+
+(defun find-kpathsea (string)
+  (interactive "sFind file in TeX distribution: ")
+  (find-file (substring (shell-command-to-string
+			 (format "kpsewhich %s" string))
+			0 -1)))
+(require 'latex)
+(define-key LaTeX-mode-map (kbd "C-c f") 'find-kpathsea)
+
+(defun delete-this-buffer-and-file ()
+  "Removes file connected to current buffer and kills buffer."
+  (interactive)
+  (let ((filename (buffer-file-name))
+        (buffer (current-buffer))
+        (name (buffer-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (when (yes-or-no-p "Are you sure you want to remove this file? ")
+        (delete-file filename)
+        (kill-buffer buffer)
+        (message "File '%s' successfully removed" filename)))))
+
+(global-set-key (kbd "C-c k") 'delete-this-buffer-and-file)
+(defun copy-buffer-file-name-as-kill (choice)
+  "Copy the buffer-file-name to the kill-ring"
+  (interactive "cCopy Buffer Name (F) Full, (D) Directory, (N) Name")
+  (let ((new-kill-string)
+        (name (if (eq major-mode 'dired-mode)
+                  (dired-get-filename)
+                (or (buffer-file-name) ""))))
+    (cond ((eq choice ?f)
+           (setq new-kill-string name))
+          ((eq choice ?d)
+           (setq new-kill-string (file-name-directory name)))
+          ((eq choice ?n)
+           (setq new-kill-string (file-name-nondirectory name)))
+          (t (message "Quit")))
+    (when new-kill-string
+      (message "%s copied" new-kill-string)
+      (kill-new new-kill-string))))
+(global-set-key (kbd "C-c x") 'copy-buffer-file-name-as-kill)
+
+(defun align-regexp-multiple (s)
+  "align at each character in `S` in succession"
+  (let ((p (point))
+	(m (mark)))
+    (if (< (length s) 1)
+	(align-regexp p m s)
+      (align-regexp p m (substring s 0 1))
+      (align-regexp-multiple (substring s 1)))))
+
+(setq insert-directory-program "gls")
+
+(defvar delete-whitespace-on-save
+  nil
+  "If `t', files will be stripped of trailing whitespace before
+saving.")
+(add-hook 'before-save-hook (function maybe-delete-trailing-whitespace))
+(defun maybe-delete-trailing-whitespace ()
+  (if delete-whitespace-on-save (delete-trailing-whitespace)))
+
+(global-set-key (kbd "C-c M-a") (function align-regexp))
+(setq-default truncate-lines t)
+#+end_src
+* COMMENT File IO
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(defun file-string (file)
+  "Read the contents of a file and return as a string,
+   closing the file if it was not already open"
+  ; (if (buffer-is-visiting file) don't close
+  (with-temp-buffer (find-file-noselect file)
+    (buffer-string)))
+
+(defun file-lines (file)
+  (split-string (file-string file) "\n"))
+
+(defun load-safe (f)
+  (if (not (ignore-errors (load f)))
+      (not (message " |- LOAD-SAFE: '%s' failed to load." f)) t))
+
+(defun load-files-from-file (file &optional home-directory)
+  (if (not home-directory)
+      (setq home-directory "~/Dropbox/.emacs.d/"))
+  (message
+	(if (not (and
+		  (mapcar 'load-safe
+			  (mapcar (lambda (f) (concat home-directory f))
+				  (file-lines (concat home-directory file))))))
+	    "All subordinate files loaded successfully."
+	  "At least one subordinate file failed to load.  Check the log for more information.")))
+
+
+(require 'recentf)
+(recentf-mode t)
+(setq recentf-max-menu-items 25)
+(global-set-key (kbd "C-x M-f") 'recentf-open-files)
+
+(eval-after-load "dired"
+  '(progn
+     (define-key dired-mode-map "F" 'my-dired-find-file)
+     (defun my-dired-find-file (&optional arg)
+       "Open each of the marked files, or the file under the point, or when prefix arg, the next N files "
+       (interactive "P")
+       (let* ((fn-list (dired-get-marked-files nil arg)))
+         (mapc 'find-file fn-list)))))
+
+(defun unfill-region (beg end) (interactive "*r") (let ((fill-column (point-max))) (fill-region beg end)))
+(global-set-key (kbd "C-M-q") 'unfill-region)
+
+(defun change-file-line-ending (fpath lineEndingStyle)
+  "Change file's newline character.
+ 「fpath」 is full path to file.
+ 「lineEndingStyle」 is one of 'unix 'dos 'mac or any of accepted emacs coding system. See `list-coding-systems'.
+
+If the file is already opened, it will be saved after this command.
+"
+  (let (mybuffer
+        (bufferOpened-p (get-file-buffer fpath))
+        )
+    (if bufferOpened-p
+        (progn (with-current-buffer bufferOpened-p (set-buffer-file-coding-system lineEndingStyle) (save-buffer) ))
+      (progn
+        (setq mybuffer (find-file fpath))
+        (set-buffer-file-coding-system lineEndingStyle)
+        (save-buffer)
+        (kill-buffer mybuffer) ) ) ) )
+
+(defun change-file-line-ending-style (fileList lineEndingStyle)
+  "Change current file or dired marked file's newline convention.
+When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or any of accepted emacs coding system. See `list-coding-systems'.
+"
+  (interactive
+   (list
+    (if (eq major-mode 'dired-mode )
+        (dired-get-marked-files)
+      (list (buffer-file-name)) )
+    (ido-completing-read "Style:" '("Unix" "Mac OS 9" "Windows") "PREDICATE" "REQUIRE-MATCH"))
+   )
+  (let* (
+         (nlStyle
+          (cond
+           ((equal lineEndingStyle "Unix") 'unix)
+           ((equal lineEndingStyle "Mac OS 9") 'mac)
+           ((equal lineEndingStyle "Windows") 'dos)
+           (t (error "code logic error 65327. Expect one of it." ))
+           ))
+         )
+    (mapc
+     (lambda (ff) (change-file-line-ending ff nlStyle))
+     fileList)))
+#+end_src
+* COMMENT Markdown
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(require 'markdown-mode)
+(define-key markdown-mode-map (kbd "M-<left>") 'backward-word)
+(define-key markdown-mode-map (kbd "M-<right>") 'forward-word)
+#+end_src
 * Incremental Search (=isearch=)
 #+begin_src emacs-lisp
 (defun *-isearch-yank-thing-at-point ()
@@ -346,7 +1416,18 @@ These are default fonts.  The fonts I /use/ are properly customized.
 **** TODO Use faces instead of strings
 - then I'll be able to use different faces for text and ~code~.
 
+* COMMENT Other Files
+:PROPERTIES:
+:tangle: no
+:END:
+- mwe-color-box.el
+- unbound.el
+- mc-auto-encrypt.el
+
 * COMMENT File Local Variables
+:PROPERTIES:
+:tangle: no
+:END:
 # Local Variables:
 # org-edit-src-content-indentation: 0
 # eval: (add-hook 'org-babel-post-tangle-hook (lambda nil (byte-compile-file "~/dotfiles/.emacs.d/init.el") (load-file "~/dotfiles/.emacs.d/init.elc")))
