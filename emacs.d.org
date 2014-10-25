@@ -30,7 +30,7 @@ tangle the file.  This will create a Makefile and all of the necessary
 Lisp files needed to fully reproduce this installation.
 
 ** Byte Compilation
-#+begin_src emacs-lisp :tangle no
+#+begin_src elisp :tangle no
 (add-hook 'org-babel-post-tangle-hook
           (lambda () (interactive)
             (mapc 'byte-compile-file
@@ -46,7 +46,7 @@ mainly use
 - Red Hat.
 Do effect this, I use the variable ~system-type~.  These variables are
 simply introduced to make code more readable.
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defconst *--windows-p
   (equal system-type 'windows-nt)
   "Predicate indicating if this is a Windows environment.")
@@ -62,7 +62,7 @@ If there ever is an occasion to toggle configuration based on the
 current window system (or lack thereof), there is ~window-system~.
 
 * Extending Emacs Lisp
-#+begin_src emacs-lisp
+#+begin_src elisp
 ;; Prepare a list of conses - see docstring
 ;; http://stackoverflow.com/a/13946304/1443496
 (defvar auto-minor-mode-alist ()
@@ -92,7 +92,7 @@ current window system (or lack thereof), there is ~window-system~.
 
 * File Management
 ** Creating Temporary Files
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defun *-create-temporary-file (ext &optional prefix)
   "Creates a temporary file with EXT as the extension."
   (interactive "sExtension: ")
@@ -147,7 +147,7 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 * Ido
 ** Smex
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defun *-smex-smart-smex ()
   (interactive)
   (or (boundp 'smex-cache)
@@ -183,7 +183,7 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 
 ** Global
-#+begin_src emacs-lisp
+#+begin_src elisp
 (*-with-map-bind-keys-to-functions
  global-map
  '((magit "M-?" magit-status)
@@ -224,14 +224,14 @@ Neither of these seem to work, but figure it out.
 
 ** TODO Fix defvar
 ** Isearch
-#+begin_src emacs-lisp
+#+begin_src elisp
 (*-with-map-bind-keys-to-functions
  isearch-mode-map
  '((t "C-SPC" *-isearch-yank-thing-at-point)))
 #+end_src
 
 ** God
-#+begin_src emacs-lisp
+#+begin_src elisp
 (*-with-map-bind-keys-to-functions
  god-local-mode-map
  '((god-mode "." repeat)))
@@ -241,7 +241,7 @@ Neither of these seem to work, but figure it out.
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (setq magit-emacsclient-executable nil)
 
 (defun *magit-delete-trailing-whitespace-from-file ()
@@ -334,27 +334,16 @@ This function brings them up within emacs.
                    texdoc-query)))))))
 #+end_src
 
+*** TODO Research =TeX-doc=
+This function claims to do this, but I can't manage it...
+
 ** COMMENT LaTeX3 Support
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
-;;; expl3.el - Special code for expl3.
-
-;; $Id: expl3.el,v 1.4 2013/08/22 06:50:33 sallred Exp $
-
-;;; Code:
-
-(defun join-string-list (string-list &optional separator)
-    "Concatenates a list of strings
-and puts spaces between the elements."
-    (let ((separator (if separator separator " ")))
-      (mapconcat 'identity string-list separator)))
-
-(defun regex-group (content)
-  (concat "\\(" content "\\)"))
-
-(defvar special-types
+This node is still a work in progress.
+#+begin_src elisp
+(defcustom *-LaTeX3-special-types
   '("acro"       "alloc"      "array"      "bool"
     "box"        "cctab"      "char"       "chemformula"
     "chemmacros" "chemnum"    "chk"        "classics"
@@ -445,7 +434,7 @@ and puts spaces between the elements."
 :tangle: no
 :END:
 oh lord
-#+begin_src emacs-lisp
+#+begin_src elisp
 (message "in TeX setup")
 (require 'latex)
  ;; Sets the default PDF viewer to, well, the default PDF viewer.
@@ -748,7 +737,7 @@ oh lord
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (require 'dired)
 (defun for-each-dired-marked-file (fn)
   "Do stuff for each marked file, only works in dired window"
@@ -946,13 +935,13 @@ If the prefix is non-nil, it will not be printed with faces."
 ;	       (org-edit-src-exit) (save-buffer)))
 
 (setq org-structure-template-alist
-      (cons '("esf" "#+begin_src emacs-lisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
+      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
 (setq org-structure-template-alist
-      (cons '("es" "#+begin_src emacs-lisp\n?\n#+end_src") org-structure-template-alist))
+      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
 (setq org-structure-template-alist
       (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
 (setq org-structure-template-alist
-      (cons '("nt" "#+name: ?\n#+begin_src emacs-lisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
+      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
 
 (require 'org2blog)
 
@@ -1089,13 +1078,13 @@ If the prefix is non-nil, it will not be printed with faces."
 ;	       (org-edit-src-exit) (save-buffer)))
 
 (setq org-structure-template-alist
-      (cons '("esf" "#+begin_src emacs-lisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
+      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
 (setq org-structure-template-alist
-      (cons '("es" "#+begin_src emacs-lisp\n?\n#+end_src") org-structure-template-alist))
+      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
 (setq org-structure-template-alist
       (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
 (setq org-structure-template-alist
-      (cons '("nt" "#+name: ?\n#+begin_src emacs-lisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
+      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
 
 (require 'org2blog)
 
@@ -1202,7 +1191,7 @@ If the prefix is non-nil, it will not be printed with faces."
 :tangle: no
 :END:
 ** GMail
-#+begin_src emacs-lisp
+#+begin_src elisp
 (setq message-directory  (concat user-emacs-directory "mail/"))
 (setq gnus-directory     (concat user-emacs-directory "news/"))
 (setq nnfolder-directory (concat user-emacs-directory "mail/archive"))
@@ -1211,7 +1200,7 @@ If the prefix is non-nil, it will not be printed with faces."
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (setq-default indent-tabs-mode t)
 
 ; Fix server file stuff
@@ -1288,7 +1277,7 @@ saving.")
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defun file-string (file)
   "Read the contents of a file and return as a string,
    closing the file if it was not already open"
@@ -1378,20 +1367,20 @@ When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or 
 :PROPERTIES:
 :tangle: no
 :END:
-#+begin_src emacs-lisp
+#+begin_src elisp
 (require 'markdown-mode)
 (define-key markdown-mode-map (kbd "M-<left>") 'backward-word)
 (define-key markdown-mode-map (kbd "M-<right>") 'forward-word)
 #+end_src
 * Incremental Search (=isearch=)
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defun *-isearch-yank-thing-at-point ()
   (interactive)
   (isearch-yank-string (thing-at-point 'symbol)))
 #+end_src
 
 * M4
-#+begin_src emacs-lisp
+#+begin_src elisp
 (defvar m4-mode-syntax-table)
 (eval-after-load 'm4-mode
  '(modify-syntax-entry ?# "@" m4-mode-syntax-table))
@@ -1408,7 +1397,7 @@ they are included there.
 
 Fortunately, Emacs supports the customization of where all of these
 customizations are stored.  (A little nuts, right?)
-#+begin_src emacs-lisp
+#+begin_src elisp
 (load
  (setq custom-file
        (concat user-emacs-directory
