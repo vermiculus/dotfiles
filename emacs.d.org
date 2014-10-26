@@ -820,7 +820,11 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
                    path-separator))
 #+end_src
 * Org
-** Exporting
+** COMMENT Exporting
+:PROPERTIES:
+:ID:       ABC7D6F7-3E87-47CF-9827-600769A53F4D
+:tangle:   no
+:END:
 #+begin_src emacs-lisp
 (defcustom *-org-preprocess-final-replace-alist
   '((" --\n" . " -- \n"))

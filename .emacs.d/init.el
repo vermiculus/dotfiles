@@ -54,7 +54,7 @@
       (package-install pkg))
     (if ftr (require ftr))))
 
-(package-initialize)      
+(package-initialize)
 (mapc #'*-require-package
       '(
         (auctex . latex)
@@ -235,6 +235,18 @@
                      ,(getenv "PATH"))
                    path-separator))
 
+(defun org-ps-print-subtree (&optional prefix)
+  "Prints the current subtree.
+If the prefix is non-nil, it will be printed without faces."
+  (interactive)
+  (save-excursion
+    (org-mark-subtree)
+    (funcall (if prefix
+                 #'ps-print-region
+               #'ps-print-region-with-faces)
+             (point) (mark) "out.ps")
+    (shell-command "open out.ps")))
+
 (*-with-map-bind-keys-to-functions
  markdown-mode-map
  '((markdown-mode "M-<left>" backward-word)
@@ -269,6 +281,15 @@
   :group '*-fonts)
 
 (set-frame-font *-text-mono-type)
+
+(defcustom *-dropbox-directory
+  (expand-file-name
+   "Dropbox"
+   (cond
+    (*--windows-p "T:")
+    (*--osx-p "~")))
+  "Dropbox directory"
+  :group '*-multi-platform)
 
 (*-with-map-bind-keys-to-functions
  dired-mode-map
