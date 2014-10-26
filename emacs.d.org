@@ -38,6 +38,9 @@ Lisp files needed to fully reproduce this installation.
 #+end_src
 
 * A Multi-Platform Configuration
+:PROPERTIES:
+:ID:       7CD67A70-10FB-4A27-B0EF-269F1A1AAB80
+:END:
 One of the things I like about Emacs is its consistent availability on
 a variety of platforms---far more even than I've ever heard of.  I
 mainly use
@@ -62,6 +65,9 @@ If there ever is an occasion to toggle configuration based on the
 current window system (or lack thereof), there is ~window-system~.
 
 ** Dropbox
+:PROPERTIES:
+:ID:       6BBD6555-3BC9-47CE-8D72-876DFA4912B1
+:END:
 #+begin_src emacs-lisp
 (defcustom *-dropbox-directory
   (expand-file-name
@@ -74,6 +80,9 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 
 * Extending Emacs Lisp
+:PROPERTIES:
+:ID:       3965422A-36EB-4169-B1F4-D2C460AD4F46
+:END:
 #+begin_src elisp
 ;; Prepare a list of conses - see docstring
 ;; http://stackoverflow.com/a/13946304/1443496
@@ -104,6 +113,9 @@ current window system (or lack thereof), there is ~window-system~.
 
 * File Management
 ** Creating Temporary Files
+:PROPERTIES:
+:ID:       5D2605A7-0E33-479E-A7CD-4EB0F60B091A
+:END:
 #+begin_src elisp
 (defun *-create-temporary-file (ext &optional prefix)
   "Creates a temporary file with EXT as the extension."
@@ -118,6 +130,9 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 
 * Package Management
+:PROPERTIES:
+:ID:       7AD2769A-F069-4908-A8F6-A6319928B5AA
+:END:
 #+begin_src elisp
 (require 'package)
 (defun *-require-package (pkg)
@@ -160,6 +175,9 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 * Ido
 ** Smex
+:PROPERTIES:
+:ID:       26A3ADE7-4054-49DD-B2F4-F52DC014B833
+:END:
 #+begin_src elisp
 (defun *-smex-smart-smex ()
   (interactive)
@@ -177,6 +195,9 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 ** Flx
 * Keybindings
+:PROPERTIES:
+:ID:       4785E12F-3823-42E0-9EC2-1614E52E3513
+:END:
 #+begin_src elisp
 (defun *-with-map-bind-keys-to-functions (map ft-k-f)
   (when ft-k-f
@@ -197,6 +218,9 @@ current window system (or lack thereof), there is ~window-system~.
 #+end_src
 
 ** Global
+:PROPERTIES:
+:ID:       A8CCC9CA-7BEC-4E25-A5B7-6D68DE492979
+:END:
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  global-map
@@ -230,6 +254,9 @@ Neither of these seem to work, but figure it out.
 - =god-mode=
 
 ** AUCTeX
+:PROPERTIES:
+:ID:       166EFC94-5BBE-407E-A9B9-DA1C24485322
+:END:
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
@@ -238,6 +265,9 @@ Neither of these seem to work, but figure it out.
 #+end_src
 
 ** C Modes
+:PROPERTIES:
+:ID:       CF630EC3-8D69-4EBE-A7A8-39CB871655A1
+:END:
 #+begin_src elisp
 (defvar c-mode-base-map)
 (eval-after-load 'cc-mode
@@ -249,6 +279,9 @@ Neither of these seem to work, but figure it out.
 
 *** TODO Fix defvar
 ** Isearch
+:PROPERTIES:
+:ID:       EA80878A-23C6-4B4C-B80C-AACC04D7F79A
+:END:
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  isearch-mode-map
@@ -256,6 +289,9 @@ Neither of these seem to work, but figure it out.
 #+end_src
 
 ** Dired
+:PROPERTIES:
+:ID:       698AB5FA-7197-4704-92AC-2A1E2CBD12CE
+:END:
 #+begin_src emacs-lisp
 (*-with-map-bind-keys-to-functions
  dired-mode-map
@@ -263,6 +299,9 @@ Neither of these seem to work, but figure it out.
 #+end_src
 
 ** God
+:PROPERTIES:
+:ID:       BD4B6E93-6332-4A32-90D7-B07EEC9E02CF
+:END:
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  god-local-mode-map
@@ -270,6 +309,9 @@ Neither of these seem to work, but figure it out.
 #+end_src
 
 ** Org
+:PROPERTIES:
+:ID:       1A1235E7-8123-4EA7-99AE-A776B0F4A661
+:END:
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  org-mode-map
@@ -304,6 +346,9 @@ Since =yasnippet= has its own snippet creation workflow from within
 emacs, they are not created here.
 
 * [[https://github.com/chrisdone/god-mode][God Mode]]
+:PROPERTIES:
+:ID:       1EB69989-1D35-4FE6-946F-73E209F855D5
+:END:
 Modal-editing the emacs way.  When in this minor mode, modifier keys
 are more-or-less stripped away.  See [[https://github.com/chrisdone/god-mode][upstream]] for details.
 
@@ -342,6 +387,9 @@ and typographical consistency.  I'm a heavy user of this system under
 [[http://www.gnu.org/s/auctex][AUCTeX]] and [[http://www.gnu.org/s/auctex/reftex.html][RefTeX]], two of the most indispensible resources available
 for TeX under emacs.
 ** Jumping to Source Code
+:PROPERTIES:
+:ID:       4F444822-5172-4CFE-B17F-249713AE5A4E
+:END:
 #+begin_src emacs-lisp
 (defun *-TeX-find-kpathsea (string)
   (interactive "sFind file in TeX distribution: ")
@@ -350,6 +398,9 @@ for TeX under emacs.
                         0 -1)))
 #+end_src
 ** Finding Documentation with TeXdoc
+:PROPERTIES:
+:ID:       C812C891-2428-4EFA-8E0C-8FD67710B7BC
+:END:
 =texdoc= is an application that comes with most TeX distributions.
 This function brings them up within emacs.
 #+begin_src elisp
@@ -745,6 +796,9 @@ oh lord
 
 * Dired
 ** Mapping Over Marked Files
+:PROPERTIES:
+:ID:       05B8B02F-50F9-4C97-802B-28C0A84A207D
+:END:
 #+begin_src elisp
 (defun *-dired-for-each-marked-file (function)
   "Do stuff for each marked file, only works in dired window"
@@ -795,6 +849,9 @@ There is work to be done on this.
 #+end_src
 
 * Twitter
+:PROPERTIES:
+:ID:       9319BB3B-40B9-41EF-B9F5-124336400C78
+:END:
 Use ~twit~ (I believe) to set your account info.  This is also the
 entry point into the mode.
 #+begin_src elisp
@@ -806,6 +863,9 @@ entry point into the mode.
 #+end_src
 * C Modes
 * ~$PATH~ Setup
+:PROPERTIES:
+:ID:       9B3EA54C-866B-4AA0-8DFA-693F5AD2A318
+:END:
 I don't know why I can't =M-x customize= this, but this form allows me
 to use programs that aren't in the standard path (=/usr/bin=,
 =/usr/sbin=, =/bin=, and =/sbin=).  In particular, TeX distributions
@@ -839,6 +899,9 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
 #+end_src
 
 ** Printing Subtrees
+:PROPERTIES:
+:ID:       0555DF57-0E20-4168-9554-E71F65018863
+:END:
 #+begin_src elisp
 (defun org-ps-print-subtree (&optional prefix)
   "Prints the current subtree.
@@ -902,6 +965,9 @@ If the prefix is non-nil, it will be printed without faces."
 ** Text Editing
 ** Buffer Information
 *** Removing Temporary Files
+:PROPERTIES:
+:ID:       19D3A424-889C-4A53-A9B2-FE825C7405BD
+:END:
 #+begin_src emacs-lisp
 (defun *-delete-this-buffer-and-file ()
   "Removes file connected to current buffer and kills buffer."
@@ -917,6 +983,9 @@ If the prefix is non-nil, it will be printed without faces."
         (message "File '%s' successfully removed" filename)))))
 #+end_src
 *** Yanking Current File Information
+:PROPERTIES:
+:ID:       0C6F73B1-74F4-465E-95D7-1370CEF32443
+:END:
 #+begin_src emacs-lisp
 (defun *-copy-buffer-file-name-as-kill (choice)
   "Copy the buffer-file-name to the kill-ring"
@@ -947,6 +1016,9 @@ If the prefix is non-nil, it will be printed without faces."
     (align-regexp-multiple (substring s 1))))
 #+end_src
 *** Deleting Trailing Whitespace
+:PROPERTIES:
+:ID:       BB298C84-1FFF-4DCD-8202-216D2E2ADBD2
+:END:
 #+begin_src emacs-lisp
 (defcustom *-delete-trailing-whitespace-on-save
   nil
@@ -1008,6 +1080,9 @@ The function is added to ~before-save-hook~ via =customize=.
 #+end_src
 
 * Markdown
+:PROPERTIES:
+:ID:       0F97E595-E128-4C06-BCCA-484C2A5FB23B
+:END:
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  markdown-mode-map
@@ -1016,6 +1091,9 @@ The function is added to ~before-save-hook~ via =customize=.
 #+end_src
 
 * Incremental Search (=isearch=)
+:PROPERTIES:
+:ID:       AA7E9EC1-99EF-42DD-A35A-82E0A10C16EF
+:END:
 #+begin_src elisp
 (defun *-isearch-yank-thing-at-point ()
   (interactive)
@@ -1023,6 +1101,9 @@ The function is added to ~before-save-hook~ via =customize=.
 #+end_src
 
 * M4
+:PROPERTIES:
+:ID:       C211A63E-90F8-4952-A049-ECA6614DBA6D
+:END:
 #+begin_src elisp
 (defvar m4-mode-syntax-table)
 (eval-after-load 'm4-mode
@@ -1033,6 +1114,9 @@ The function is added to ~before-save-hook~ via =customize=.
 
 * Customize
 ** Setting a Custom Custom File
+:PROPERTIES:
+:ID:       B1E68499-15D1-43B0-9A41-97E224C3C511
+:END:
 Emacs is famous for its customizability.  There are many, many
 variables that directly support being customized with =custom.el=.
 All of these variables can visually clog up the initialization file if
@@ -1057,6 +1141,9 @@ track these customizations in its own file.  Sorry to disappoint!
 If anything interesting comes up, explanations will be placed here.
 
 *** Fonts
+:PROPERTIES:
+:ID:       B2310DEE-3854-455E-BE58-380E23E9CFF4
+:END:
 These are default fonts.  The fonts I /use/ are properly customized.
 #+BEGIN_SRC elisp
 (defcustom *-text-sans-type
