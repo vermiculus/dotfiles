@@ -293,8 +293,96 @@
  '(menu-bar-mode (not *--windows-p))
  '(org-agenda-files "~/.emacs.d/.agenda_files")
  '(org-agenda-include-diary t)
+ '(org-babel-load-languages
+   (quote
+    ((perl . t)
+     (ruby . t)
+     (python . t)
+     (sh . t)
+     (R . t)
+     (emacs-lisp . t))))
+ '(org-capture-templates
+   (quote
+    (("n" "Note" entry
+      (file "notes.org")
+      "* %U %?")
+     ("t" "Task" entry
+      (file "unfiled-tasks.org")
+      "* TODO %?")
+     ("j" "Journal Entry" entry
+      (file+datetree "journal.org")
+      "* %u %?"))))
+ '(org-completion-use-ido t)
  '(org-edit-src-content-indentation 0)
+ '(org-id-link-to-org-use-id t)
+ '(org-load-hook (quote (org-agenda-to-appt appt-activate)))
  '(org-log-done (quote note))
+ '(org-mobile-directory (concat "/Users/sean/Dropbox/Apps/MobileOrg" "4"))
+ '(org-outline-path-complete-in-steps nil)
+ '(org-structure-template-alist
+   (quote
+    (("n" "#+name: ?
+#+begin_src 
+
+#+end_src" "")
+     ("nt" "#+name: ?
+#+begin_src elisp :tangle \"\"
+
+#+end_src" "")
+     ("s" "#+begin_src ?
+
+#+end_src" "<src lang=\"?\">
+
+</src>")
+     ("es" "#+begin_src elisp
+?
+#+end_src" "")
+     ("esf" "#+begin_src elisp :tangle %file
+?
+#+end_src" "")
+     ("e" "#+begin_example
+?
+#+end_example" "<example>
+?
+</example>")
+     ("q" "#+begin_quote
+?
+#+end_quote" "<quote>
+?
+</quote>")
+     ("v" "#+begin_verse
+?
+#+end_verse" "<verse>
+?
+</verse>")
+     ("V" "#+begin_verbatim
+?
+#+end_verbatim" "<verbatim>
+?
+</verbatim>")
+     ("c" "#+begin_center
+?
+#+end_center" "<center>
+?
+</center>")
+     ("l" "#+begin_latex
+?
+#+end_latex" "<literal style=\"latex\">
+?
+</literal>")
+     ("L" "#+LaTeX: " "<literal style=\"latex\">?</literal>")
+     ("h" "#+begin_html
+?
+#+end_html" "<literal style=\"html\">
+?
+</literal>")
+     ("H" "#+HTML: " "<literal style=\"html\">?</literal>")
+     ("a" "#+begin_ascii
+?
+#+end_ascii" "")
+     ("A" "#+ASCII: " "")
+     ("i" "#+INDEX: ?" "#+INDEX: ?")
+     ("I" "#+INCLUDE: %file ?" "<include file=%file markup=\"?\">"))))
  '(package-archives
    (quote
     (("gnu" . "http://elpa.gnu.org/packages/")

@@ -61,6 +61,18 @@ simply introduced to make code more readable.
 If there ever is an occasion to toggle configuration based on the
 current window system (or lack thereof), there is ~window-system~.
 
+** Dropbox
+#+begin_src emacs-lisp
+(defcustom *-dropbox-directory
+  (expand-file-name
+   "Dropbox"
+   (cond
+    (*--windows-p "T:")
+    (*--osx-p "~")))
+  "Dropbox directory"
+  :group '*-multi-platform)
+#+end_src
+
 * Extending Emacs Lisp
 #+begin_src elisp
 ;; Prepare a list of conses - see docstring
@@ -115,7 +127,7 @@ current window system (or lack thereof), there is ~window-system~.
       (package-install pkg))
     (if ftr (require ftr))))
 
-(package-initialize)      
+(package-initialize)
 (mapc #'*-require-package
       '(
         (auctex . latex)
@@ -268,23 +280,23 @@ Neither of these seem to work, but figure it out.
 :PROPERTIES:
 :tangle: no
 :END:
+** TODO Whitespace [0/2]
+- [ ] localize to the hunk
+- [ ] come back to magit-status in the same position
 #+begin_src elisp
-(setq magit-emacsclient-executable nil)
-
-(defun *magit-delete-trailing-whitespace-from-file ()
+(defun *-magit-delete-trailing-whitespace-from-file ()
   "Removes whitespace from the current item."
   (interactive)
   (save-excursion
     (magit-visit-item)
     (delete-trailing-whitespace)
-    (save-buffer)
-    (kill-buffer))
+    (save-buffer))
   (magit-refresh))
 
 ; (add-hook 'magit-status-mode-hook
 ; 	  (local-set-key
 ; 	   (kbd "C-c w")
-; 	   '*magit-delete-trailing-whitespace-from-file))
+; 	   '*-magit-delete-trailing-whitespace-from-file))
 #+end_src
 * [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
@@ -443,9 +455,9 @@ oh lord
  ;; Set the default LaTeX exec to pdfTeX
 ;(setq TeX-PDF-mode t)
 
-;; the wrapping up of the two loads make sure 
-;; auctex is loaded only when editing tex files. 
-;(eval-after-load "tex-mode" 
+;; the wrapping up of the two loads make sure
+;; auctex is loaded only when editing tex files.
+;(eval-after-load "tex-mode"
 ;  '(progn
 ;     (load "auctex.el" nil nil t)
 ;     (load "preview-latex.el" nil nil t)
@@ -523,7 +535,7 @@ oh lord
 ;    (delete-backward-char 2) (TeX-newline) (TeX-newline))
 
 
-; 
+;
 
 
 ;   (local-set-key (kbd "RET") 'TeX-newline)
@@ -748,7 +760,7 @@ oh lord
 There is work to be done on this.
 #+begin_src elisp
 (eval-after-load "dired-aux"
-   '(add-to-list 'dired-compress-file-suffixes 
+   '(add-to-list 'dired-compress-file-suffixes
                  '("\\.zip\\'" ".zip" "unzip")))
 
 (eval-after-load "dired"
@@ -759,11 +771,11 @@ There is work to be done on this.
 
   ;; create the zip file
   (let ((zip-file (if (string-match ".zip$" zip-file) zip-file (concat zip-file ".zip"))))
-    (shell-command 
-     (concat "zip " 
+    (shell-command
+     (concat "zip "
              zip-file
              " "
-             (concat-string-list 
+             (concat-string-list
               (mapcar
                '(lambda (filename)
                   (file-name-nondirectory filename))
@@ -777,8 +789,8 @@ There is work to be done on this.
   (dired-mark-files-regexp zip-file);;(filename-to-regexp zip-file))
   )
 
-(defun concat-string-list (list) 
-   "Return a string which is a concatenation of all elements of the list separated by spaces" 
+(defun concat-string-list (list)
+   "Return a string which is a concatenation of all elements of the list separated by spaces"
     (mapconcat '(lambda (obj) (format "%s" obj)) list " "))
 #+end_src
 
@@ -807,75 +819,64 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
                      ,(getenv "PATH"))
                    path-separator))
 #+end_src
-* COMMENT Org
-:PROPERTIES:
-:tangle: no
-:END:
+* Org
+** Exporting
+#+begin_src emacs-lisp
+(defcustom *-org-preprocess-final-replace-alist
+  '((" --\n" . " -- \n"))
+  "Alist of replacements to make before export"
+  :group '*-org)
 
+(defun *-org-preprocess-final-make-replacements ()
+  (mapc (lambda (pair)
+          (replace-string (car pair)
+                          (cdr pair)))
+        *-org-preprocess-final-replace-alist))
+#+end_src
+
+** Printing Subtrees
 #+begin_src elisp
-(setq org-agenda-files (expand-file-name
-                        "org-agenda-files.list" user-emacs-directory))
-
-(setq org-capture-templates
-      '(("t" "Todo" entry
-         (file+headline (org-file "unfiled-tasks.org") "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry
-         (file+datetree (org-file "journal.org"))
-         "* %?\nEntered on %U\n  %i\n  %a")))
-
-(add-hook 'org-export-preprocess-final-hook
-          (lambda () (replace-string " --\n" " -- \n")))
-
-
 (defun org-ps-print-subtree (&optional prefix)
   "Prints the current subtree.
 If the prefix is non-nil, it will be printed without faces."
   (interactive)
   (save-excursion
     (org-mark-subtree)
-    (funcall (if prefix #'ps-print-region #'ps-print-region-with-faces)
+    (funcall (if prefix
+                 #'ps-print-region
+               #'ps-print-region-with-faces)
              (point) (mark) "out.ps")
     (shell-command "open out.ps")))
+#+end_src
 
+** COMMENT Mobile
+:PROPERTIES:
+:tangle:   no
+:END:
+#+begin_src emacs-lisp
 (setq org-mobile-directory
       (concat user-emacs-directory "../Apps/MobileOrg"))
 (setq org-mobile-inbox-for-pull
       (concat user-emacs-directory "../org/from-mobile.org"))
-
-;(org-agenda  birthdays?
-
-(org-agenda-to-appt)
-(appt-activate t)
-
-;(define-key org-src-mode-map
-;  "\C-x\C-s" (lambda () (interactive)
-;              (org-edit-src-exit) (save-buffer)))
-
-(setq org-structure-template-alist
-      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
-
+#+end_src
+** COMMENT Blogging
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src emacs-lisp
 (require 'org2blog)
 
 (setq org2blog/wp-blog-alist
       '(("wordpress"
          :url "http://itsalltext.wordpress.com/xmlrpc.php"
          :username "vermiculus"
-         
+
          :default-title "Hello World"
          :default-categories ("customization")
          :tags-as-categories nil)
         ("It's All Text"
          :url "http://itsalltext.wordpress.com/xmlrpc.php"
          :username "vermiculus")))
-
-(setq org-id-link-to-org-use-id t)
 
 (setq org-publish-project-alist
    '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
@@ -887,30 +888,12 @@ If the prefix is non-nil, it will be printed without faces."
                  :headline-levels 4
                  :html-extension "markdown"
                  :body-only t))))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((sh . t)
-   (python . t)
-   (R . t)
-   (ruby . t)
-   (perl . t)))
-
-(require 'ox-md)
 #+end_src
+
 ** TODO Customize the following [0/2]
 - [ ] ~org-directory~
 - [ ] ~org-default-notes-file~
-* COMMENT Gnus
-:PROPERTIES:
-:tangle: no
-:END:
-** GMail
-#+begin_src elisp
-(setq message-directory  (concat user-emacs-directory "mail/"))
-(setq gnus-directory     (concat user-emacs-directory "news/"))
-(setq nnfolder-directory (concat user-emacs-directory "mail/archive"))
-#+end_src
+
 * General
 ** Text Editing
 ** Buffer Information
@@ -1018,49 +1001,8 @@ The function is added to ~before-save-hook~ via =customize=.
 
 (defun unfill-region (beg end) (interactive "*r") (let ((fill-column (point-max))) (fill-region beg end)))
 (global-set-key (kbd "C-M-q") 'unfill-region)
-
-(defun change-file-line-ending (fpath lineEndingStyle)
-  "Change file's newline character.
- 「fpath」 is full path to file.
- 「lineEndingStyle」 is one of 'unix 'dos 'mac or any of accepted emacs coding system. See `list-coding-systems'.
-
-If the file is already opened, it will be saved after this command.
-"
-  (let (mybuffer
-        (bufferOpened-p (get-file-buffer fpath))
-        )
-    (if bufferOpened-p
-        (progn (with-current-buffer bufferOpened-p (set-buffer-file-coding-system lineEndingStyle) (save-buffer) ))
-      (progn
-        (setq mybuffer (find-file fpath))
-        (set-buffer-file-coding-system lineEndingStyle)
-        (save-buffer)
-        (kill-buffer mybuffer) ) ) ) )
-
-(defun change-file-line-ending-style (fileList lineEndingStyle)
-  "Change current file or dired marked file's newline convention.
-When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or any of accepted emacs coding system. See `list-coding-systems'.
-"
-  (interactive
-   (list
-    (if (eq major-mode 'dired-mode )
-        (dired-get-marked-files)
-      (list (buffer-file-name)) )
-    (ido-completing-read "Style:" '("Unix" "Mac OS 9" "Windows") "PREDICATE" "REQUIRE-MATCH"))
-   )
-  (let* (
-         (nlStyle
-          (cond
-           ((equal lineEndingStyle "Unix") 'unix)
-           ((equal lineEndingStyle "Mac OS 9") 'mac)
-           ((equal lineEndingStyle "Windows") 'dos)
-           (t (error "code logic error 65327. Expect one of it." ))
-           ))
-         )
-    (mapc
-     (lambda (ff) (change-file-line-ending ff nlStyle))
-     fileList)))
 #+end_src
+
 * Markdown
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
@@ -1068,6 +1010,7 @@ When called in lisp program, “lineEndingStyle” is one of 'unix 'dos 'mac or 
  '((markdown-mode "M-<left>" backward-word)
    (markdown-mode "M-<right>" forward-word)))
 #+end_src
+
 * Incremental Search (=isearch=)
 #+begin_src elisp
 (defun *-isearch-yank-thing-at-point ()
@@ -1135,9 +1078,8 @@ These are default fonts.  The fonts I /use/ are properly customized.
 - then I'll be able to use different faces for text and ~code~.
 
 * COMMENT Other Files
-:PROPERTIES:
-:tangle: no
-:END:
+Some other files that I found in my =.emacs.d= that I don't really use
+anymore, but could be useful...
 - mwe-color-box.el
 - unbound.el
 - mc-auto-encrypt.el

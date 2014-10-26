@@ -59,3 +59,18 @@ Archived entries from file /Users/sean/dotfiles/emacs.d.org
 (define-key octopress-map (kbd "p") 'octopress-preview)
 #+end_src
 
+
+* Gnus
+:PROPERTIES:
+:tangle: no
+:ARCHIVE_TIME: 2014-10-25 Sat 22:53
+:ARCHIVE_FILE: ~/dotfiles/emacs.d.org
+:ARCHIVE_CATEGORY: emacs.d
+:END:
+I don't really use Gnus anymore, so...
+** GMail
+#+begin_src elisp
+(setq message-directory  (concat user-emacs-directory "mail/"))
+(setq gnus-directory     (concat user-emacs-directory "news/"))
+(setq nnfolder-directory (concat user-emacs-directory "mail/archive"))
+#+end_src
