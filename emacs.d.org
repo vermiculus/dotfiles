@@ -318,6 +318,27 @@ Neither of these seem to work, but figure it out.
  '((org-mode "C-`" org-info)))
 #+end_src
 
+** Twitter
+   :PROPERTIES:
+   :ID:       ECD83E40-D7FA-42AF-9A14-1C7D8B8603B1
+   :END:
+#+begin_src emacs-lisp
+(*-with-map-bind-keys-to-functions
+ twittering-mode-map
+ '((twittering-mode ">" twittering-reply-to-user)
+   (twittering-mode "F" twittering-follow)
+   (twittering-mode "B" twittering-block)))
+#+end_src
+** Markdown
+   :PROPERTIES:
+   :ID:       55BBC826-C030-4F40-8C89-9F354D488428
+   :END:
+#+begin_src emacs-lisp
+(*-with-map-bind-keys-to-functions
+ markdown-mode-map
+ '((markdown-mode "M-<left>" backward-word)
+   (markdown-mode "M-<right>" forward-word)))
+#+end_src
 * COMMENT [[https://github.com/magit/magit][Magit]]
 :PROPERTIES:
 :tangle: no
@@ -352,11 +373,12 @@ emacs, they are not created here.
 Modal-editing the emacs way.  When in this minor mode, modifier keys
 are more-or-less stripped away.  See [[https://github.com/chrisdone/god-mode][upstream]] for details.
 
+** Updating the Cursor
+   :PROPERTIES:
+   :ID:       6BE32D66-B37C-4228-AC45-FACBDA3561E6
+   :END:
 These are the recommended settings.
 #+begin_src elisp
-(require 'god-mode)
-(global-set-key (kbd "<escape>") 'god-local-mode)
-
 (defcustom *-god-mode-update-cursor-affected-forms
   '(god-local-mode buffer-read-only)
   "If any of these forms evaluate to non-nil, the cursor will change."
@@ -376,9 +398,6 @@ These are the recommended settings.
  (lambda (hook)
    (add-hook hook #'*--god-mode-update-cursor))
  '(god-mode-enabled-hook god-mode-disabled-hook))
-
-(define-key god-local-mode-map (kbd ".") 'repeat)
-
 #+end_src
 
 * TeX
@@ -849,18 +868,9 @@ There is work to be done on this.
 #+end_src
 
 * Twitter
-:PROPERTIES:
-:ID:       9319BB3B-40B9-41EF-B9F5-124336400C78
-:END:
 Use ~twit~ (I believe) to set your account info.  This is also the
 entry point into the mode.
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- twittering-mode-map
- '((twittering-mode ">" twittering-reply-to-user)
-   (twittering-mode "F" twittering-follow)
-   (twittering-mode "B" twittering-block)))
-#+end_src
+
 * C Modes
 * ~$PATH~ Setup
 :PROPERTIES:
@@ -879,7 +889,7 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
                      ,(getenv "PATH"))
                    path-separator))
 #+end_src
-* Org
+* [[http://www.orgmode.org][Org]]
 ** COMMENT Exporting
 :PROPERTIES:
 :ID:       ABC7D6F7-3E87-47CF-9827-600769A53F4D
@@ -1079,18 +1089,7 @@ The function is added to ~before-save-hook~ via =customize=.
 (global-set-key (kbd "C-M-q") 'unfill-region)
 #+end_src
 
-* Markdown
-:PROPERTIES:
-:ID:       0F97E595-E128-4C06-BCCA-484C2A5FB23B
-:END:
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- markdown-mode-map
- '((markdown-mode "M-<left>" backward-word)
-   (markdown-mode "M-<right>" forward-word)))
-#+end_src
-
-* Incremental Search (=isearch=)
+* [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html][Incremental Search]] (=isearch=)
 :PROPERTIES:
 :ID:       AA7E9EC1-99EF-42DD-A35A-82E0A10C16EF
 :END:
@@ -1100,7 +1099,7 @@ The function is added to ~before-save-hook~ via =customize=.
   (isearch-yank-string (thing-at-point 'symbol)))
 #+end_src
 
-* M4
+* [[http://www.gnu.org/s/m4][M4]]
 :PROPERTIES:
 :ID:       C211A63E-90F8-4952-A049-ECA6614DBA6D
 :END:
@@ -1112,7 +1111,7 @@ The function is added to ~before-save-hook~ via =customize=.
 
 ** TODO Fix defvar
 
-* Customize
+* [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html][Customize]]
 ** Setting a Custom Custom File
 :PROPERTIES:
 :ID:       B1E68499-15D1-43B0-9A41-97E224C3C511

@@ -164,9 +164,6 @@
  org-mode-map
  '((org-mode "C-`" org-info)))
 
-(require 'god-mode)
-(global-set-key (kbd "<escape>") 'god-local-mode)
-
 (defcustom *-god-mode-update-cursor-affected-forms
   '(god-local-mode buffer-read-only)
   "If any of these forms evaluate to non-nil, the cursor will change."
@@ -186,8 +183,6 @@
  (lambda (hook)
    (add-hook hook #'*--god-mode-update-cursor))
  '(god-mode-enabled-hook god-mode-disabled-hook))
-
-(define-key god-local-mode-map (kbd ".") 'repeat)
 
 (defcustom *-TeX-find-texdoc-temp-file-format
   "TeX-find-texdoc--%s--"
@@ -222,12 +217,6 @@
       (mapcar function (dired-get-marked-files))
     (error "Not a Dired buffer `%s'" major-mode)))
 
-(*-with-map-bind-keys-to-functions
- twittering-mode-map
- '((twittering-mode ">" twittering-reply-to-user)
-   (twittering-mode "F" twittering-follow)
-   (twittering-mode "B" twittering-block)))
-
 (setenv "PATH"
         (mapconcat #'identity
                    `("/usr/texbin"
@@ -246,11 +235,6 @@ If the prefix is non-nil, it will be printed without faces."
                #'ps-print-region-with-faces)
              (point) (mark) "out.ps")
     (shell-command "open out.ps")))
-
-(*-with-map-bind-keys-to-functions
- markdown-mode-map
- '((markdown-mode "M-<left>" backward-word)
-   (markdown-mode "M-<right>" forward-word)))
 
 (defun *-isearch-yank-thing-at-point ()
   (interactive)
@@ -294,6 +278,17 @@ If the prefix is non-nil, it will be printed without faces."
 (*-with-map-bind-keys-to-functions
  dired-mode-map
  '((bf-mode "b" bf-mode)))
+
+(*-with-map-bind-keys-to-functions
+ twittering-mode-map
+ '((twittering-mode ">" twittering-reply-to-user)
+   (twittering-mode "F" twittering-follow)
+   (twittering-mode "B" twittering-block)))
+
+(*-with-map-bind-keys-to-functions
+ markdown-mode-map
+ '((markdown-mode "M-<left>" backward-word)
+   (markdown-mode "M-<right>" forward-word)))
 
 (defun *-TeX-find-kpathsea (string)
   (interactive "sFind file in TeX distribution: ")
