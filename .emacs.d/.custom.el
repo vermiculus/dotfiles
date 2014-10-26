@@ -243,6 +243,7 @@
      ("\\.tgz\\'" . tar-mode)
      ("\\.tbz2?\\'" . tar-mode)
      ("\\.txz\\'" . tar-mode))) t)
+ '(before-save-hook (quote (time-stamp *-maybe-delete-trailing-whitespace)))
  '(blink-cursor-mode nil)
  '(column-number-mode t)
  '(confirm-kill-emacs (quote yes-or-no-p))
@@ -254,6 +255,7 @@
  '(debug-on-error t)
  '(default-input-method "TeX")
  '(desktop-save-mode t)
+ '(dired-listing-switches "-alh")
  '(display-time-mode t)
  '(doc-view-mode-hook (quote (auto-revert-mode)) t)
  '(emacs-lisp-mode-hook
@@ -276,6 +278,7 @@
  '(indent-tabs-mode nil)
  '(inferior-lisp-program "clisp" t)
  '(inhibit-startup-screen t)
+ '(insert-directory-program "gls" t)
  '(ispell-program-name
    (if *--windows-p "t:/#_Programs/Aspell/bin/aspell.exe" "/usr/local/bin/ispell"))
  '(lisp-mode-hook (quote (show-paren-mode slime-lisp-mode-hook)))
@@ -288,7 +291,10 @@
      ("\\b\\(builtin\\|change\\(com\\|quote\\|word\\)\\|d\\(e\\(bug\\(file\\|mode\\)\\|cr\\|f\\(ine\\|n\\)\\)\\|iv\\(ert\\|num\\)\\|nl\\|umpdef\\)\\|e\\(rrprint\\|syscmd\\|val\\)\\|f\\(ile\\|ormat\\)\\|gnu\\|i\\(f\\(def\\|else\\)\\|n\\(c\\(lude\\|r\\)\\|d\\(ex\\|ir\\)\\)\\)\\|l\\(en\\|ine\\)\\|m\\(4\\(exit\\|wrap\\)\\|aketemp\\)\\|p\\(atsubst\\|opdef\\|ushdef\\)\\|regexp\\|s\\(hift\\|include\\|ubstr\\|ys\\(cmd\\|val\\)\\)\\|tra\\(ceo\\(ff\\|n\\)\\|nslit\\)\\|un\\(d\\(efine\\|ivert\\)\\|ix\\)\\)\\b" . font-lock-keyword-face)
      ("\\b\\(m4_\\(builtin\\|change\\(com\\|quote\\|word\\)\\|d\\(e\\(bug\\(file\\|mode\\)\\|cr\\|f\\(ine\\|n\\)\\)\\|iv\\(ert\\|num\\)\\|nl\\|umpdef\\)\\|e\\(rrprint\\|syscmd\\|val\\)\\|f\\(ile\\|ormat\\)\\|i\\(f\\(def\\|else\\)\\|n\\(c\\(lude\\|r\\)\\|d\\(ex\\|ir\\)\\)\\)\\|l\\(en\\|ine\\)\\|m\\(4\\(_undefine\\|exit\\|wrap\\)\\|aketemp\\)\\|p\\(atsubst\\|opdef\\|ushdef\\)\\|regexp\\|s\\(hift\\|include\\|ubstr\\|ys\\(cmd\\|val\\)\\)\\|tra\\(ceo\\(ff\\|n\\)\\|nslit\\)\\|undivert\\)\\)\\b" . font-lock-keyword-face))) t)
  '(menu-bar-mode (not *--windows-p))
+ '(org-agenda-files "~/.emacs.d/.agenda_files")
+ '(org-agenda-include-diary t)
  '(org-edit-src-content-indentation 0)
+ '(org-log-done (quote note))
  '(package-archives
    (quote
     (("gnu" . "http://elpa.gnu.org/packages/")
@@ -296,6 +302,7 @@
  '(scroll-bar-mode nil)
  '(show-paren-mode t)
  '(tool-bar-mode nil)
+ '(truncate-lines t)
  '(twittering-use-master-password t t)
  '(user-emacs-directory (concat (if *--windows-p "T:" "~") "/.emacs.d/") t)
  '(visible-bell t)

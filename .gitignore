@@ -3,3 +3,5 @@
 *.elc
 /.emacs.d/elpa/
 /.emacs.d/tramp
+/.emacs.d/bbdb
+/.emacs.d/.agenda_files

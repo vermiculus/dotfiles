@@ -188,7 +188,10 @@ current window system (or lack thereof), there is ~window-system~.
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  global-map
- `((t "C-x C-0" delete-window)
+ `((t "C-c M-a" align-regexp)
+   (t "C-c x" *-copy-buffer-file-name-as-kill)
+   (t "C-c k" *-delete-this-buffer-and-file)
+   (t "C-x C-0" delete-window)
    (t "C-x C-1" delete-other-windows)
    (t "C-x C-2" split-window-below)
    (t "C-x C-3" split-window-right)
@@ -201,6 +204,7 @@ current window system (or lack thereof), there is ~window-system~.
    (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
    (org "C-c a" org-agenda)
    (org "C-c c" org-capture)
+   (org "C-c l" org-store-link)
    (smex "M-S-x" *-smex-smart-smex-major-mode-commands)
    (smex "M-x" *-smex-smart-smex)
    (speedbar "C-c C-SPC" speedbar-get-focus)
@@ -208,7 +212,7 @@ current window system (or lack thereof), there is ~window-system~.
    (twittering-mode "C-c n" twittering-update-status-interactive)))
 #+end_src
 
-** TODO Enable God-Mode globally
+*** TODO Enable God-Mode globally
 Neither of these seem to work, but figure it out.
 - =god-mode-all=
 - =god-mode=
@@ -217,7 +221,8 @@ Neither of these seem to work, but figure it out.
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
- '((latex "C-c t" *-TeX-find-texdoc)))
+ '((latex "C-c t" *-TeX-find-texdoc)
+   (latex "C-c f" *-TeX-find-kpathsea)))
 #+end_src
 
 ** C Modes
@@ -230,7 +235,7 @@ Neither of these seem to work, but figure it out.
       (cc-mode "C-c C-'" compile))))
 #+end_src
 
-** TODO Fix defvar
+*** TODO Fix defvar
 ** Isearch
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
@@ -238,11 +243,25 @@ Neither of these seem to work, but figure it out.
  '((t "C-SPC" *-isearch-yank-thing-at-point)))
 #+end_src
 
+** Dired
+#+begin_src emacs-lisp
+(*-with-map-bind-keys-to-functions
+ dired-mode-map
+ '((bf-mode "b" bf-mode)))
+#+end_src
+
 ** God
 #+begin_src elisp
 (*-with-map-bind-keys-to-functions
  god-local-mode-map
  '((god-mode "." repeat)))
+#+end_src
+
+** Org
+#+begin_src elisp
+(*-with-map-bind-keys-to-functions
+ org-mode-map
+ '((org-mode "C-`" org-info)))
 #+end_src
 
 * COMMENT [[https://github.com/magit/magit][Magit]]
@@ -310,7 +329,14 @@ TeX is a typesetting system that produces documents of high quality
 and typographical consistency.  I'm a heavy user of this system under
 [[http://www.gnu.org/s/auctex][AUCTeX]] and [[http://www.gnu.org/s/auctex/reftex.html][RefTeX]], two of the most indispensible resources available
 for TeX under emacs.
-
+** Jumping to Source Code
+#+begin_src emacs-lisp
+(defun *-TeX-find-kpathsea (string)
+  (interactive "sFind file in TeX distribution: ")
+  (find-file (substring (shell-command-to-string
+                         (format "kpsewhich %s" string))
+                        0 -1)))
+#+end_src
 ** Finding Documentation with TeXdoc
 =texdoc= is an application that comes with most TeX distributions.
 This function brings them up within emacs.
@@ -705,23 +731,21 @@ oh lord
       ("\\\\iffalse\\(\\(.\\|\n\\)*?\\)\\\\fi" 1 font-lock-comment-face)))))
 #+end_src
 
-* COMMENT Dired
-:PROPERTIES:
-:tangle: no
-:END:
+* Dired
+** Mapping Over Marked Files
 #+begin_src elisp
-(require 'dired)
-(defun for-each-dired-marked-file (fn)
+(defun *-dired-for-each-marked-file (function)
   "Do stuff for each marked file, only works in dired window"
   (interactive)
   (if (eq major-mode 'dired-mode)
-      (let ((filenames (dired-get-marked-files)))
-	(mapcar fn filenames))
-    (error (format "Not a Dired buffer \(%s\)" major-mode))))
-
-(setq dired-listing-switches "-alh")
-(define-key dired-mode-map (kbd "b") 'bf-mode)
+      (mapcar function (dired-get-marked-files))
+    (error "Not a Dired buffer `%s'" major-mode)))
 #+end_src
+** TODO Zipping Files
+:PROPERTIES:
+:tangle: no
+:END:
+There is work to be done on this.
 #+begin_src elisp
 (eval-after-load "dired-aux"
    '(add-to-list 'dired-compress-file-suffixes 
@@ -787,24 +811,8 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
 :PROPERTIES:
 :tangle: no
 :END:
+
 #+begin_src elisp
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-(global-set-key "\C-cd" 'org-indent-mode)
-(global-set-key (kbd "C-`") 'org-info)
-(setq org-agenda-include-diary nil)
-
-(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
-(setq org-directory (if currently-using-windows
-                        "t:/Dropbox/org"
-                      "~/Dropbox/org"))
-
-(defun org-file (s) (concat org-directory "/" s))
-
-(setq org-default-notes-file (org-file "notes.org"))
-
 (setq org-agenda-files (expand-file-name
                         "org-agenda-files.list" user-emacs-directory))
 
@@ -820,58 +828,16 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
           (lambda () (replace-string " --\n" " -- \n")))
 
 
-
-;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
-;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
-
-;; (defun org-meeting-place (meeting) (car (last meeting)))
-
-;; (defun org-any-meeting-meets-now (meeting-list)
-;;   (if meeting-list
-;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
-;; 	     (calendar-day-of-week date)) ; gets the dayname for today
-;; 	  ; If the first meeting of the list did not meet today,
-;; 	  ; move on to the others
-;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
-
-;; (defun org-flexi-class (start-year start-month start-day
-;;                           end-year   end-month   end-day
-;;                         meetings &rest skip-weeks)
-;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
-;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
-;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
-;; 	 (d (calendar-absolute-from-gregorian date))
-;;      (and
-;;       (<= date1 d) ; today is at least the start date
-;;       (<= d date2) ; today is at most the end date
-;;       (org-any-meeting-meets-today meetings)
-;; )
-
-;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
-
-;; (defun org-flexi-class-for-semester (semester-list meeting-times)
-;;   (apply 'org-flexi-class semester-list meeting-times))
-
-;; (org-flexi-class-for-semester (cons (org-meeting
-
 (defun org-ps-print-subtree (&optional prefix)
   "Prints the current subtree.
-If the prefix is non-nil, it will not be printed with faces."
+If the prefix is non-nil, it will be printed without faces."
   (interactive)
-  (if prefix
-      (progn
-	(org-mark-subtree)
-	(ps-print-region (point) (mark) "out.ps")
-	(shell-command "open out.ps")
-	(pop-mark))
-    (progn
-      (interactive)
-      (org-mark-subtree)
-      (ps-print-region-with-faces (point) (mark) "out.ps")
-      (shell-command "open out.ps")
-      (pop-mark))))
+  (save-excursion
+    (org-mark-subtree)
+    (funcall (if prefix #'ps-print-region #'ps-print-region-with-faces)
+             (point) (mark) "out.ps")
+    (shell-command "open out.ps")))
 
-(setq org-log-done 'note)
 (setq org-mobile-directory
       (concat user-emacs-directory "../Apps/MobileOrg"))
 (setq org-mobile-inbox-for-pull
@@ -884,7 +850,7 @@ If the prefix is non-nil, it will not be printed with faces."
 
 ;(define-key org-src-mode-map
 ;  "\C-x\C-s" (lambda () (interactive)
-;	       (org-edit-src-exit) (save-buffer)))
+;              (org-edit-src-exit) (save-buffer)))
 
 (setq org-structure-template-alist
       (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
@@ -899,158 +865,15 @@ If the prefix is non-nil, it will not be printed with faces."
 
 (setq org2blog/wp-blog-alist
       '(("wordpress"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus"
-	 
-	 :default-title "Hello World"
-	 :default-categories ("customization")
-	 :tags-as-categories nil)
-	("It's All Text"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus")))
-
-(setq org-id-link-to-org-use-id t)
-
-(setq org-publish-project-alist
-   '(("blog" .  (:base-directory "~/github/octopress/source/org_posts/"
-                 :base-extension "org"
-                 :publishing-directory "~/github/octopress/source/_posts/"
-                 :sub-superscript ""
-                 :recursive t
-                 :publishing-function org-html-publish-to-html
-                 :headline-levels 4
-                 :html-extension "markdown"
-                 :body-only t))))
-
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((sh . t)
-   (python . t)
-   (R . t)
-   (ruby . t)
-   (perl . t)))
-
-(require 'ox-md)
-(global-set-key "\C-cl" 'org-store-link)
-(global-set-key "\C-cc" 'org-capture)
-(global-set-key "\C-ca" 'org-agenda)
-(global-set-key "\C-cb" 'org-iswitchb)
-(global-set-key "\C-cd" 'org-indent-mode)
-(global-set-key (kbd "C-`") 'org-info)
-(setq org-agenda-include-diary nil)
-
-(global-set-key (kbd "C-c u") (lambda nil (interactive) (search-backward-regexp "^*")))
-(setq org-directory (if currently-using-windows
-                        "t:/Dropbox/org"
-                      "~/Dropbox/org"))
-
-(defun org-file (s) (concat org-directory "/" s))
-
-(setq org-default-notes-file (org-file "notes.org"))
-
-(setq org-agenda-files (expand-file-name
-                        "org-agenda-files.list" user-emacs-directory))
-
-(setq org-capture-templates
-      '(("t" "Todo" entry
-         (file+headline (org-file "unfiled-tasks.org") "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("j" "Journal" entry
-         (file+datetree (org-file "journal.org"))
-         "* %?\nEntered on %U\n  %i\n  %a")))
-
-(add-hook 'org-export-preprocess-final-hook
-          (lambda () (replace-string " --\n" " -- \n")))
-
-
-
-;; (defun org-meeting (dayname start-hour start-minute end-hour end-minute meeting-place)
-;;   (list dayname start-hour start-minute end-hour end-minute meeting-place))
-
-;; (defun org-meeting-place (meeting) (car (last meeting)))
-
-;; (defun org-any-meeting-meets-now (meeting-list)
-;;   (if meeting-list
-;;       (or (= (caar meeting-list) ; gets the dayname of the first meeting in the list
-;; 	     (calendar-day-of-week date)) ; gets the dayname for today
-;; 	  ; If the first meeting of the list did not meet today,
-;; 	  ; move on to the others
-;; 	  (org-any-meeting-meets-today (cdr meeting-list)))))
-
-;; (defun org-flexi-class (start-year start-month start-day
-;;                           end-year   end-month   end-day
-;;                         meetings &rest skip-weeks)
-;;   "Returns the place if the meeting lies within the parameters, nil otherwise"
-;;   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
-;; 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
-;; 	 (d (calendar-absolute-from-gregorian date))
-;;      (and
-;;       (<= date1 d) ; today is at least the start date
-;;       (<= d date2) ; today is at most the end date
-;;       (org-any-meeting-meets-today meetings)
-;; )
-
-;; (setq *spring-2013-semester* (list 2013 1 21 2013 5 9))
-
-;; (defun org-flexi-class-for-semester (semester-list meeting-times)
-;;   (apply 'org-flexi-class semester-list meeting-times))
-
-;; (org-flexi-class-for-semester (cons (org-meeting
-
-(defun org-ps-print-subtree (&optional prefix)
-  "Prints the current subtree.
-If the prefix is non-nil, it will not be printed with faces."
-  (interactive)
-  (if prefix
-      (progn
-	(org-mark-subtree)
-	(ps-print-region (point) (mark) "out.ps")
-	(shell-command "open out.ps")
-	(pop-mark))
-    (progn
-      (interactive)
-      (org-mark-subtree)
-      (ps-print-region-with-faces (point) (mark) "out.ps")
-      (shell-command "open out.ps")
-      (pop-mark))))
-
-(setq org-log-done 'note)
-(setq org-mobile-directory
-      (concat user-emacs-directory "../Apps/MobileOrg"))
-(setq org-mobile-inbox-for-pull
-      (concat user-emacs-directory "../org/from-mobile.org"))
-
-;(org-agenda  birthdays?
-
-(org-agenda-to-appt)
-(appt-activate t)
-
-;(define-key org-src-mode-map
-;  "\C-x\C-s" (lambda () (interactive)
-;	       (org-edit-src-exit) (save-buffer)))
-
-(setq org-structure-template-alist
-      (cons '("esf" "#+begin_src elisp :tangle %file\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("es" "#+begin_src elisp\n?\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("n" "#+name: ?\n#+begin_src \n\n#+end_src") org-structure-template-alist))
-(setq org-structure-template-alist
-      (cons '("nt" "#+name: ?\n#+begin_src elisp :tangle \"\"\n\n#+end_src") org-structure-template-alist))
-
-(require 'org2blog)
-
-(setq org2blog/wp-blog-alist
-      '(("wordpress"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus"
-	 
-	 :default-title "Hello World"
-	 :default-categories ("customization")
-	 :tags-as-categories nil)
-	("It's All Text"
-	 :url "http://itsalltext.wordpress.com/xmlrpc.php"
-	 :username "vermiculus")))
+         :url "http://itsalltext.wordpress.com/xmlrpc.php"
+         :username "vermiculus"
+         
+         :default-title "Hello World"
+         :default-categories ("customization")
+         :tags-as-categories nil)
+        ("It's All Text"
+         :url "http://itsalltext.wordpress.com/xmlrpc.php"
+         :username "vermiculus")))
 
 (setq org-id-link-to-org-use-id t)
 
@@ -1075,16 +898,9 @@ If the prefix is non-nil, it will not be printed with faces."
 
 (require 'ox-md)
 #+end_src
-* COMMENT Navigation
-:PROPERTIES:
-:tangle: no
-:END:
-#+begin_src elisp
-(global-set-key (kbd "M-<down>")
-		(lambda () (interactive) (scroll-up 1)))
-(global-set-key (kbd "M-<up>")
-		(lambda () (interactive) (scroll-up -1)))
-#+end_src
+** TODO Customize the following [0/2]
+- [ ] ~org-directory~
+- [ ] ~org-default-notes-file~
 * COMMENT Gnus
 :PROPERTIES:
 :tangle: no
@@ -1095,29 +911,12 @@ If the prefix is non-nil, it will not be printed with faces."
 (setq gnus-directory     (concat user-emacs-directory "news/"))
 (setq nnfolder-directory (concat user-emacs-directory "mail/archive"))
 #+end_src
-* COMMENT General
-:PROPERTIES:
-:tangle: no
-:END:
-#+begin_src elisp
-(setq-default indent-tabs-mode t)
-
-; Fix server file stuff
-(setenv "EMACS_SERVER_FILE" (expand-file-name "server/server" user-emacs-directory))
-
-(global-set-key (kbd "C-M-<") 'mc/mark-next-lines)
-(global-set-key (kbd "C-M->") 'mc/mark-next-like-this)
-(global-set-key (kbd "  s-r") 'mc/mark-all-like-this-dwim)
-
-(defun find-kpathsea (string)
-  (interactive "sFind file in TeX distribution: ")
-  (find-file (substring (shell-command-to-string
-			 (format "kpsewhich %s" string))
-			0 -1)))
-(require 'latex)
-(define-key LaTeX-mode-map (kbd "C-c f") 'find-kpathsea)
-
-(defun delete-this-buffer-and-file ()
+* General
+** Text Editing
+** Buffer Information
+*** Removing Temporary Files
+#+begin_src emacs-lisp
+(defun *-delete-this-buffer-and-file ()
   "Removes file connected to current buffer and kills buffer."
   (interactive)
   (let ((filename (buffer-file-name))
@@ -1129,49 +928,49 @@ If the prefix is non-nil, it will not be printed with faces."
         (delete-file filename)
         (kill-buffer buffer)
         (message "File '%s' successfully removed" filename)))))
-
-(global-set-key (kbd "C-c k") 'delete-this-buffer-and-file)
-(defun copy-buffer-file-name-as-kill (choice)
+#+end_src
+*** Yanking Current File Information
+#+begin_src emacs-lisp
+(defun *-copy-buffer-file-name-as-kill (choice)
   "Copy the buffer-file-name to the kill-ring"
-  (interactive "cCopy Buffer Name (F) Full, (D) Directory, (N) Name")
+  (interactive "cCopy Buffer Name (f)ull, (d)irectory, (b)asename:")
   (let ((new-kill-string)
         (name (if (eq major-mode 'dired-mode)
                   (dired-get-filename)
                 (or (buffer-file-name) ""))))
-    (cond ((eq choice ?f)
-           (setq new-kill-string name))
-          ((eq choice ?d)
-           (setq new-kill-string (file-name-directory name)))
-          ((eq choice ?n)
-           (setq new-kill-string (file-name-nondirectory name)))
-          (t (message "Quit")))
+    (setq new-kill-string
+          (cond ((eq choice ?f) name)
+                ((eq choice ?d) (file-name-directory name))
+                ((eq choice ?b) (file-name-nondirectory name))
+                (t (message "Quit") nil)))
     (when new-kill-string
       (message "%s copied" new-kill-string)
       (kill-new new-kill-string))))
-(global-set-key (kbd "C-c x") 'copy-buffer-file-name-as-kill)
-
-(defun align-regexp-multiple (s)
-  "align at each character in `S` in succession"
-  (let ((p (point))
-	(m (mark)))
-    (if (< (length s) 1)
-	(align-regexp p m s)
-      (align-regexp p m (substring s 0 1))
-      (align-regexp-multiple (substring s 1)))))
-
-(setq insert-directory-program "gls")
-
-(defvar delete-whitespace-on-save
-  nil
-  "If `t', files will be stripped of trailing whitespace before
-saving.")
-(add-hook 'before-save-hook (function maybe-delete-trailing-whitespace))
-(defun maybe-delete-trailing-whitespace ()
-  (if delete-whitespace-on-save (delete-trailing-whitespace)))
-
-(global-set-key (kbd "C-c M-a") (function align-regexp))
-(setq-default truncate-lines t)
 #+end_src
+*** Aligning at Multiple Regexps
+:PROPERTIES:
+:tangle: no
+:END:
+#+begin_src elisp
+(defun *-align-regexp-multiple (s)
+  "align at each character in S in succession"
+  (if (< (length s) 1)
+      (align-regexp (point) (mark) s)
+    (align-regexp (point) (mark) (substring s 0 1))
+    (align-regexp-multiple (substring s 1))))
+#+end_src
+*** Deleting Trailing Whitespace
+#+begin_src emacs-lisp
+(defcustom *-delete-trailing-whitespace-on-save
+  nil
+  "If `t', files will be stripped of trailing whitespace before saving."
+  :group '*-files)
+
+(defun *-maybe-delete-trailing-whitespace ()
+  (when *-delete-trailing-whitespace-on-save
+    (delete-trailing-whitespace)))
+#+end_src
+The function is added to ~before-save-hook~ via =customize=.
 * COMMENT File IO
 :PROPERTIES:
 :tangle: no

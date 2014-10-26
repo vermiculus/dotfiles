@@ -117,24 +117,33 @@
 
 (*-with-map-bind-keys-to-functions
  global-map
- `((magit "M-?" magit-status)
-   (multiple-cursors "C-M->" mc/mark-next-like-this)
-   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
-   (t "C-x t" *-find-temporary-file)
-   (speedbar "C-c C-SPC" speedbar-get-focus)
-   (god-mode "<escape>" god-local-mode)
+ `((t "C-c M-a" align-regexp)
+   (t "C-c x" *-copy-buffer-file-name-as-kill)
+   (t "C-c k" *-delete-this-buffer-and-file)
+   (t "C-x C-0" delete-window)
    (t "C-x C-1" delete-other-windows)
    (t "C-x C-2" split-window-below)
    (t "C-x C-3" split-window-right)
-   (smex "M-x" *-smex-smart-smex)
+   (t "C-x t" *-find-temporary-file)
+   (t "M-<down>" ,(lambda () (interactive) (scroll-up -1)))
+   (t "M-<up>" ,(lambda () (interactive) (scroll-up 1)))
+   (god-mode "<escape>" god-local-mode)
+   (magit "M-?" magit-status)
+   (multiple-cursors "C-M->" mc/mark-next-like-this)
+   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
+   (org "C-c a" org-agenda)
+   (org "C-c c" org-capture)
+   (org "C-c l" org-store-link)
    (smex "M-S-x" *-smex-smart-smex-major-mode-commands)
-   (twittering-mode "C-c n" twittering-update-status-interactive)
+   (smex "M-x" *-smex-smart-smex)
+   (speedbar "C-c C-SPC" speedbar-get-focus)
    (twittering-mode "C-c m" ,(lambda () (interactive) (twittering-update-status-from-minibuffer)))
-   (t "C-x C-0" delete-window)))
+   (twittering-mode "C-c n" twittering-update-status-interactive)))
 
 (*-with-map-bind-keys-to-functions
  TeX-mode-map
- '((latex "C-c t" *-TeX-find-texdoc)))
+ '((latex "C-c t" *-TeX-find-texdoc)
+   (latex "C-c f" *-TeX-find-kpathsea)))
 
 (defvar c-mode-base-map)
 (eval-after-load 'cc-mode
@@ -150,6 +159,10 @@
 (*-with-map-bind-keys-to-functions
  god-local-mode-map
  '((god-mode "." repeat)))
+
+(*-with-map-bind-keys-to-functions
+ org-mode-map
+ '((org-mode "C-`" org-info)))
 
 (require 'god-mode)
 (global-set-key (kbd "<escape>") 'god-local-mode)
@@ -202,6 +215,13 @@
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
 
+(defun *-dired-for-each-marked-file (function)
+  "Do stuff for each marked file, only works in dired window"
+  (interactive)
+  (if (eq major-mode 'dired-mode)
+      (mapcar function (dired-get-marked-files))
+    (error "Not a Dired buffer `%s'" major-mode)))
+
 (*-with-map-bind-keys-to-functions
  twittering-mode-map
  '((twittering-mode ">" twittering-reply-to-user)
@@ -249,3 +269,51 @@
   :group '*-fonts)
 
 (set-frame-font *-text-mono-type)
+
+(*-with-map-bind-keys-to-functions
+ dired-mode-map
+ '((bf-mode "b" bf-mode)))
+
+(defun *-TeX-find-kpathsea (string)
+  (interactive "sFind file in TeX distribution: ")
+  (find-file (substring (shell-command-to-string
+                         (format "kpsewhich %s" string))
+                        0 -1)))
+
+(defun *-delete-this-buffer-and-file ()
+  "Removes file connected to current buffer and kills buffer."
+  (interactive)
+  (let ((filename (buffer-file-name))
+        (buffer (current-buffer))
+        (name (buffer-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (when (yes-or-no-p "Are you sure you want to remove this file? ")
+        (delete-file filename)
+        (kill-buffer buffer)
+        (message "File '%s' successfully removed" filename)))))
+
+(defun *-copy-buffer-file-name-as-kill (choice)
+  "Copy the buffer-file-name to the kill-ring"
+  (interactive "cCopy Buffer Name (f)ull, (d)irectory, (b)asename:")
+  (let ((new-kill-string)
+        (name (if (eq major-mode 'dired-mode)
+                  (dired-get-filename)
+                (or (buffer-file-name) ""))))
+    (setq new-kill-string
+          (cond ((eq choice ?f) name)
+                ((eq choice ?d) (file-name-directory name))
+                ((eq choice ?b) (file-name-nondirectory name))
+                (t (message "Quit") nil)))
+    (when new-kill-string
+      (message "%s copied" new-kill-string)
+      (kill-new new-kill-string))))
+
+(defcustom *-delete-trailing-whitespace-on-save
+  nil
+  "If `t', files will be stripped of trailing whitespace before saving."
+  :group '*-files)
+
+(defun *-maybe-delete-trailing-whitespace ()
+  (when *-delete-trailing-whitespace-on-save
+    (delete-trailing-whitespace)))
