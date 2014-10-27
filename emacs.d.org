@@ -1,9 +1,9 @@
 #+Title: Emacs Customizations
 #+Author: Sean Allred
 #+Date: [2014-10-24 Fri]
-#+Macro: version 0.1
 
-#+PROPERTY: tangle ".emacs.d/init.el"
+#+PROPERTY: tangle ".emacs.d/init.org.el"
+#+PROPERTY: noweb yes
 #+PROPERTY: mkdirp t
 #+OPTIONS: tasks:nil toc:1
 
@@ -37,7 +37,182 @@ Lisp files needed to fully reproduce this installation.
                   '("init.el"))))
 #+end_src
 
-* A Multi-Platform Configuration
+* Package Management
+=use-package.el=.  Fantastic, fantastic tool.  We need to initialize
+the standard =package.el= to use it though, since it was installed
+using it.  (See this [[http://emacs.stackexchange.com/q/2647/2264][emacs.se question]].)
+#+begin_src elisp
+(require 'package)
+(package-initialize)
+(require 'use-package)
+#+end_src
+** Windowed-Specific Settings
+#+begin_src elisp
+(when window-system
+ (tool-bar-mode -1)
+ (scroll-bar-mode -1))
+#+end_src
+* TeX
+TeX is a typesetting system that produces documents of high quality
+and typographical consistency.  I'm a heavy user of this system under
+[[http://www.gnu.org/s/auctex][AUCTeX]] and [[http://www.gnu.org/s/auctex/reftex.html][RefTeX]], two of the most indispensible resources available
+for TeX under emacs.
+#+begin_src emacs-lisp
+(use-package tex
+  :ensure auctex
+  :config (prog1 t
+            <<TeX-support-functions>>)
+  :bind (("C-c t" . *-TeX-find-texdoc)
+         ("C-c f" . *-TeX-find-kpathsea)))
+#+end_src
+** Jumping to Source Code
+:PROPERTIES:
+:noweb-ref: TeX-support-functions
+:tangle: no
+:END:
+#+begin_src emacs-lisp
+(defun *-TeX-find-kpathsea (string)
+  (interactive "sFind file in TeX distribution: ")
+  (find-file (substring (shell-command-to-string
+                         (format "kpsewhich %s" string))
+                        0 -1)))
+#+end_src
+** Finding Documentation with TeXdoc
+:PROPERTIES:
+:noweb-ref: TeX-support-functions
+:END:
+=texdoc= is an application that comes with most TeX distributions.
+This function brings them up within emacs.
+#+begin_src elisp :tangle no
+(defun *-TeX-find-texdoc (texdoc-query)
+  (interactive "sPackage: ")
+  (if (string-equal texdoc-query "")
+      (error "Cannot query texdoc against an empty string")
+    (let ((texdoc-output (shell-command-to-string
+                          (format "texdoc -l -M %s"
+                                  texdoc-query))))
+      (if (string-match texdoc-output "")
+          (error "Sorry, no documentation found for %s" texdoc-query)
+        (let ((texdoc-file (nth 2 (split-string texdoc-output))))
+          (if (file-readable-p texdoc-file)
+              (let ((new-file (*-create-temporary-file
+                               "pdf"
+                               (format *-TeX-find-texdoc-temp-file-format
+                                       texdoc-query
+                                       texdoc-file))))
+                (copy-file texdoc-file new-file t)
+                (find-file-other-window new-file))
+            (error "Sorry, the file returned by texdoc for %s isn't readable"
+                   texdoc-query)))))))
+#+end_src
+
+To support this function, the following is provided to control the
+format of the file name that is generated.
+#+begin_src elisp 
+(defcustom *-TeX-find-texdoc-temp-file-format
+  "TeX-find-texdoc--%s--"
+  "The prefix for temporary files created with `*-TeX-find-texdoc'"
+  :group '*-tex)
+#+end_src
+
+- [ ] Research =TeX-doc= \\
+  This function claims to do this, but I can't manage it...
+
+* Other
+#+begin_src emacs-lisp :tangle no
+;TODO: See if this works in latex-mode
+(use-package tex
+  :ensure auctex
+  :config (prog1 t
+            <<TeX-support-functions>>)
+  :bind (("C-c t" . *-TeX-find-texdoc)
+         ("C-c f" . *-TeX-find-kpathsea)))
+
+(use-package cc-mode
+  :bind (("C-c RET" . ff-find-related-file)
+         ("C-c C-'" . compile)))
+
+(use-package company
+  :ensure t
+  :commands company-mode
+  :defer t)
+
+(use-package monokai-theme
+  :if window-system
+  :config (enable-theme 'monokai))
+(use-package bbdb
+  :if window-system)
+(use-package github-clone
+  :if window-system)
+(use-package helm
+  :ensure t
+  :if window-system
+  :commands (helm helm-M-x))
+(use-package helm-ag
+  :if window-system)
+(use-package htmlize
+  :if window-system)
+(use-package magit
+  :defer t 
+  :if window-system)
+(use-package nose
+  :defer t
+  :if window-system)
+
+(use-package org
+  :defer t
+  :if window-system)
+
+(use-package slime
+  :defer t
+  :if window-system)
+
+(use-package twittering-mode
+  :commands (twit twittering-mode)
+  :if window-system)
+
+(use-package multiple-cursors
+  :bind (("C-<"   . mc/mark-previous-like-this)
+         ("C->"   . mc/mark-next-like-this)
+         ("C-M->" . mc/mark-all-like-this-dwim)))
+
+(use-package yasnippet
+  :defer t)
+
+(use-package yaml-mode)
+(use-package smex
+  :config (progn (smex-initialize) (message "Smex loaded"))
+  :bind (("M-x" . smex)
+         ("s-x" . smex-major-mode-commands)))
+
+(use-package markdown-mode)
+(use-package god-mode
+  :bind ("<escape>" . god-local-mode))
+(use-package evil
+  :commands evil-mode)
+
+(use-package fish-mode
+  :mode "\\.fish\\'")
+(use-package ido
+  :config (progn
+            (use-package flx-ido)
+            (ido-mode t)
+            (setq ido-everywhere t)))
+
+(use-package bf-mode
+  :defer t)
+
+(use-package coffee-mode
+  :defer t)
+
+(use-package csv-mode
+  :defer t)
+#+end_src
+* COMMENT NO TANGLE
+  :PROPERTIES:
+  :tangle:   no
+  :END:
+** COMMENT A Multi-Platform Configuration
 :PROPERTIES:
 :ID:       7CD67A70-10FB-4A27-B0EF-269F1A1AAB80
 :END:
@@ -64,25 +239,32 @@ simply introduced to make code more readable.
 If there ever is an occasion to toggle configuration based on the
 current window system (or lack thereof), there is ~window-system~.
 
-** Dropbox
+*** Dropbox
 :PROPERTIES:
 :ID:       6BBD6555-3BC9-47CE-8D72-876DFA4912B1
 :END:
 #+begin_src emacs-lisp
-(defcustom *-dropbox-directory
+(defconst *-dropbox-directory
   (expand-file-name
-   "Dropbox"
+   "Dropbox folder"
    (cond
     (*--windows-p "T:")
     (*--osx-p "~")))
-  "Dropbox directory"
-  :group '*-multi-platform)
+  "Dropbox directory")
 #+end_src
 
-* Extending Emacs Lisp
+*** Themes
+I don't want black backgrounds when I'm in a terminal.  That's just obnoxious.
+#+begin_src elisp
+
+#+end_src
+
+** COMMENT Extending Emacs Lisp
 :PROPERTIES:
+:tangle: no
 :ID:       3965422A-36EB-4169-B1F4-D2C460AD4F46
 :END:
+*** Automatic Minor-Mode Selection
 #+begin_src elisp
 ;; Prepare a list of conses - see docstring
 ;; http://stackoverflow.com/a/13946304/1443496
@@ -110,9 +292,10 @@ current window system (or lack thereof), there is ~window-system~.
 	    (funcall (cdar alist) 1))
 	(setq alist (cdr alist))))))
 #+end_src
+This must be hooked onto ~find-file~ to work.
 
-* File Management
-** Creating Temporary Files
+** COMMENT File Management
+*** Creating Temporary Files
 :PROPERTIES:
 :ID:       5D2605A7-0E33-479E-A7CD-4EB0F60B091A
 :END:
@@ -128,53 +311,8 @@ current window system (or lack thereof), there is ~window-system~.
   (interactive "sExtension: ")
   (find-file (*-create-temporary-file ext prefix)))
 #+end_src
-
-* Package Management
-:PROPERTIES:
-:ID:       7AD2769A-F069-4908-A8F6-A6319928B5AA
-:END:
-#+begin_src elisp
-(require 'package)
-(defun *-require-package (pkg)
-  (let ((pkg (if (consp pkg) (car pkg) pkg))
-        (ftr (if (consp pkg) (cdr pkg) pkg)))
-    (when (not (package-installed-p pkg))
-      (package-install pkg))
-    (if ftr (require ftr))))
-
-(package-initialize)
-(mapc #'*-require-package
-      '(
-        (auctex . latex)
-        bbdb
-        bf-mode
-        coffee-mode
-        color-theme-sanityinc-solarized
-        color-theme-sanityinc-tomorrow
-        csv-mode
-        evil
-        fish-mode
-        flx-ido
-        github-clone
-        god-mode
-        helm
-        helm-ag
-        htmlize
-        magit
-        markdown-mode
-        monokai-theme
-        multiple-cursors
-        nose
-        org
-        slime
-        smex
-        twittering-mode
-        yaml-mode
-        yasnippet
-        ))
-#+end_src
-* Ido
-** Smex
+** COMMENT Ido
+*** Smex
 :PROPERTIES:
 :ID:       26A3ADE7-4054-49DD-B2F4-F52DC014B833
 :END:
@@ -193,8 +331,8 @@ current window system (or lack thereof), there is ~window-system~.
   (global-set-key (kbd "M-S-x") 'smex-major-mode-commands)
   (smex-major-mode-commands))
 #+end_src
-** Flx
-* Keybindings
+*** Flx
+** COMMENT Keybindings
 :PROPERTIES:
 :ID:       4785E12F-3823-42E0-9EC2-1614E52E3513
 :END:
@@ -217,163 +355,19 @@ current window system (or lack thereof), there is ~window-system~.
     (*-after-feature-set-keys-to-functions feature (rest k-f))))
 #+end_src
 
-** Global
-:PROPERTIES:
-:ID:       A8CCC9CA-7BEC-4E25-A5B7-6D68DE492979
-:END:
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- global-map
- `((t "C-c M-a" align-regexp)
-   (t "C-c x" *-copy-buffer-file-name-as-kill)
-   (t "C-c k" *-delete-this-buffer-and-file)
-   (t "C-x C-0" delete-window)
-   (t "C-x C-1" delete-other-windows)
-   (t "C-x C-2" split-window-below)
-   (t "C-x C-3" split-window-right)
-   (t "C-x t" *-find-temporary-file)
-   (t "M-<down>" ,(lambda () (interactive) (scroll-up -1)))
-   (t "M-<up>" ,(lambda () (interactive) (scroll-up 1)))
-   (god-mode "<escape>" god-local-mode)
-   (magit "M-?" magit-status)
-   (multiple-cursors "C-M->" mc/mark-next-like-this)
-   (multiple-cursors "C-M-S-r" mc/mark-all-like-this-dwim)
-   (org "C-c a" org-agenda)
-   (org "C-c c" org-capture)
-   (org "C-c l" org-store-link)
-   (smex "M-S-x" *-smex-smart-smex-major-mode-commands)
-   (smex "M-x" *-smex-smart-smex)
-   (speedbar "C-c C-SPC" speedbar-get-focus)
-   (twittering-mode "C-c m" ,(lambda () (interactive) (twittering-update-status-from-minibuffer)))
-   (twittering-mode "C-c n" twittering-update-status-interactive)))
-#+end_src
-
-*** TODO Enable God-Mode globally
-Neither of these seem to work, but figure it out.
-- =god-mode-all=
-- =god-mode=
-
-** AUCTeX
-:PROPERTIES:
-:ID:       166EFC94-5BBE-407E-A9B9-DA1C24485322
-:END:
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- TeX-mode-map
- '((latex "C-c t" *-TeX-find-texdoc)
-   (latex "C-c f" *-TeX-find-kpathsea)))
-#+end_src
-
-** C Modes
-:PROPERTIES:
-:ID:       CF630EC3-8D69-4EBE-A7A8-39CB871655A1
-:END:
-#+begin_src elisp
-(defvar c-mode-base-map)
-(eval-after-load 'cc-mode
-  '(*-with-map-bind-keys-to-functions
-    c-mode-base-map
-    '((find-file "C-c RET" ff-find-related-file)
-      (cc-mode "C-c C-'" compile))))
-#+end_src
-
-*** TODO Fix defvar
-** Isearch
-:PROPERTIES:
-:ID:       EA80878A-23C6-4B4C-B80C-AACC04D7F79A
-:END:
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- isearch-mode-map
- '((t "C-SPC" *-isearch-yank-thing-at-point)))
-#+end_src
-
-** Dired
-:PROPERTIES:
-:ID:       698AB5FA-7197-4704-92AC-2A1E2CBD12CE
-:END:
-#+begin_src emacs-lisp
-(*-with-map-bind-keys-to-functions
- dired-mode-map
- '((bf-mode "b" bf-mode)))
-#+end_src
-
-** God
-:PROPERTIES:
-:ID:       BD4B6E93-6332-4A32-90D7-B07EEC9E02CF
-:END:
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- god-local-mode-map
- '((god-mode "." repeat)))
-#+end_src
-
-** Org
-:PROPERTIES:
-:ID:       1A1235E7-8123-4EA7-99AE-A776B0F4A661
-:END:
-#+begin_src elisp
-(*-with-map-bind-keys-to-functions
- org-mode-map
- '((org-mode "C-`" org-info)))
-#+end_src
-
-** Twitter
-   :PROPERTIES:
-   :ID:       ECD83E40-D7FA-42AF-9A14-1C7D8B8603B1
-   :END:
-#+begin_src emacs-lisp
-(*-with-map-bind-keys-to-functions
- twittering-mode-map
- '((twittering-mode ">" twittering-reply-to-user)
-   (twittering-mode "F" twittering-follow)
-   (twittering-mode "B" twittering-block)))
-#+end_src
-** Markdown
-   :PROPERTIES:
-   :ID:       55BBC826-C030-4F40-8C89-9F354D488428
-   :END:
-#+begin_src emacs-lisp
-(*-with-map-bind-keys-to-functions
- markdown-mode-map
- '((markdown-mode "M-<left>" backward-word)
-   (markdown-mode "M-<right>" forward-word)))
-#+end_src
-* COMMENT [[https://github.com/magit/magit][Magit]]
-:PROPERTIES:
-:tangle: no
-:END:
-** TODO Whitespace [0/2]
-- [ ] localize to the hunk
-- [ ] come back to magit-status in the same position
-#+begin_src elisp
-(defun *-magit-delete-trailing-whitespace-from-file ()
-  "Removes whitespace from the current item."
-  (interactive)
-  (save-excursion
-    (magit-visit-item)
-    (delete-trailing-whitespace)
-    (save-buffer))
-  (magit-refresh))
-
-; (add-hook 'magit-status-mode-hook
-; 	  (local-set-key
-; 	   (kbd "C-c w")
-; 	   '*-magit-delete-trailing-whitespace-from-file))
-#+end_src
-* [[https://github.com/capitaomorte/yasnippet][Snippets]]
+** COMMENT [[https://github.com/capitaomorte/yasnippet][Snippets]]
 =yasnippet= is a great way to manage mode-specific code snippets.
 Since =yasnippet= has its own snippet creation workflow from within
 emacs, they are not created here.
 
-* [[https://github.com/chrisdone/god-mode][God Mode]]
+** COMMENT [[https://github.com/chrisdone/god-mode][God Mode]]
 :PROPERTIES:
 :ID:       1EB69989-1D35-4FE6-946F-73E209F855D5
 :END:
 Modal-editing the emacs way.  When in this minor mode, modifier keys
 are more-or-less stripped away.  See [[https://github.com/chrisdone/god-mode][upstream]] for details.
 
-** Updating the Cursor
+*** Updating the Cursor
    :PROPERTIES:
    :ID:       6BE32D66-B37C-4228-AC45-FACBDA3561E6
    :END:
@@ -400,12 +394,15 @@ These are the recommended settings.
  '(god-mode-enabled-hook god-mode-disabled-hook))
 #+end_src
 
-* TeX
+** TeX
+:PROPERTIES:
+
+:END:
 TeX is a typesetting system that produces documents of high quality
 and typographical consistency.  I'm a heavy user of this system under
 [[http://www.gnu.org/s/auctex][AUCTeX]] and [[http://www.gnu.org/s/auctex/reftex.html][RefTeX]], two of the most indispensible resources available
 for TeX under emacs.
-** Jumping to Source Code
+*** Jumping to Source Code
 :PROPERTIES:
 :ID:       4F444822-5172-4CFE-B17F-249713AE5A4E
 :END:
@@ -416,7 +413,7 @@ for TeX under emacs.
                          (format "kpsewhich %s" string))
                         0 -1)))
 #+end_src
-** Finding Documentation with TeXdoc
+*** Finding Documentation with TeXdoc
 :PROPERTIES:
 :ID:       C812C891-2428-4EFA-8E0C-8FD67710B7BC
 :END:
@@ -427,7 +424,9 @@ This function brings them up within emacs.
   "TeX-find-texdoc--%s--"
   "The prefix for temporary files created with `*-TeX-find-texdoc'"
   :group '*-tex)
+#+end_src
 
+#+begin_src elisp 
 (defun *-TeX-find-texdoc (texdoc-query)
   (interactive "sPackage: ")
   (if (string-equal texdoc-query "")
@@ -450,371 +449,11 @@ This function brings them up within emacs.
                    texdoc-query)))))))
 #+end_src
 
-*** TODO Research =TeX-doc=
+**** TODO Research =TeX-doc=
 This function claims to do this, but I can't manage it...
 
-** COMMENT LaTeX3 Support
-:PROPERTIES:
-:tangle: no
-:END:
-This node is still a work in progress.
-#+begin_src elisp
-(defcustom *-LaTeX3-special-types
-  '("acro"       "alloc"      "array"      "bool"
-    "box"        "cctab"      "char"       "chemformula"
-    "chemmacros" "chemnum"    "chk"        "classics"
-    "clist"      "codedoc"    "coffin"     "color"
-    "conteq"     "cs"         "dim"        "driver"
-    "dry"        "dt"         "else"       "ENdiagram"
-    "enotez"     "etex"       "exp"        "expl"
-    "exsheets"   "fi"         "file"       "flag"
-    "fltr"       "fnpct"      "fontspec"   "fp"
-    "galley"     "ghsystem"   "group"      "GS"
-    "hbox"       "hcoffin"    "hobete"     "if"
-    "insert"     "int"        "ior"        "iow"
-    "kgl"        "kernel"     "keys"       "keyval"
-    "lltxmath"   "lua"        "luatex"     "mix"
-    "mode"       "MOdiagram"  "morewrites" "msg"
-    "muskip"     "notestobib" "or"         "pdftex"
-    "peek"       "prg"        "primargs"   "prop"
-    "quark"      "randomwalk" "regex"      "reverse"
-    "scan"       "seq"        "siunitx"    "skip"
-    "sort"       "substances" "str"        "tasks"
-    "tex"        "tl"         "token"      "um"
-    "use"        "vbox"       "vcoffin"    "with"
-    "xeCJK"      "xetex"      "xfrac"      "xparse"
-    "xpatch"     "xpeek"      "xpinyin"    "xtemplate"
-    "zhnum"      "zxjt")
-  "Special LaTeX3 types."
-  :group '*-LaTeX3)
-
-(let ((types  (regexp-opt-group *-LaTeX3-special-types t))
-      (general "\\([A-z_:]+\\)")
-      (camel   "\\([A-z@]+\\)")
-      (nocamel "\\(?:[^A-z@_:]\\)")
-      (command "\\\\")))
-
-(defcustom LaTeX-expl3-syntax-mode nil
-  "Controls keybindings for expl3 syntax"
-  :group '*-LaTeX3)
-
-(defun LaTeX-insert-space ()
-  (interactive)
-  (insert (if LaTeX-expl3-syntax-mode " ~ " " ")))
-
-(defun LaTeX-toggle-expl3-syntax ()
-  (interactive)
-  (message "LaTeX3 space mode is now %s."
-           (if (setq LaTeX-expl3-syntax-mode
-                     (not LaTeX-expl3-syntax-mode))
-               "on" "off")))
-#+end_src
-
-** COMMENT TeX Setup
-:PROPERTIES:
-:tangle: no
-:END:
-oh lord
-#+begin_src elisp
-(message "in TeX setup")
-(require 'latex)
- ;; Sets the default PDF viewer to, well, the default PDF viewer.
-;(setq TeX-view-program-list '(("Shell Default" "open %o")))
-;(setq TeX-view-program-selection '((output-pdf "Shell Default")))
-
- ;; Set the default LaTeX exec to pdfTeX
-;(setq TeX-PDF-mode t)
-
-;; the wrapping up of the two loads make sure
-;; auctex is loaded only when editing tex files.
-;(eval-after-load "tex-mode"
-;  '(progn
-;     (load "auctex.el" nil nil t)
-;     (load "preview-latex.el" nil nil t)
-;     )
-;  )
-
-;; AUCTeX replaces latex-mode-hook with LaTeX-mode-hook
-;(add-hook 'LaTeX-mode-hook
-;         (lambda ()
-;           (setq TeX-auto-save t)
-;           (setq TeX-parse-self t)
-;           ;; (setq-default TeX-master nil)
-;           (reftex-mode t)
-;           (TeX-fold-mode t)))
-
-(require 'tex-mode nil t)
-(setq TeX-view-program-selection
-      '((output-dvi "Emacs")
-        (output-pdf "PDF Viewer")
-        (output-html "HTML Viewer")))
-;; this example is good for OS X only
-(if currently-using-windows
-    (setq TeX-view-program-list
-          '(("DVI Viewer" "start \"\" %o")
-            ("PDF Viewer" "start \"\" %o")
-            ("HTML Viewer" "start \"\" %o")))
-  (setq TeX-view-program-list
-        '(("DVI Viewer" "open %o")
-          ("PDF Viewer" "open %o")
-          ("HTML Viewer" "open %o")
-          ("Emacs" "(message \"%o\")"))))
-
-;; TODO
-;(defvar TeX-use-find-for-view t
-;  "Use `find-file' for viewing finished documents.  See
-;  `TeX-maybe-find-finished-document'.")
-;(defun TeX-maybe-find-finished-document-or-fallback (filepath fallback)
-;  "Checks `TeX-use-find-for-view' for truth and opens a finished
-;document appropriately."
-;  (funcall (if TeX-use-find-for-view 'find-file fallback)
-;           filepath))
-;(defun TeX-maybe-find-finished-document (filepath)
-;  (interactive)
-;  (TeX-maybe-find-finished-document-or-fallback
-;   filepath
-;   (lambda (fp)
-;     (shell-command (format "open %s" fp)))))
-
-(setq TeX-use-find-for-view nil)
-
-(setq TeX-PDF-mode t)
-
-(setq preview-gs-options '("-q" "-dNOSAFER" "-dNOPAUSE" "-DNOPLATFONTS" "-dPrinted" "-dTextAlphaBits=4" "-dGraphicsAlphaBits=4"))
-
-;(defun TeX-electric-return ()
-;  "if the previous line is whitespace, remove whitespace, insert comment and new line
-; if the char before the char before point is a new line, insert a new line
-; if the char before the char before point is a %, remove % and have it such that point is seperated from the last content by two blank lines
-; else insert new line and indent"
-;  (interactive)
-;
-;  (cond
-;   ((save-excursion (forward-line -1)
-;                   (let ((p (string-match-p "^\\s-*$" (thing-at-point 'line))))
-;                     (forward-line -1)
-;                     (and p (string-match-p "^\\s-*$" (thing-at-point 'line)))))
-;    (TeX-newline))
-;   ((save-excursion (forward-line -1)
-;                   (string-match-p "^\\s-*$" (thing-at-point 'line)))
-;    (move-beginning-of-line)
-;    (kill-line)
-;    (insert "%")
-;    (TeX-newline))
-;   ((= 37 (char-before (1- (point))))
-;    (delete-backward-char 2) (TeX-newline) (TeX-newline))
-
-
-;
-
-
-;   (local-set-key (kbd "RET") 'TeX-newline)
-
-(add-to-list 'exec-path "/usr/texbin")
-
-(setq TeX-auto-save t)
-(setq TeX-parse-self t)
-(setq-default TeX-master nil)
-
-
-
-(eval-after-load "tex"
-  '(progn
-     ; Add Biber to the list of document processors
-;     (add-to-list 'TeX-command-list
-;                 '("Biber"
-;                   "biber %s"
-;                   TeX-run-BibTeX
-;                   t
-;                   t
-;                   :help "Run the document through Biber"))
-;     ; Hide BibTeX
-;     (setcar (assoc "BibTeX" TeX-command-list) ".BibTeX")
-     (add-to-list 'TeX-command-list
-                  '("arara"
-                    "arara %s"
-                    TeX-run-command
-                    t
-                    t
-                    :help "Run Arara"))))
-
-(require 'reftex)
-
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
-(setq reftex-plug-into-AUCTeX t)
-
-;; (add-hook 'LaTeX-mode-hook
-;;        (lambda ()
-;;          (push '("LaTeXmk"
-;;                  "latexmk -pdf %s"
-
-(setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
-(setq reftex-toc-split-windows-horizontally t)
-
-;(require 'latex)
-(eval-after-load "latex"
-  '(mapc (lambda (ext)
-          (add-to-list 'LaTeX-clean-intermediate-suffixes
-                       (format "\\.%s" ext)))
-        '("tdo" "run\\.xml" "bcf" "dvi")))
-
-(setq LaTeX-csquotes-close-quote "}"
-      LaTeX-csquotes-open-quote "\\enquote{")
-
-(setq reftex-index-macros '(multind))
-
-(defcustom TeX-environments-with-arguments
-  (list "function" "variable" "macro" "enumerate")
-  "Environments that will continue to display their arguments when folded.")
-
-(defun mg-TeX-fold-environment-with-argument ()
-  "Hide the current environment with \"[environment]{argument}\"."
-  (interactive)
-  (if (and (boundp 'TeX-fold-mode) TeX-fold-mode)
-      (if (memq (LaTeX-current-environment) TeX-environments-with-arguments)
-          (let ((env-end (save-excursion
-                           (LaTeX-find-matching-end)
-                           (point)))
-                env-start priority ov)
-            (setq env-start (save-excursion
-                              (LaTeX-find-matching-begin)
-                              (looking-at (format "\\\\begin{%s}\\({[^}]*}\\)" (LaTeX-current-environment)))
-                              (point)))
-            (if (and env-start env-end)
-                (progn
-                  (setq priority (TeX-overlay-prioritize env-start env-end))
-                  (setq ov (make-overlay env-start env-end
-                                         (current-buffer) t nil))
-                  (overlay-put ov 'category 'TeX-fold)
-                  (overlay-put ov 'priority priority)
-                  (overlay-put ov 'evaporate t)
-                  (overlay-put ov 'TeX-fold-display-string-spec
-                               (concat (format "[%s]" (LaTeX-current-environment)) (match-string-no-properties 1)))
-                  (TeX-fold-hide-item ov))
-              (message "No environment found"))))
-    (message "TeX-fold-mode is not enabled.")))
-
-(defun dtx-newline ()
-  (interactive)
-  (setq dtx-newline-is-sentence-end
-        (memq (char-before) '(?\. ?\! ?\?))
-  (if (not (= (current-column) 0))
-      (progn
-        (newline)
-        (insert "%   ")
-        (if dtx-newline-is-sentence-end
-            (indent-for-tab-command)))
-    (newline))
-  (if dtx-newline-is-sentence-end
-      (progn (move-to-column 2)
-             (kill-line)
-             (newline)
-             (left-char 1)))))
-
-(fset 'dtx-newline 'newline)
-
-(fset 'LaTeX-usepackage-to-requirepackage
-   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([11 25 1 37 1 return up 25 M-left left 67108896 C-M-left 4 123 24 24 backspace 67108911 backspace 125 1 M-right M-backspace 82 101 113 117 105 114 101 M-backspace 80 97 115 115 79 112 116 105 111 110 115 84 111 80 97 99 107 97 103 101 5 M-left M-right M-backspace 25 5 return 92 82 101 113 117 105 114 101 80 97 99 107 97 103 101 123 25 125] 0 "%d")) arg)))
-
-(defun LaTeX-new-comment-section (section-title)
-  (interactive "sSection: ")
-  (let ((comment (make-string 64 ?%)))
-    (insert (format "%s\n%s\n%s\n\n\n" comment comment comment))
-    (previous-line 4)
-    (right-char 3)
-    (insert (format " %s " section-title))
-    (delete-char (+ 2 (length section-title)))
-    (next-line 3)))
-
-(defun LaTeX-insert-current-format-version ()
-  (interactive)
-  (insert
-   (substring (shell-command-to-string "grep edef.fmtversion $(kpsewhich latex.ltx)")
-              -12 -2)))
-
-(fset 'LaTeX-newenvironment-to-NewDocumentEnvironment
-   (lambda (&optional arg) "Keyboard
-   macro." (interactive "p") (kmacro-exec-ring-item (quote ([right
-   134217828 78 101 119 68 111 99 117 109 101 110 116 69 110 118
-   105 114 111 110 109 101 110 116 32 right 32 M-right 32 right
-   123 C-M-right 125 return 32 right return tab backspace 5
-   C-M-left left return 32 right return tab C-M-right left return
-   tab] 0 "%d")) arg)))
-
-;(setq LaTeX-expl3-syntax-mode nil)
-;(define-key LaTeX-mode-map
-;  (kbd "SPC")
-;  'LaTeX-insert-space)
-;(define-key LaTeX-mode-map
-;  (kbd "C-c C-SPC")
-;  'LaTeX-toggle-expl3-syntax)
-
-(define-key LaTeX-math-mode-map (kbd "` 4")
-  (lambda ()
-    (interactive)
-    (TeX-insert-dollar 2)
-    (backward-char)))
-(define-key LaTeX-math-mode-map (kbd "` ;")
-  (lambda ()
-    (interactive)
-    (TeX-insert-macro "ell")))
-(define-key LaTeX-math-mode-map (kbd "` ,")
-  (lambda ()
-    (interactive)
-    (TeX-insert-macro "ldots")))
-(define-key LaTeX-math-mode-map (kbd "` 1")
-  (lambda ()
-    (interactive)
-    (insert "^{-1}")))
-(define-key LaTeX-math-mode-map (kbd "` '")
-  (lambda ()
-    (interactive)
-    (insert "^")
-    (TeX-insert-macro "prime")))
-
-(add-hook
- 'LaTeX-mode-hook
- (lambda ()
-   (let ((math (reverse (append LaTeX-math-list LaTeX-math-default))))
-     (while math
-       (let ((entry (car math))
-         value)
-     (setq math (cdr math))
-     (if (listp (cdr entry))
-         (setq value (nth 1 entry))
-       (setq value (cdr entry)))
-     (if (stringp value)
-         (fset (intern (concat "LaTeX-math-" value))
-           (list 'lambda (list 'arg) (list 'interactive "*P")
-             (list 'LaTeX-math-insert value
-                   '(null (texmathp)))))))))))
-
-
-
-(define-key LaTeX-mode-map (kbd "M--")
-  (lambda ()
-    (interactive)
-    (just-one-space)
-    (insert "\\Dash ")))
-(define-key LaTeX-mode-map (kbd "M-_")
-  (lambda ()
-    (interactive)
-    (just-one-space)
-    (insert "\\textendash ")))
-(define-key LaTeX-mode-map (kbd "C-c r") 'reftex-parse-all)
-
-(setq-default TeX-command-default "arara")
-(setq LaTeX-command-style '(("" "%(PDF)%(latex) -file-line-error %S%(PDFout)")))
-
-;; comment in between \iffalse...\fi contstructs
-(add-hook 'TeX-mode-hook
-  (lambda nil
-    (font-lock-add-keywords nil '(
-      ("\\\\iffalse\\(\\(.\\|\n\\)*?\\)\\\\fi" 1 font-lock-comment-face)))))
-#+end_src
-
-* Dired
-** Mapping Over Marked Files
+** COMMENT Dired
+*** Mapping Over Marked Files
 :PROPERTIES:
 :ID:       05B8B02F-50F9-4C97-802B-28C0A84A207D
 :END:
@@ -826,7 +465,7 @@ oh lord
       (mapcar function (dired-get-marked-files))
     (error "Not a Dired buffer `%s'" major-mode)))
 #+end_src
-** TODO Zipping Files
+*** TODO Zipping Files
 :PROPERTIES:
 :tangle: no
 :END:
@@ -867,12 +506,12 @@ There is work to be done on this.
     (mapconcat '(lambda (obj) (format "%s" obj)) list " "))
 #+end_src
 
-* Twitter
+** COMMENT Twitter
 Use ~twit~ (I believe) to set your account info.  This is also the
 entry point into the mode.
 
-* C Modes
-* ~$PATH~ Setup
+** COMMENT C Modes
+** COMMENT ~$PATH~ Setup
 :PROPERTIES:
 :ID:       9B3EA54C-866B-4AA0-8DFA-693F5AD2A318
 :END:
@@ -889,8 +528,8 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
                      ,(getenv "PATH"))
                    path-separator))
 #+end_src
-* [[http://www.orgmode.org][Org]]
-** COMMENT Exporting
+** COMMENT [[http://www.orgmode.org][Org]]
+*** COMMENT Exporting
 :PROPERTIES:
 :ID:       ABC7D6F7-3E87-47CF-9827-600769A53F4D
 :tangle:   no
@@ -908,7 +547,7 @@ on *NIX system use =/usr/texbin= and Homebrew shoves stuff into
         *-org-preprocess-final-replace-alist))
 #+end_src
 
-** Printing Subtrees
+*** Printing Subtrees
 :PROPERTIES:
 :ID:       0555DF57-0E20-4168-9554-E71F65018863
 :END:
@@ -926,7 +565,7 @@ If the prefix is non-nil, it will be printed without faces."
     (shell-command "open out.ps")))
 #+end_src
 
-** COMMENT Mobile
+*** COMMENT Mobile
 :PROPERTIES:
 :tangle:   no
 :END:
@@ -936,7 +575,7 @@ If the prefix is non-nil, it will be printed without faces."
 (setq org-mobile-inbox-for-pull
       (concat user-emacs-directory "../org/from-mobile.org"))
 #+end_src
-** COMMENT Blogging
+*** COMMENT Blogging
 :PROPERTIES:
 :tangle: no
 :END:
@@ -967,14 +606,14 @@ If the prefix is non-nil, it will be printed without faces."
                  :body-only t))))
 #+end_src
 
-** TODO Customize the following [0/2]
+*** TODO Customize the following [0/2]
 - [ ] ~org-directory~
 - [ ] ~org-default-notes-file~
 
-* General
-** Text Editing
-** Buffer Information
-*** Removing Temporary Files
+** COMMENT General
+*** Text Editing
+*** Buffer Information
+**** Removing Temporary Files
 :PROPERTIES:
 :ID:       19D3A424-889C-4A53-A9B2-FE825C7405BD
 :END:
@@ -992,7 +631,7 @@ If the prefix is non-nil, it will be printed without faces."
         (kill-buffer buffer)
         (message "File '%s' successfully removed" filename)))))
 #+end_src
-*** Yanking Current File Information
+**** Yanking Current File Information
 :PROPERTIES:
 :ID:       0C6F73B1-74F4-465E-95D7-1370CEF32443
 :END:
@@ -1013,7 +652,7 @@ If the prefix is non-nil, it will be printed without faces."
       (message "%s copied" new-kill-string)
       (kill-new new-kill-string))))
 #+end_src
-*** Aligning at Multiple Regexps
+**** Aligning at Multiple Regexps
 :PROPERTIES:
 :tangle: no
 :END:
@@ -1025,7 +664,7 @@ If the prefix is non-nil, it will be printed without faces."
     (align-regexp (point) (mark) (substring s 0 1))
     (align-regexp-multiple (substring s 1))))
 #+end_src
-*** Deleting Trailing Whitespace
+**** Deleting Trailing Whitespace
 :PROPERTIES:
 :ID:       BB298C84-1FFF-4DCD-8202-216D2E2ADBD2
 :END:
@@ -1040,7 +679,7 @@ If the prefix is non-nil, it will be printed without faces."
     (delete-trailing-whitespace)))
 #+end_src
 The function is added to ~before-save-hook~ via =customize=.
-* COMMENT File IO
+** COMMENT File IO
 :PROPERTIES:
 :tangle: no
 :END:
@@ -1085,11 +724,14 @@ The function is added to ~before-save-hook~ via =customize=.
        (let* ((fn-list (dired-get-marked-files nil arg)))
          (mapc 'find-file fn-list)))))
 
-(defun unfill-region (beg end) (interactive "*r") (let ((fill-column (point-max))) (fill-region beg end)))
+(defun unfill-region (beg end)
+ (interactive "*r")
+ (let ((fill-column (point-max)))
+ (fill-region beg end)))
 (global-set-key (kbd "C-M-q") 'unfill-region)
 #+end_src
 
-* [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html][Incremental Search]] (=isearch=)
+** COMMENT [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html][Incremental Search]] (=isearch=)
 :PROPERTIES:
 :ID:       AA7E9EC1-99EF-42DD-A35A-82E0A10C16EF
 :END:
@@ -1099,7 +741,7 @@ The function is added to ~before-save-hook~ via =customize=.
   (isearch-yank-string (thing-at-point 'symbol)))
 #+end_src
 
-* [[http://www.gnu.org/s/m4][M4]]
+** COMMENT [[http://www.gnu.org/s/m4][M4]]
 :PROPERTIES:
 :ID:       C211A63E-90F8-4952-A049-ECA6614DBA6D
 :END:
@@ -1109,10 +751,10 @@ The function is added to ~before-save-hook~ via =customize=.
  '(modify-syntax-entry ?# "@" m4-mode-syntax-table))
 #+end_src
 
-** TODO Fix defvar
+*** TODO Fix defvar
 
-* [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html][Customize]]
-** Setting a Custom Custom File
+** COMMENT [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html][Customize]]
+*** Setting a Custom Custom File
 :PROPERTIES:
 :ID:       B1E68499-15D1-43B0-9A41-97E224C3C511
 :END:
@@ -1132,14 +774,14 @@ customizations are stored.  (A little nuts, right?)
 Remember: the ~set~ family of functions returns the value that the
 variable was set to.
 
-** Variable Customizations
+*** Variable Customizations
 Since it would be unreasonable to set up a system by which =custom.el=
 would edit the Org source file for its customizations, I've decided to
 track these customizations in its own file.  Sorry to disappoint!
 
 If anything interesting comes up, explanations will be placed here.
 
-*** Fonts
+**** Fonts
 :PROPERTIES:
 :ID:       B2310DEE-3854-455E-BE58-380E23E9CFF4
 :END:
@@ -1163,8 +805,8 @@ These are default fonts.  The fonts I /use/ are properly customized.
 (set-frame-font *-text-mono-type)
 #+END_SRC
 
-**** TODO add download instructions
-**** TODO Use faces instead of strings
+***** TODO add download instructions
+***** TODO Use faces instead of strings
 - then I'll be able to use different faces for text and ~code~.
 
 * COMMENT Other Files
@@ -1180,5 +822,5 @@ anymore, but could be useful...
 :END:
 # Local Variables:
 # org-edit-src-content-indentation: 0
-# eval: (add-hook 'org-babel-post-tangle-hook (lambda nil (byte-compile-file "~/dotfiles/.emacs.d/init.el") (load-file "~/dotfiles/.emacs.d/init.elc")))
+# eval: (add-hook 'org-babel-post-tangle-hook (lambda () (load-file user-init-file)))
 # End:

@@ -87,6 +87,7 @@
         TeX-view
         count-words-region
         dired-do-copy
+        god-local-mode
         mc/mark-next-lines
         next-buffer
         ns-print-buffer

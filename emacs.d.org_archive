@@ -74,3 +74,375 @@ I don't really use Gnus anymore, so...
 (setq gnus-directory     (concat user-emacs-directory "news/"))
 (setq nnfolder-directory (concat user-emacs-directory "mail/archive"))
 #+end_src
+
+* COMMENT TeX Setup
+:PROPERTIES:
+:noweb-ref: nil
+:tangle: no
+:ARCHIVE_TIME: 2014-10-26 Sun 14:50
+:ARCHIVE_FILE: ~/dotfiles/emacs.d.org
+:ARCHIVE_OLPATH: COMMENT NO TANGLE/COMMENT TeX/COMMENT Works In Progress
+:ARCHIVE_CATEGORY: emacs.d
+:END:
+oh lord
+#+begin_src elisp
+(message "in TeX setup")
+(require 'latex)
+ ;; Sets the default PDF viewer to, well, the default PDF viewer.
+;(setq TeX-view-program-list '(("Shell Default" "open %o")))
+;(setq TeX-view-program-selection '((output-pdf "Shell Default")))
+
+ ;; Set the default LaTeX exec to pdfTeX
+;(setq TeX-PDF-mode t)
+
+;; the wrapping up of the two loads make sure
+;; auctex is loaded only when editing tex files.
+;(eval-after-load "tex-mode"
+;  '(progn
+;     (load "auctex.el" nil nil t)
+;     (load "preview-latex.el" nil nil t)
+;     )
+;  )
+
+;; AUCTeX replaces latex-mode-hook with LaTeX-mode-hook
+;(add-hook 'LaTeX-mode-hook
+;         (lambda ()
+;           (setq TeX-auto-save t)
+;           (setq TeX-parse-self t)
+;           ;; (setq-default TeX-master nil)
+;           (reftex-mode t)
+;           (TeX-fold-mode t)))
+
+(require 'tex-mode nil t)
+(setq TeX-view-program-selection
+      '((output-dvi "Emacs")
+        (output-pdf "PDF Viewer")
+        (output-html "HTML Viewer")))
+;; this example is good for OS X only
+(if currently-using-windows
+    (setq TeX-view-program-list
+          '(("DVI Viewer" "start \"\" %o")
+            ("PDF Viewer" "start \"\" %o")
+            ("HTML Viewer" "start \"\" %o")))
+  (setq TeX-view-program-list
+        '(("DVI Viewer" "open %o")
+          ("PDF Viewer" "open %o")
+          ("HTML Viewer" "open %o")
+          ("Emacs" "(message \"%o\")"))))
+
+;; TODO
+;(defvar TeX-use-find-for-view t
+;  "Use `find-file' for viewing finished documents.  See
+;  `TeX-maybe-find-finished-document'.")
+;(defun TeX-maybe-find-finished-document-or-fallback (filepath fallback)
+;  "Checks `TeX-use-find-for-view' for truth and opens a finished
+;document appropriately."
+;  (funcall (if TeX-use-find-for-view 'find-file fallback)
+;           filepath))
+;(defun TeX-maybe-find-finished-document (filepath)
+;  (interactive)
+;  (TeX-maybe-find-finished-document-or-fallback
+;   filepath
+;   (lambda (fp)
+;     (shell-command (format "open %s" fp)))))
+
+(setq TeX-use-find-for-view nil)
+
+(setq TeX-PDF-mode t)
+
+(setq preview-gs-options '("-q" "-dNOSAFER" "-dNOPAUSE" "-DNOPLATFONTS" "-dPrinted" "-dTextAlphaBits=4" "-dGraphicsAlphaBits=4"))
+
+;(defun TeX-electric-return ()
+;  "if the previous line is whitespace, remove whitespace, insert comment and new line
+; if the char before the char before point is a new line, insert a new line
+; if the char before the char before point is a %, remove % and have it such that point is seperated from the last content by two blank lines
+; else insert new line and indent"
+;  (interactive)
+;
+;  (cond
+;   ((save-excursion (forward-line -1)
+;                   (let ((p (string-match-p "^\\s-*$" (thing-at-point 'line))))
+;                     (forward-line -1)
+;                     (and p (string-match-p "^\\s-*$" (thing-at-point 'line)))))
+;    (TeX-newline))
+;   ((save-excursion (forward-line -1)
+;                   (string-match-p "^\\s-*$" (thing-at-point 'line)))
+;    (move-beginning-of-line)
+;    (kill-line)
+;    (insert "%")
+;    (TeX-newline))
+;   ((= 37 (char-before (1- (point))))
+;    (delete-backward-char 2) (TeX-newline) (TeX-newline))
+
+
+;
+
+
+;   (local-set-key (kbd "RET") 'TeX-newline)
+
+(add-to-list 'exec-path "/usr/texbin")
+
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+(setq-default TeX-master nil)
+
+
+
+(eval-after-load "tex"
+  '(progn
+     ; Add Biber to the list of document processors
+;     (add-to-list 'TeX-command-list
+;                 '("Biber"
+;                   "biber %s"
+;                   TeX-run-BibTeX
+;                   t
+;                   t
+;                   :help "Run the document through Biber"))
+;     ; Hide BibTeX
+;     (setcar (assoc "BibTeX" TeX-command-list) ".BibTeX")
+     (add-to-list 'TeX-command-list
+                  '("arara"
+                    "arara %s"
+                    TeX-run-command
+                    t
+                    t
+                    :help "Run Arara"))))
+
+(require 'reftex)
+
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
+(setq reftex-plug-into-AUCTeX t)
+
+;; (add-hook 'LaTeX-mode-hook
+;;        (lambda ()
+;;          (push '("LaTeXmk"
+;;                  "latexmk -pdf %s"
+
+(setq reftex-bibliography-commands '("bibliography" "nobibliography" "addbibresource"))
+(setq reftex-toc-split-windows-horizontally t)
+
+;(require 'latex)
+(eval-after-load "latex"
+  '(mapc (lambda (ext)
+          (add-to-list 'LaTeX-clean-intermediate-suffixes
+                       (format "\\.%s" ext)))
+        '("tdo" "run\\.xml" "bcf" "dvi")))
+
+(setq LaTeX-csquotes-close-quote "}"
+      LaTeX-csquotes-open-quote "\\enquote{")
+
+(setq reftex-index-macros '(multind))
+
+(defcustom TeX-environments-with-arguments
+  (list "function" "variable" "macro" "enumerate")
+  "Environments that will continue to display their arguments when folded.")
+
+(defun mg-TeX-fold-environment-with-argument ()
+  "Hide the current environment with \"[environment]{argument}\"."
+  (interactive)
+  (if (and (boundp 'TeX-fold-mode) TeX-fold-mode)
+      (if (memq (LaTeX-current-environment) TeX-environments-with-arguments)
+          (let ((env-end (save-excursion
+                           (LaTeX-find-matching-end)
+                           (point)))
+                env-start priority ov)
+            (setq env-start (save-excursion
+                              (LaTeX-find-matching-begin)
+                              (looking-at (format "\\\\begin{%s}\\({[^}]*}\\)" (LaTeX-current-environment)))
+                              (point)))
+            (if (and env-start env-end)
+                (progn
+                  (setq priority (TeX-overlay-prioritize env-start env-end))
+                  (setq ov (make-overlay env-start env-end
+                                         (current-buffer) t nil))
+                  (overlay-put ov 'category 'TeX-fold)
+                  (overlay-put ov 'priority priority)
+                  (overlay-put ov 'evaporate t)
+                  (overlay-put ov 'TeX-fold-display-string-spec
+                               (concat (format "[%s]" (LaTeX-current-environment)) (match-string-no-properties 1)))
+                  (TeX-fold-hide-item ov))
+              (message "No environment found"))))
+    (message "TeX-fold-mode is not enabled.")))
+
+(defun dtx-newline ()
+  (interactive)
+  (setq dtx-newline-is-sentence-end
+        (memq (char-before) '(?\. ?\! ?\?))
+  (if (not (= (current-column) 0))
+      (progn
+        (newline)
+        (insert "%   ")
+        (if dtx-newline-is-sentence-end
+            (indent-for-tab-command)))
+    (newline))
+  (if dtx-newline-is-sentence-end
+      (progn (move-to-column 2)
+             (kill-line)
+             (newline)
+             (left-char 1)))))
+
+(fset 'dtx-newline 'newline)
+
+(fset 'LaTeX-usepackage-to-requirepackage
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([11 25 1 37 1 return up 25 M-left left 67108896 C-M-left 4 123 24 24 backspace 67108911 backspace 125 1 M-right M-backspace 82 101 113 117 105 114 101 M-backspace 80 97 115 115 79 112 116 105 111 110 115 84 111 80 97 99 107 97 103 101 5 M-left M-right M-backspace 25 5 return 92 82 101 113 117 105 114 101 80 97 99 107 97 103 101 123 25 125] 0 "%d")) arg)))
+
+(defun LaTeX-new-comment-section (section-title)
+  (interactive "sSection: ")
+  (let ((comment (make-string 64 ?%)))
+    (insert (format "%s\n%s\n%s\n\n\n" comment comment comment))
+    (previous-line 4)
+    (right-char 3)
+    (insert (format " %s " section-title))
+    (delete-char (+ 2 (length section-title)))
+    (next-line 3)))
+
+(defun LaTeX-insert-current-format-version ()
+  (interactive)
+  (insert
+   (substring (shell-command-to-string "grep edef.fmtversion $(kpsewhich latex.ltx)")
+              -12 -2)))
+
+(fset 'LaTeX-newenvironment-to-NewDocumentEnvironment
+   (lambda (&optional arg) "Keyboard
+   macro." (interactive "p") (kmacro-exec-ring-item (quote ([right
+   134217828 78 101 119 68 111 99 117 109 101 110 116 69 110 118
+   105 114 111 110 109 101 110 116 32 right 32 M-right 32 right
+   123 C-M-right 125 return 32 right return tab backspace 5
+   C-M-left left return 32 right return tab C-M-right left return
+   tab] 0 "%d")) arg)))
+
+;(setq LaTeX-expl3-syntax-mode nil)
+;(define-key LaTeX-mode-map
+;  (kbd "SPC")
+;  'LaTeX-insert-space)
+;(define-key LaTeX-mode-map
+;  (kbd "C-c C-SPC")
+;  'LaTeX-toggle-expl3-syntax)
+
+(define-key LaTeX-math-mode-map (kbd "` 4")
+  (lambda ()
+    (interactive)
+    (TeX-insert-dollar 2)
+    (backward-char)))
+(define-key LaTeX-math-mode-map (kbd "` ;")
+  (lambda ()
+    (interactive)
+    (TeX-insert-macro "ell")))
+(define-key LaTeX-math-mode-map (kbd "` ,")
+  (lambda ()
+    (interactive)
+    (TeX-insert-macro "ldots")))
+(define-key LaTeX-math-mode-map (kbd "` 1")
+  (lambda ()
+    (interactive)
+    (insert "^{-1}")))
+(define-key LaTeX-math-mode-map (kbd "` '")
+  (lambda ()
+    (interactive)
+    (insert "^")
+    (TeX-insert-macro "prime")))
+
+(add-hook
+ 'LaTeX-mode-hook
+ (lambda ()
+   (let ((math (reverse (append LaTeX-math-list LaTeX-math-default))))
+     (while math
+       (let ((entry (car math))
+         value)
+     (setq math (cdr math))
+     (if (listp (cdr entry))
+         (setq value (nth 1 entry))
+       (setq value (cdr entry)))
+     (if (stringp value)
+         (fset (intern (concat "LaTeX-math-" value))
+           (list 'lambda (list 'arg) (list 'interactive "*P")
+             (list 'LaTeX-math-insert value
+                   '(null (texmathp)))))))))))
+
+
+
+(define-key LaTeX-mode-map (kbd "M--")
+  (lambda ()
+    (interactive)
+    (just-one-space)
+    (insert "\\Dash ")))
+(define-key LaTeX-mode-map (kbd "M-_")
+  (lambda ()
+    (interactive)
+    (just-one-space)
+    (insert "\\textendash ")))
+(define-key LaTeX-mode-map (kbd "C-c r") 'reftex-parse-all)
+
+(setq-default TeX-command-default "arara")
+(setq LaTeX-command-style '(("" "%(PDF)%(latex) -file-line-error %S%(PDFout)")))
+
+;; comment in between \iffalse...\fi contstructs
+(add-hook 'TeX-mode-hook
+  (lambda nil
+    (font-lock-add-keywords nil '(
+      ("\\\\iffalse\\(\\(.\\|\n\\)*?\\)\\\\fi" 1 font-lock-comment-face)))))
+#+end_src
+
+
+* COMMENT LaTeX3 Support
+:PROPERTIES:
+:tangle: no
+:noweb-ref: nil
+:ARCHIVE_TIME: 2014-10-26 Sun 14:50
+:ARCHIVE_FILE: ~/dotfiles/emacs.d.org
+:ARCHIVE_OLPATH: COMMENT NO TANGLE/COMMENT TeX/COMMENT Works In Progress
+:ARCHIVE_CATEGORY: emacs.d
+:END:
+This node is still a work in progress.
+#+begin_src elisp
+(defcustom *-LaTeX3-special-types
+  '("acro"       "alloc"      "array"      "bool"
+    "box"        "cctab"      "char"       "chemformula"
+    "chemmacros" "chemnum"    "chk"        "classics"
+    "clist"      "codedoc"    "coffin"     "color"
+    "conteq"     "cs"         "dim"        "driver"
+    "dry"        "dt"         "else"       "ENdiagram"
+    "enotez"     "etex"       "exp"        "expl"
+    "exsheets"   "fi"         "file"       "flag"
+    "fltr"       "fnpct"      "fontspec"   "fp"
+    "galley"     "ghsystem"   "group"      "GS"
+    "hbox"       "hcoffin"    "hobete"     "if"
+    "insert"     "int"        "ior"        "iow"
+    "kgl"        "kernel"     "keys"       "keyval"
+    "lltxmath"   "lua"        "luatex"     "mix"
+    "mode"       "MOdiagram"  "morewrites" "msg"
+    "muskip"     "notestobib" "or"         "pdftex"
+    "peek"       "prg"        "primargs"   "prop"
+    "quark"      "randomwalk" "regex"      "reverse"
+    "scan"       "seq"        "siunitx"    "skip"
+    "sort"       "substances" "str"        "tasks"
+    "tex"        "tl"         "token"      "um"
+    "use"        "vbox"       "vcoffin"    "with"
+    "xeCJK"      "xetex"      "xfrac"      "xparse"
+    "xpatch"     "xpeek"      "xpinyin"    "xtemplate"
+    "zhnum"      "zxjt")
+  "Special LaTeX3 types."
+  :group '*-LaTeX3)
+
+(let ((types  (regexp-opt-group *-LaTeX3-special-types t))
+      (general "\\([A-z_:]+\\)")
+      (camel   "\\([A-z@]+\\)")
+      (nocamel "\\(?:[^A-z@_:]\\)")
+      (command "\\\\")))
+
+(defcustom LaTeX-expl3-syntax-mode nil
+  "Controls keybindings for expl3 syntax"
+  :group '*-LaTeX3)
+
+(defun LaTeX-insert-space ()
+  (interactive)
+  (insert (if LaTeX-expl3-syntax-mode " ~ " " ")))
+
+(defun LaTeX-toggle-expl3-syntax ()
+  (interactive)
+  (message "LaTeX3 space mode is now %s."
+           (if (setq LaTeX-expl3-syntax-mode
+                     (not LaTeX-expl3-syntax-mode))
+               "on" "off")))
+#+end_src
+
