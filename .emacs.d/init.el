@@ -9,6 +9,8 @@
 (when window-system
  (tool-bar-mode -1)
  (scroll-bar-mode -1))
+(when (not window-system)
+  (menu-bar-mode -1))
 
 
 ;; Multi-Platform Support
@@ -135,14 +137,30 @@ closing the file if it was not already open."
 
 ;; TeX initialization
 
+(defun *-read-from-minibuffer (prompt &optional default)
+  (let ((response
+	 (read-from-minibuffer
+	  (concat prompt (if default (format " (default `%s')" default)) ": "))))
+    (if response response default)))
+
+
+
 (use-package tex
   :ensure auctex
   :config (prog1 t
             (defun *-TeX-find-kpathsea (string)
-              (interactive "sFind file in TeX distribution: ")
+	      (interactive)
+	      (unless string
+		(let ((default (thing-at-point 'symbol t)))
+		  (setq string
+			(*-read-from-minibuffer
+			 "Find file in TeX distribution"
+			 (thing-at-point 'symbol)))))
+
               (find-file (substring (shell-command-to-string
                                      (format "kpsewhich %s" string))
                                     0 -1)))
+
             (defun *-TeX-find-texdoc (texdoc-query)
               (interactive "sPackage: ")
               (if (string-equal texdoc-query "")
@@ -154,21 +172,20 @@ closing the file if it was not already open."
                       (error "Sorry, no documentation found for %s" texdoc-query)
                     (let ((texdoc-file (nth 2 (split-string texdoc-output))))
                       (if (file-readable-p texdoc-file)
-                          (let ((new-file (tempfile-create-temporary-file
-                                           "pdf"
-                                           (format *-TeX-find-texdoc-temp-file-format
-                                                   texdoc-query
-                                                   texdoc-file))))
-                            (copy-file texdoc-file new-file t)
-                            (find-file-other-window new-file))
+			  (find-file-other-window new-file)
                         (error "Sorry, the file returned by texdoc for %s isn't readable"
                                texdoc-query)))))))
-            (defcustom *-TeX-find-texdoc-temp-file-format
-              "TeX-find-texdoc--%s--"
-              "The prefix for temporary files created with `*-TeX-find-texdoc'"
-              :group '*-tex))
-  :bind (("C-c t" . *-TeX-find-texdoc)
-         ("C-c f" . *-TeX-find-kpathsea)))
+
+	    (add-to-list
+	     'TeX-command-list
+	     '("Arara"
+	       "arara %(verbose)%s"
+	       TeX-run-command
+	       nil			; ask for confirmation
+	       t			; active in all modes
+	       :help "Run Arara")))
+  :bind (("C-c ?" . *-TeX-find-texdoc)
+         ("C-c M-?" . *-TeX-find-kpathsea)))
 
 
 ;; God-Mode
@@ -207,9 +224,9 @@ closing the file if it was not already open."
 ;; Smex
 
 (use-package smex
-  :config (progn (smex-initialize) (message "Smex loaded"))
+  :config (smex-initialize)
   :bind (("M-x" . smex)
-         ("s-x" . smex-major-mode-commands)))
+         ("C-c M-x" . smex-major-mode-commands)))
 
 
 ;; Yasnippet
@@ -293,7 +310,10 @@ closing the file if it was not already open."
 
 (use-package slime
   :defer t
-  :if window-system)
+  :if window-system
+  :config
+  (setq
+   inferior-lisp-program "clisp"))
 
 
 ;; Twitter
@@ -301,7 +321,7 @@ closing the file if it was not already open."
 (defun *-twittering-new-tweet-from-minibuffer ()
   (interactive)
   (twittering-update-status-from-minibuffer))
-  
+
 (use-package twittering-mode
   :commands (twit twittering-mode)
   :bind (("C-c m" . *-twittering-new-tweet-from-minibuffer)
@@ -359,12 +379,15 @@ closing the file if it was not already open."
 
 ;; PATH Setup
 
-(setenv "PATH"
-        (mapconcat #'identity
-                   `("/usr/texbin"
-                     "/usr/local/bin"
-                     ,(getenv "PATH"))
-                   path-separator))
+
+(let ((more-paths '("/usr/texbin" "/usr/local/bin")))
+  (setenv "PATH"
+	  (mapconcat #'identity
+		     `(,@more-paths
+		       ,(getenv "PATH"))
+		     path-separator))
+  (mapc (lambda (p) (add-to-list 'exec-path p))
+	more-paths))
 
 
 ;; Dired
@@ -404,3 +427,9 @@ closing the file if it was not already open."
   (dired-change-marks 42 ?\040)
   ;;(filename-to-regexp zip-file))
   (dired-mark-files-regexp zip-file))
+
+
+;; Ibuffer
+
+(use-package ibuffer
+  :bind ("C-x C-b" . ibuffer))
