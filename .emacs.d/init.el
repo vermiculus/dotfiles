@@ -318,13 +318,15 @@ closing the file if it was not already open."
 
 ;; Twitter
 
-(defun *-twittering-new-tweet-from-minibuffer ()
+(defun *-twittering-update-status-from-minibuffer ()
   (interactive)
-  (twittering-update-status-from-minibuffer))
+  (let ((twittering-update-status-function
+	 #'twittering-update-status-from-minibuffer))
+    (twittering-update-status)))
 
 (use-package twittering-mode
-  :commands (twit twittering-mode)
-  :bind (("C-c m" . *-twittering-new-tweet-from-minibuffer)
+  :commands (twit twittering-mode twittering-update-status)
+  :bind (("C-c m" . *-twittering-update-status-from-minibuffer)
 	 ("C-c n" . twittering-update-status-interactive))
   :if window-system)
 
