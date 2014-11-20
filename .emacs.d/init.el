@@ -1,8 +1,3 @@
-;; C-M-S-s-c
-(require 'package)
-(package-initialize)
-(require 'use-package)
-
 
 ;; Windows
 
@@ -33,6 +28,28 @@
     (*-windows-p "T:")
     (*-osx-p "~")))
   "Dropbox directory")
+
+
+;; Custom
+(load-file
+ (setq custom-file
+       (expand-file-name ".custom.el"
+			 user-emacs-directory)))
+
+
+;; Package Management
+
+;; use order C-M-S-s-c
+(require 'package)
+
+;; Add MELPA before initialization
+(add-to-list
+ 'package-archives
+ '("melpa" . "http://melpa.org/packages/") t)
+
+(package-initialize)
+
+(require 'use-package)
 
 
 ;; Auto-Minor-Mode
@@ -274,10 +291,12 @@ closing the file if it was not already open."
 (use-package helm
   :ensure t
   :if window-system
-  :commands (helm helm-M-x))
+  :config (require 'helm-command)
+  :bind ("s-x" . helm-M-x))
 
 (use-package helm-ag
-  :if window-system)
+  :if window-system
+  :bind ("s-f" . helm-do-ag))
 
 
 ;; HTMLize
@@ -303,9 +322,15 @@ closing the file if it was not already open."
 
 (use-package org
   :defer t
-  :if window-system)
+  :if window-system
+  :bind ("C-c c" . org-capture))
 
-
+(use-package outorg
+  :ensure t
+  :config (use-package outshine :ensure t)
+  :bind ("M-#" . outorg-edit-as-org))
+
+;; 
 ;; Lisp
 
 (use-package slime
@@ -314,6 +339,26 @@ closing the file if it was not already open."
   :config
   (setq
    inferior-lisp-program "clisp"))
+
+(use-package erefactor
+  :ensure t)
+
+(mapc (lambda (f)
+	(add-hook 'emacs-lisp-mode-hook f))
+      '(paredit-mode
+	eldoc-mode
+	company-mode
+	show-paren-mode))
+
+(use-package lisp-mode
+  :init (add-hook 'lisp-mode-hook #'erefactor-highlight-mode)
+  :config (progn
+	    (font-lock-add-keywords
+	     'emacs-lisp-mode
+	     '(("\\_<\\.\\(?:\\sw\\|\\s_\\)+\\_>" 0
+		font-lock-builtin-face))))
+  :bind (("C-x C-e" . pp-eval-last-sexp)
+	 ("C-x M-e" . pp-macroexpand-last-sexp)))
 
 
 ;; Twitter
@@ -358,8 +403,9 @@ closing the file if it was not already open."
 ;; Ido
 (use-package ido
   :config (progn
-            (use-package flx-ido)
-            (ido-mode t)
+            (use-package flx-ido
+	      :config (flx-ido-mode t))
+	    (ido-mode t)
             (setq ido-everywhere t)))
 
 
@@ -435,3 +481,85 @@ closing the file if it was not already open."
 
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer))
+
+
+;; Projectile
+
+(use-package projectile
+  :ensure t
+  :defer t)
+(use-package ag
+  :ensure t
+  :commands (ag-regexp))
+(use-package helm-projectile
+  :ensure t
+  :bind ("C-c p" . projectile-command-map)
+  :config
+  (setq projectile-completion-system 'helm))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(find-file-hook
+   (quote
+    (auto-insert
+     #[nil "\302\301!\210\303\304!8\211\207"
+	   [buffer-file-name auto-revert-tail-pos make-local-variable 7 file-attributes]
+	   3]
+     *-enable-minor-mode-based-on-extension global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
+ '(magit-use-overlays nil)
+ '(org-capture-templates
+   (quote
+    (("T" "Stack ToDo" entry
+      (file "~/github/vermiculus/stack-mode/todo.org")
+      ""))))
+ '(org-export-backends
+   (quote
+    (ascii beamer html icalendar latex man md odt org texinfo)))
+ '(safe-local-variable-values
+   (quote
+    ((org-export-date-timestamp-format . "$B %e %Y")
+     (user-mail-address . "code@seanallred.com")
+     (column-number-mode . t)))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(sx-question-mode-tags ((t (:inherit font-lock-function-name-face :underline nil :slant normal)))))
+
+
+;;; Impatient Mode
+
+(use-package impatient-mode
+  :ensure t)
+
+
+;;; Expand Region by Semantic Units
+(use-package expand-region
+  :ensure t
+  :bind ("C-=" . er/expand-region))
+
+
+;;; Speedbar
+(use-package speedbar
+  :bind ("C-c C-SPC" . speedbar-get-focus))
+
+(use-package ace-jump-mode
+  :ensure t
+  :config (progn
+	    (define-prefix-command 'my:ace-jump-map)
+	    (mapc (lambda (x) (define-key my:ace-jump-map
+				(car x) (cadr x)))
+		  '(("j" ace-jump-mode)
+		    ("k" ace-jump-char-mode)
+		    ("l" ace-jump-line-mode)))
+	    (setq ace-jump-mode-move-keys
+		  (loop for i from ?a to ?z collect i)))
+  :bind (("C-c j" . my:ace-jump-map)))
+
+(use-package ace-window
+  :ensure t
+  :bind ("C-x o" . ace-window))
