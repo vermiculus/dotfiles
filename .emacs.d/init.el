@@ -571,3 +571,10 @@ closing the file if it was not already open."
 (use-package ace-window
   :ensure t
   :bind ("C-x o" . ace-window))
+
+
+;;; Ruby
+(use-package ruby-mode
+  ;; Use M-x racr to use `rvm-activate-corresponding-ruby'
+  :init (use-package rvm :ensure t)
+  :ensure t)
