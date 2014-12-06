@@ -33,7 +33,9 @@
 	completion-at-point
 	dabbrev-expand
 	delete-horizontal-space
+	dired-flag-file-deletion
 	dired-mark
+	dired-next-line
 	dired-previous-line
 	downcase-region
 	electric-newline-and-maybe-indent
@@ -59,7 +61,9 @@
 	org-delete-char
 	org-end-of-line
 	org-force-self-insert
+	org-insert-heading-respect-content
 	org-kill-line
+	org-mark-subtree
 	org-metaleft
 	org-metaright
 	org-open-at-point
@@ -82,6 +86,7 @@
 	paredit-reindent-defun
 	paredit-semicolon
 	paredit-splice-sexp-killing-backward
+	pp-eval-last-sexp
 	python-indent-electric-colon
 	python-nav-backward-up-list
 	reftex-citation
