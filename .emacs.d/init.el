@@ -396,7 +396,7 @@ closing the file if it was not already open."
   (progn
     (use-package helm-swoop
       :ensure t
-      :bind ("C-S" . helm-swoop)
+      :bind ("C-S-s" . helm-swoop)
       :config
       (progn
         (bind-key "C-s" #'helm-swoop helm-map)
