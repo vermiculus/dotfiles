@@ -1,0 +1,19 @@
+# -*- gitignore -*-
+*~
+/elpa/
+.agenda_files
+.cask
+.custom.el
+.mc-lists.el
+.org-id-locations
+.sx
+auto-save-list
+bbdb
+bookmarks
+elpa/
+eshell/
+profile-dotemacs.el
+projectile-bookmarks.eld
+tramp/
+url/
+var/
