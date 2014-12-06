@@ -55,6 +55,7 @@ install ruby
 install saxon
 install scala
 install sublime-text
+install surfraw
 install terminal-notifier
 install texinfo
 install the_silver_searcher
