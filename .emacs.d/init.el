@@ -141,6 +141,7 @@ closing the file if it was not already open."
 
 
 (use-package m4-mode
+  :ensure t
   :defer t
   :config
   (progn
@@ -213,6 +214,7 @@ closing the file if it was not already open."
 ;; God-Mode
 
 (use-package god-mode
+  :ensure t
   :bind ("<escape>" . god-local-mode)
   :config
   (progn
@@ -240,6 +242,7 @@ closing the file if it was not already open."
 ;; Multiple Cursors
 
 (use-package multiple-cursors
+  :ensure t
   :bind (("C-<"   . mc/mark-previous-like-this)
          ("C->"   . mc/mark-next-like-this)
          ("C-M->" . mc/mark-all-like-this-dwim)))
@@ -248,6 +251,7 @@ closing the file if it was not already open."
 ;; Smex
 
 (use-package smex
+  :ensure t
   :config
   (progn
     (smex-initialize))
@@ -266,6 +270,7 @@ closing the file if it was not already open."
 ;; C Modes
 
 (use-package cc-mode
+  :ensure t
   :bind (("C-c RET" . ff-find-related-file)
          ("C-c C-'" . compile)))
 
@@ -280,6 +285,7 @@ closing the file if it was not already open."
 ;; Theming
 
 (use-package monokai-theme
+  :ensure t
   :if window-system
   :config
   (progn
@@ -289,12 +295,14 @@ closing the file if it was not already open."
 ;; Big Brother Insidious Database
 
 (use-package bbdb
+  :ensure t
   :if window-system)
 
 
 ;; GitHub
 
 (use-package github-clone
+  :ensure t
   :if window-system)
 
 
@@ -310,24 +318,28 @@ closing the file if it was not already open."
 
 (use-package helm-ag
   :if window-system
+  :ensure t
   :bind ("s-f" . helm-do-ag))
 
 
 ;; HTMLize
 
 (use-package htmlize
+  :ensure t
   :commands (htmlize-buffer htmlize-file))
 
 
 ;; Magit
 
 (use-package magit
+  :ensure t
   :if window-system
   :bind ("M-m" . magit-status))
 
 
 ;; Python
 (use-package nose
+  :ensure t
   :if window-system
   :commands nose-mode)
 
@@ -335,6 +347,7 @@ closing the file if it was not already open."
 ;; Org
 
 (use-package org
+  :ensure t
   :if window-system
   :bind ("C-c c" . org-capture))
 
@@ -349,6 +362,7 @@ closing the file if it was not already open."
 ;; Lisp
 
 (use-package slime
+  :ensure t
   :if window-system
   :commands slime
   :config
@@ -380,6 +394,7 @@ closing the file if it was not already open."
 ;; Twitter
 
 (use-package twittering-mode
+  :ensure t
   :if window-system
   :commands (twit twittering-mode twittering-update-status)
   :config
@@ -396,24 +411,28 @@ closing the file if it was not already open."
 ;; YAML
 
 (use-package yaml-mode
+  :ensure t
   :defer t)
 
 
 ;; Markdown
 
 (use-package markdown-mode
+  :ensure t
   :defer t)
 
 
 ;; Evil
 
 (use-package evil
+  :ensure t
   :bind ("C-M-`" . evil-mode))
 
 
 ;; Fish
 
 (use-package fish-mode
+  :ensure t
   :mode "\\.fish\\'")
 
 
@@ -422,6 +441,7 @@ closing the file if it was not already open."
   :config
   (progn
     (use-package flx-ido
+      :ensure t
       :config
       (progn
         (flx-ido-mode t)))
@@ -436,12 +456,14 @@ closing the file if it was not already open."
 ;; CoffeeScript
 
 (use-package coffee-mode
+  :ensure t
   :mode "\\.coffee\\'")
 
 
 ;; CSV
 
 (use-package csv-mode
+  :ensure t
   :mode "\\.csv\\'")
 
 
@@ -541,6 +563,7 @@ closing the file if it was not already open."
 
 ;;; Speedbar
 (use-package speedbar
+  :ensure t
   :bind ("C-c C-SPC" . speedbar-get-focus))
 
 (use-package ace-jump-mode
@@ -564,6 +587,7 @@ closing the file if it was not already open."
 
 ;;; Ruby
 (use-package ruby-mode
+  :ensure t
   ;; Use M-x racr to use `rvm-activate-corresponding-ruby'
   :init (use-package rvm :ensure t)
   :ensure t)
