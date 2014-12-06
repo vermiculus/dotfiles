@@ -7,9 +7,10 @@
    (quote
     (auto-insert
      #[nil "\302\301!\210\303\304!8\211\207"
-	   [buffer-file-name auto-revert-tail-pos make-local-variable 7 file-attributes]
-	   3]
+           [buffer-file-name auto-revert-tail-pos make-local-variable 7 file-attributes]
+           3]
      *-enable-minor-mode-based-on-extension global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
+ '(indent-tabs-mode nil)
  '(magit-use-overlays nil)
  '(org-capture-templates
    (quote
