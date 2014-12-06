@@ -181,7 +181,8 @@ POS-STYLE must be one of
                               "c"
                               (current-column)))
                      ((equal pos-style 'point)
-                      (point))))))
+                      (point))
+                     (t (error "Invalid style %S" pos-style))))))
            (new-kill-string (concat file-part pos-part)))
       (when new-kill-string
         (message "%s copied" new-kill-string)
