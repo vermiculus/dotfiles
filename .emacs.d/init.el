@@ -487,7 +487,11 @@ closing the file if it was not already open."
 
 (use-package projectile
   :ensure t
-  :defer t)
+  :defer t
+  :config
+  (progn
+    (projectile-global-mode)
+    (add-hook 'projectile-mode-hook #'projectile-rails-on)))
 (use-package ag
   :ensure t
   :commands (ag-regexp))
