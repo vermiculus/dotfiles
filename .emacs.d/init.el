@@ -390,6 +390,7 @@ closing the file if it was not already open."
 
 (use-package helm
   :ensure t
+  :diminish helm-mode
   :init
   (progn
     (require 'helm-config)
@@ -424,6 +425,7 @@ closing the file if it was not already open."
 (use-package magit
   :ensure t
   :if window-system
+  :diminish magit-auto-revert-mode
   :bind ("M-m" . magit-status))
 
 
@@ -472,6 +474,7 @@ closing the file if it was not already open."
 (use-package eldoc
   :ensure t
   :if window-system
+  :diminish eldoc-mode
   :config
   (progn
     (mapc (lambda (s) (add-hook s #'turn-on-eldoc-mode))
