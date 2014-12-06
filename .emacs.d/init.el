@@ -495,7 +495,9 @@ closing the file if it was not already open."
   :ensure t
   :bind ("C-c p" . projectile-command-map)
   :config
-  (setq projectile-completion-system 'helm))
+  (progn
+    (setq projectile-completion-system 'helm)
+    (bind-key "s-f" #'helm-projectile-ag projectile-command-map)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
