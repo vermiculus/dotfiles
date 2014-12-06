@@ -463,7 +463,21 @@ closing the file if it was not already open."
 
 (use-package erefactor
   :ensure t
-  :if window-system)
+  :if window-system
+  :config
+  (progn
+    (add-hook 'emacs-lisp-mode-hook #'erefactor-lazy-highlight-turn-on)
+    (bind-key "C-c C-d" erefactor-map emacs-lisp-mode-map)))
+
+(use-package eldoc
+  :ensure t
+  :if window-system
+  :config
+  (progn
+    (mapc (lambda (s) (add-hook s #'turn-on-eldoc-mode))
+          '(emacs-lisp-mode-hook
+            lisp-interaction-mode-hook
+            ielm-mode-hook))))
 
 (use-package lisp-mode
   :config
@@ -644,9 +658,10 @@ closing the file if it was not already open."
 (use-package impatient-mode
   :ensure t
   :if window-system)
-
 
+
 ;;; Expand Region by Semantic Units
+
 (use-package expand-region
   :ensure t
   :bind ("C-=" . er/expand-region))
