@@ -540,10 +540,6 @@ closing the file if it was not already open."
     (setq ido-everywhere t)))
 
 
-;; Browse Files
-(use-package bf-mode)
-
-
 ;; CoffeeScript
 
 (use-package coffee-mode
@@ -582,6 +578,7 @@ closing the file if it was not already open."
   :init (bind-key "z" #'*-dired-zip-files dired-mode-map)
   :config
   (progn
+    (use-package bf-mode)
     (defun *-dired-for-each-marked-file (function)
       "Do stuff for each marked file, only works in dired window"
       (interactive)
