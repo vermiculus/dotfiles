@@ -251,7 +251,9 @@ closing the file if it was not already open."
 ;; Yasnippet
 
 (use-package yasnippet
-  :defer t)
+  :ensure t
+  :idle (yas-global-mode)
+  :idle-priority 99)
 
 
 ;; C Modes
