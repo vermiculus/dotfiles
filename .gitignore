@@ -6,3 +6,12 @@
 /.emacs.d/bbdb
 /.emacs.d/.agenda_files
 /.emacs.d/.org-id-locations
+/.emacs.d/.cask/
+/.emacs.d/.sx/
+/.emacs.d/bookmarks
+/.emacs.d/eshell/
+/.emacs.d/profile-dotemacs.el
+/.emacs.d/projectile-bookmarks.eld
+/.emacs.d/url/
+/.emacs.d/var/
+/init.el
