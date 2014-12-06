@@ -111,6 +111,82 @@ minor modes the checking happens for all pairs in
       (message "%s copied" new-kill-string)
       (kill-new new-kill-string))))
 
+(ignore
+ (quote
+  (defun *-copy-buffer-file-name-as-kill (&optional scope pos-style)
+    "Copy the buffer-file-name to the kill-ring.
+
+SCOPE must be one of
+
+  nil
+     Copy the full name (/path/to/file)
+
+  `directory'
+     Copy the directory part (/path/to)
+
+  `basename'
+     Copy the basename (file)
+
+
+POS-STYLE must be one of
+
+  nil
+     No styling (file)
+
+  `line'
+     Get the line number (file:505)
+
+  `line-column'
+     Get both the line and column number (file:505c30)
+
+  `point'
+     Get the value of point (file:40053)"
+    (interactive
+     (cdr (assoc (prompt user for char)
+                 '((?f . full)
+                   (?d . directory)
+                   (?b . basename))))
+     (when prefix-arg
+       (cdr (assoc (prompt user for char)
+                   '((?n . nil)
+                     (?l . line)
+                     (?c . line-column)
+                     (?p . point))))))
+    ;; @todo error up here
+
+    (let* ((name (if (eq major-mode 'dired-mode)
+                     (dired-get-filename)
+                   (or (buffer-file-name)
+                       (user-error "Invalid context"))))
+           (file-part
+            (cond ((equal scope 'full)
+                   name)
+                  ((equal scope 'directory)
+                   (file-name-directory name))
+                  ((equal scope 'basename)
+                   (file-name-nondirectory name))
+                  ((null scope) nil)
+                  (t (error "Invalid scope %S" scope))))
+           ;; @todo can make this whole part a lot easier with a clever use of
+           ;; assoc.  (when pos-style (cdr (assoc pos-style ...)))
+           (pos-part
+            (when pos-style
+              (concat
+               ":"
+               (cond ((equal pos-style 'line)
+                   ;; @todo return absolute line number
+                      (line-number-at-pos))
+                     ((equal pos-style 'line-column)
+                      (concat (line-number-at-pos)
+                              "c"
+                              (current-column)))
+                     ((equal pos-style 'point)
+                      (point))))))
+           (new-kill-string (concat file-part pos-part)))
+      (when new-kill-string
+        (message "%s copied" new-kill-string)
+        (kill-new new-kill-string))))))
+
 (global-set-key (kbd "C-c x") #'*-copy-buffer-file-name-as-kill)
 
 
