@@ -142,7 +142,9 @@ closing the file if it was not already open."
 
 (use-package m4-mode
   :defer t
-  :config (modify-syntax-entry ?# "@" m4-mode-syntax-table))
+  :config
+  (progn
+    (modify-syntax-entry ?# "@" m4-mode-syntax-table)))
 
 
 ;; Interactive Search
@@ -166,43 +168,44 @@ closing the file if it was not already open."
 
 (use-package tex
   :ensure auctex
-  :config (prog1 t
-            (defun *-TeX-find-kpathsea (string)
-              (interactive)
-              (unless string
-                (let ((default (thing-at-point 'symbol t)))
-                  (setq string
-                        (*-read-from-minibuffer
-                         "Find file in TeX distribution"
-                         (thing-at-point 'symbol)))))
+  :config
+  (progn
+    (defun *-TeX-find-kpathsea (string)
+      (interactive)
+      (unless string
+        (let ((default (thing-at-point 'symbol t)))
+          (setq string
+                (*-read-from-minibuffer
+                 "Find file in TeX distribution"
+                 (thing-at-point 'symbol)))))
 
-              (find-file (substring (shell-command-to-string
-                                     (format "kpsewhich %s" string))
-                                    0 -1)))
+      (find-file (substring (shell-command-to-string
+                             (format "kpsewhich %s" string))
+                            0 -1)))
 
-            (defun *-TeX-find-texdoc (texdoc-query)
-              (interactive "sPackage: ")
-              (if (string-equal texdoc-query "")
-                  (error "Cannot query texdoc against an empty string")
-                (let ((texdoc-output (shell-command-to-string
-                                      (format "texdoc -l -M %s"
-                                              texdoc-query))))
-                  (if (string-match texdoc-output "")
-                      (error "Sorry, no documentation found for %s" texdoc-query)
-                    (let ((texdoc-file (nth 2 (split-string texdoc-output))))
-                      (if (file-readable-p texdoc-file)
-                          (find-file-other-window new-file)
-                        (error "Sorry, the file returned by texdoc for %s isn't readable"
-                               texdoc-query)))))))
+    (defun *-TeX-find-texdoc (texdoc-query)
+      (interactive "sPackage: ")
+      (if (string-equal texdoc-query "")
+          (error "Cannot query texdoc against an empty string")
+        (let ((texdoc-output (shell-command-to-string
+                              (format "texdoc -l -M %s"
+                                      texdoc-query))))
+          (if (string-match texdoc-output "")
+              (error "Sorry, no documentation found for %s" texdoc-query)
+            (let ((texdoc-file (nth 2 (split-string texdoc-output))))
+              (if (file-readable-p texdoc-file)
+                  (find-file-other-window new-file)
+                (error "Sorry, the file returned by texdoc for %s isn't readable"
+                       texdoc-query)))))))
 
-            (add-to-list
-             'TeX-command-list
-             '("Arara"
-               "arara %(verbose)%s"
-               TeX-run-command
-               nil                      ; ask for confirmation
-               t                        ; active in all modes
-               :help "Run Arara")))
+    (add-to-list
+     'TeX-command-list
+     '("Arara"
+       "arara %(verbose)%s"
+       TeX-run-command
+       nil                              ; ask for confirmation
+       t                                ; active in all modes
+       :help "Run Arara")))
   :bind (("C-c ?" . *-TeX-find-texdoc)
          ("C-c M-?" . *-TeX-find-kpathsea)))
 
@@ -211,24 +214,26 @@ closing the file if it was not already open."
 
 (use-package god-mode
   :bind ("<escape>" . god-local-mode)
-  :config (add-hook 'god-local-mode-hook
-                    #'*-god-mode-update-cursor))
+  :config
+  (progn
+    (add-hook 'god-local-mode-hook
+              #'*-god-mode-update-cursor)
 
-(defcustom *-god-mode-update-cursor-affected-forms
-  '(god-local-mode buffer-read-only)
-  "If any of these forms evaluate to non-nil, the cursor will change."
-  :group '*-god)
+    (defcustom *-god-mode-update-cursor-affected-forms
+      '(god-local-mode buffer-read-only)
+      "If any of these forms evaluate to non-nil, the cursor will change."
+      :group '*-god)
 
-(defcustom *-god-mode-cursor
-  'hbar
-  "The cursor to use"
-  :group '*-god)
+    (defcustom *-god-mode-cursor
+      'hbar
+      "The cursor to use"
+      :group '*-god)
 
-(defun *-god-mode-update-cursor ()
-  (setq cursor-type
-        (if (member t (mapcar #'eval *-god-mode-update-cursor-affected-forms))
-            *-god-mode-cursor
-          t)))
+    (defun *-god-mode-update-cursor ()
+      (setq cursor-type
+            (if (member t (mapcar #'eval *-god-mode-update-cursor-affected-forms))
+                *-god-mode-cursor
+              t)))))
 
 
 
@@ -243,7 +248,9 @@ closing the file if it was not already open."
 ;; Smex
 
 (use-package smex
-  :config (smex-initialize)
+  :config
+  (progn
+    (smex-initialize))
   :bind (("M-x" . smex)
          ("C-c M-x" . smex-major-mode-commands)))
 
@@ -274,7 +281,9 @@ closing the file if it was not already open."
 
 (use-package monokai-theme
   :if window-system
-  :config (enable-theme 'monokai))
+  :config
+  (progn
+    (enable-theme 'monokai)))
 
 
 ;; Big Brother Insidious Database
@@ -294,7 +303,9 @@ closing the file if it was not already open."
 (use-package helm
   :ensure t
   :if window-system
-  :config (require 'helm-command)
+  :config
+  (progn
+    (use-package helm-command))
   :bind ("s-x" . helm-M-x))
 
 (use-package helm-ag
@@ -329,7 +340,9 @@ closing the file if it was not already open."
 
 (use-package outorg
   :ensure t
-  :config (use-package outshine :ensure t)
+  :config
+  (progn
+    (use-package outshine :ensure t))
   :bind ("M-#" . outorg-edit-as-org))
 
 ;; 
@@ -339,43 +352,45 @@ closing the file if it was not already open."
   :if window-system
   :commands slime
   :config
-  (setq
-   inferior-lisp-program "clisp"))
+  (progn
+    (setq inferior-lisp-program "clisp")))
 
 (use-package erefactor
   :ensure t)
 
-(mapc (lambda (f)
-        (add-hook 'emacs-lisp-mode-hook f))
-      '(paredit-mode
-        eldoc-mode
-        company-mode
-        show-paren-mode))
-
 (use-package lisp-mode
-  :init (add-hook 'lisp-mode-hook #'erefactor-highlight-mode)
-  :config (progn
-            (font-lock-add-keywords
-             'emacs-lisp-mode
-             '(("\\_<\\.\\(?:\\sw\\|\\s_\\)+\\_>" 0
-                font-lock-builtin-face))))
+  :config
+  (progn
+    (add-hook 'lisp-mode-hook
+              #'erefactor-highlight-mode)
+    (mapc (lambda (f)
+            (add-hook 'emacs-lisp-mode-hook f))
+          '(paredit-mode
+            eldoc-mode
+            company-mode
+            show-paren-mode))
+    (font-lock-add-keywords
+     'emacs-lisp-mode
+     '(("\\_<\\.\\(?:\\sw\\|\\s_\\)+\\_>" 0
+        font-lock-builtin-face))))
   :bind (("C-x C-e" . pp-eval-last-sexp)
          ("C-x M-e" . pp-macroexpand-last-sexp)))
 
 
 ;; Twitter
 
-(defun *-twittering-update-status-from-minibuffer ()
-  (interactive)
-  (let ((twittering-update-status-function
-         #'twittering-update-status-from-minibuffer))
-    (twittering-update-status)))
-
 (use-package twittering-mode
+  :if window-system
   :commands (twit twittering-mode twittering-update-status)
+  :config
+  (progn
+    (defun *-twittering-update-status-from-minibuffer ()
+      (interactive)
+      (let ((twittering-update-status-function
+             #'twittering-update-status-from-minibuffer))
+        (twittering-update-status))))
   :bind (("C-c m" . *-twittering-update-status-from-minibuffer)
-         ("C-c n" . twittering-update-status-interactive))
-  :if window-system)
+         ("C-c n" . twittering-update-status-interactive)))
 
 
 ;; YAML
@@ -404,11 +419,14 @@ closing the file if it was not already open."
 
 ;; Ido
 (use-package ido
-  :config (progn
-            (use-package flx-ido
-              :config (flx-ido-mode t))
-            (ido-mode t)
-            (setq ido-everywhere t)))
+  :config
+  (progn
+    (use-package flx-ido
+      :config
+      (progn
+        (flx-ido-mode t)))
+    (ido-mode t)
+    (setq ido-everywhere t)))
 
 
 ;; Browse Files
@@ -443,40 +461,43 @@ closing the file if it was not already open."
 ;; Dired
 
 (use-package dired-aux
-  :config (add-to-list 'dired-compress-file-suffixes
-                       '("\\.zip\\'" ".zip" "unzip")))
+  :config
+  (progn
+    (add-to-list 'dired-compress-file-suffixes
+                 '("\\.zip\\'" ".zip" "unzip"))))
 
 (use-package dired
-  :init (bind-key "z" #'*-dired-zip-files dired-mode-map))
+  :init (bind-key "z" #'*-dired-zip-files dired-mode-map)
+  :config
+  (progn
+    (defun *-dired-for-each-marked-file (function)
+      "Do stuff for each marked file, only works in dired window"
+      (interactive)
+      (if (eq major-mode 'dired-mode)
+          (mapcar function (dired-get-marked-files))
+        (error "Not a Dired buffer `%s'" major-mode)))
 
-(defun *-dired-for-each-marked-file (function)
-  "Do stuff for each marked file, only works in dired window"
-  (interactive)
-  (if (eq major-mode 'dired-mode)
-      (mapcar function (dired-get-marked-files))
-    (error "Not a Dired buffer `%s'" major-mode)))
+    (defun *-dired-zip-files (zip-file)
+      "Create an archive containing the marked files."
+      (interactive "sEnter name of zip file: ")
+      (let ((zip-file
+             (if (string-match ".zip$" zip-file)
+                 zip-file
+               (concat zip-file ".zip"))))
+        (shell-command
+         (concat "zip "
+                 zip-file
+                 " "
+                 (mapconcat (lambda (filename)
+                              (file-name-nondirectory filename))
+                            (dired-get-marked-files) " "))))
 
-(defun *-dired-zip-files (zip-file)
-  "Create an archive containing the marked files."
-  (interactive "sEnter name of zip file: ")
-  (let ((zip-file
-         (if (string-match ".zip$" zip-file)
-             zip-file
-           (concat zip-file ".zip"))))
-    (shell-command
-     (concat "zip "
-             zip-file
-             " "
-             (mapconcat (lambda (filename)
-                          (file-name-nondirectory filename))
-                        (dired-get-marked-files) " "))))
-
-  ;; remove the mark on all the files  "*" to " "
-  (revert-buffer)
-  ;; mark zip file
-  (dired-change-marks 42 ?\040)
-  ;;(filename-to-regexp zip-file))
-  (dired-mark-files-regexp zip-file))
+      ;; remove the mark on all the files  "*" to " "
+      (revert-buffer)
+      ;; mark zip file
+      (dired-change-marks 42 ?\040)
+      ;;(filename-to-regexp zip-file))
+      (dired-mark-files-regexp zip-file))))
 
 
 ;; Ibuffer
@@ -524,15 +545,16 @@ closing the file if it was not already open."
 
 (use-package ace-jump-mode
   :ensure t
-  :config (progn
-            (define-prefix-command 'my:ace-jump-map)
-            (mapc (lambda (x) (define-key my:ace-jump-map
-                                (car x) (cadr x)))
-                  '(("j" ace-jump-mode)
-                    ("k" ace-jump-char-mode)
-                    ("l" ace-jump-line-mode)))
-            (setq ace-jump-mode-move-keys
-                  (loop for i from ?a to ?z collect i)))
+  :config
+  (progn
+    (define-prefix-command 'my:ace-jump-map)
+    (mapc (lambda (x) (define-key my:ace-jump-map
+                        (car x) (cadr x)))
+          '(("j" ace-jump-mode)
+            ("k" ace-jump-char-mode)
+            ("l" ace-jump-line-mode)))
+    (setq ace-jump-mode-move-keys
+          (loop for i from ?a to ?z collect i)))
   :bind (("C-c j" . my:ace-jump-map)))
 
 (use-package ace-window
