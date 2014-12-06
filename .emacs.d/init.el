@@ -533,7 +533,6 @@ closing the file if it was not already open."
 
 (use-package projectile
   :ensure t
-  :defer t
   :if window-system
   :config
   (progn
