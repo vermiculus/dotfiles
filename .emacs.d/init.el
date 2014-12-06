@@ -267,8 +267,7 @@ closing the file if it was not already open."
 
 (use-package company
   :ensure t
-  :commands company-mode
-  :defer t)
+  :commands company-mode)
 
 
 ;; Theming
@@ -318,14 +317,13 @@ closing the file if it was not already open."
 
 ;; Python
 (use-package nose
-  :defer t
-  :if window-system)
+  :if window-system
+  :commands nose-mode)
 
 
 ;; Org
 
 (use-package org
-  :defer t
   :if window-system
   :bind ("C-c c" . org-capture))
 
@@ -338,8 +336,8 @@ closing the file if it was not already open."
 ;; Lisp
 
 (use-package slime
-  :defer t
   :if window-system
+  :commands slime
   :config
   (setq
    inferior-lisp-program "clisp"))
