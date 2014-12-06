@@ -359,7 +359,15 @@ closing the file if it was not already open."
 (use-package company
   :ensure t
   :if window-system
-  :commands company-mode)
+  :commands company-mode
+  :diminish company-mode
+  :config
+  (progn
+    (mapc (lambda (s) (add-hook s #'company-mode-on))
+          '(emacs-lisp-mode-hook
+            lisp-interaction-mode-hook
+            ielm-mode-hook
+            ruby-mode-hook))))
 
 
 ;; Theming
@@ -482,23 +490,35 @@ closing the file if it was not already open."
             lisp-interaction-mode-hook
             ielm-mode-hook))))
 
+(use-package paredit
+  :ensure t
+  :diminish paredit-mode
+  :config
+  (progn
+    (mapc (lambda (s) (add-hook s #'paredit-mode))
+          '(emacs-lisp-mode-hook
+            lisp-interaction-mode-hook
+            ielm-mode-hook))))
+
 (use-package lisp-mode
   :config
   (progn
-    (add-hook 'lisp-mode-hook
-              #'erefactor-highlight-mode)
-    (mapc (lambda (f)
-            (add-hook 'emacs-lisp-mode-hook f))
-          '(paredit-mode
-            eldoc-mode
-            company-mode
-            show-paren-mode))
+    (mapc (lambda (s) (add-hook s #'show-paren-mode))
+          '(emacs-lisp-mode-hook
+            lisp-interaction-mode-hook))
     (font-lock-add-keywords
      'emacs-lisp-mode
      '(("\\_<\\.\\(?:\\sw\\|\\s_\\)+\\_>" 0
         font-lock-builtin-face))))
   :bind (("C-x C-e" . pp-eval-last-sexp)
          ("C-x M-e" . pp-macroexpand-last-sexp)))
+
+(use-package ielm
+  :ensure t
+  :if window-system
+  :config
+  (progn
+    (add-hook 'ielm-mode-hook show-paren-mode)))
 
 
 ;; Twitter
