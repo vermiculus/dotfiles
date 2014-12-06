@@ -315,6 +315,15 @@ closing the file if it was not already open."
   (progn
     (require 'helm-config)
     (helm-mode))
+  :config
+  (progn
+    (use-package helm-swoop
+      :ensure t
+      :bind ("C-S" . helm-swoop)
+      :config
+      (progn
+        (bind-key "C-s" #'helm-swoop helm-map)
+        (bind-key "M-i" #'helm-swoop-from-isearch isearch-mode-map))))
   :bind (("s-x"   . helm-M-x)
          ("C-c g" . helm-google-suggest)
          ("C-c y" . helm-show-kill-ring)))
