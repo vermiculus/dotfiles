@@ -340,6 +340,8 @@ closing the file if it was not already open."
 (use-package yasnippet
   :ensure t
   :if window-system
+  :diminish yas-minor-mode
+  :commands yas-global-mode
   :idle (yas-global-mode)
   :idle-priority 99)
 
