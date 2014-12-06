@@ -536,8 +536,7 @@ closing the file if it was not already open."
   :if window-system
   :config
   (progn
-    (projectile-global-mode)
-    (add-hook 'projectile-mode-hook #'projectile-rails-on)))
+    (projectile-global-mode)))
 
 (use-package ag
   :ensure t
@@ -595,8 +594,19 @@ closing the file if it was not already open."
 (use-package ruby-mode
   :ensure t
   ;; Use M-x racr to use `rvm-activate-corresponding-ruby'
-  :init (use-package rvm :ensure t)
-  :ensure t)
+  :if window-system
+  :defer t
+  :init
+  (progn
+    (use-package rvm  :ensure t)
+    (use-package robe :ensure t)
+    (use-package projectile-rails
+      :ensure t
+      :config
+      (progn
+        (add-hook 'projectile-mode-hook
+                  #'projectile-rails-on)))))
+
 ;; Local Variables:
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
