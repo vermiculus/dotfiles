@@ -309,7 +309,7 @@ closing the file if it was not already open."
 
 (use-package magit
   :if window-system
-  :bind ("M-?" . magit-status))
+  :bind ("M-m" . magit-status))
 
 
 ;; Python
