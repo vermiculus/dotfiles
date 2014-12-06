@@ -80,12 +80,13 @@ minor modes the checking happens for all pairs in
             (funcall (cdar alist) 1))
         (setq alist (cdr alist))))))
 
-(add-hook 'find-file-hook #'*-enable-minor-mode-based-on-extension)
+(add-hook 'find-file-hook
+          #'*-enable-minor-mode-based-on-extension)
 
 
 ;; Creating Temporary Files
 
-;; TODO: to be released on GitHub and published on MELPA
+;; @TODO: to be released on GitHub and published on MELPA
 (use-package tempfile
   :load-path "~/github/vermiculus/tempfile.el"
   :bind (("C-x t" . tempfile-find-temporary-file)
@@ -164,8 +165,6 @@ closing the file if it was not already open."
          (read-from-minibuffer
           (concat prompt (if default (format " (default `%s')" default)) ": "))))
     (if response response default)))
-
-
 
 (use-package tex
   :ensure auctex
@@ -469,7 +468,6 @@ closing the file if it was not already open."
 
 ;; PATH Setup
 
-
 (let ((more-paths '("/usr/texbin" "/usr/local/bin")))
   (setenv "PATH"
           (mapconcat #'identity
@@ -537,9 +535,11 @@ closing the file if it was not already open."
   (progn
     (projectile-global-mode)
     (add-hook 'projectile-mode-hook #'projectile-rails-on)))
+
 (use-package ag
   :ensure t
   :commands (ag-regexp))
+
 (use-package helm-projectile
   :ensure t
   :bind ("C-c p" . projectile-command-map)
@@ -592,5 +592,6 @@ closing the file if it was not already open."
   :init (use-package rvm :ensure t)
   :ensure t)
 ;; Local Variables:
+;; fill-column: 80
 ;; indent-tabs-mode: nil
 ;; End:
