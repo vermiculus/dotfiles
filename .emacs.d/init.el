@@ -36,7 +36,7 @@
 (load-file
  (setq custom-file
        (expand-file-name ".custom.el"
-			 user-emacs-directory)))
+                         user-emacs-directory)))
 
 
 ;; Package Management
@@ -69,16 +69,16 @@ minor modes the checking happens for all pairs in
 `*-auto-minor-mode-alist'"
   (when buffer-file-name
     (let ((name buffer-file-name)
-	  (remote-id (file-remote-p buffer-file-name))
-	  (alist *-auto-minor-mode-alist))
+          (remote-id (file-remote-p buffer-file-name))
+          (alist *-auto-minor-mode-alist))
       (setq name (file-name-sans-versions name))
       (when (and (stringp remote-id)
-		 (string-match-p (regexp-quote remote-id) name))
-	(setq name (substring name (match-end 0))))
+                 (string-match-p (regexp-quote remote-id) name))
+        (setq name (substring name (match-end 0))))
       (while (and alist (caar alist) (cdar alist))
-	(if (string-match (caar alist) name)
-	    (funcall (cdar alist) 1))
-	(setq alist (cdr alist))))))
+        (if (string-match (caar alist) name)
+            (funcall (cdar alist) 1))
+        (setq alist (cdr alist))))))
 
 (add-hook 'find-file-hook #'*-enable-minor-mode-based-on-extension)
 
@@ -89,7 +89,7 @@ minor modes the checking happens for all pairs in
 (use-package tempfile
   :load-path "~/github/vermiculus/tempfile.el"
   :bind (("C-x t" . tempfile-find-temporary-file)
-	 ("C-c k" . tempfile-delete-this-buffer-and-file)))
+         ("C-c k" . tempfile-delete-this-buffer-and-file)))
 
 
 ;; Files and Buffers
@@ -158,8 +158,8 @@ closing the file if it was not already open."
 
 (defun *-read-from-minibuffer (prompt &optional default)
   (let ((response
-	 (read-from-minibuffer
-	  (concat prompt (if default (format " (default `%s')" default)) ": "))))
+         (read-from-minibuffer
+          (concat prompt (if default (format " (default `%s')" default)) ": "))))
     (if response response default)))
 
 
@@ -168,13 +168,13 @@ closing the file if it was not already open."
   :ensure auctex
   :config (prog1 t
             (defun *-TeX-find-kpathsea (string)
-	      (interactive)
-	      (unless string
-		(let ((default (thing-at-point 'symbol t)))
-		  (setq string
-			(*-read-from-minibuffer
-			 "Find file in TeX distribution"
-			 (thing-at-point 'symbol)))))
+              (interactive)
+              (unless string
+                (let ((default (thing-at-point 'symbol t)))
+                  (setq string
+                        (*-read-from-minibuffer
+                         "Find file in TeX distribution"
+                         (thing-at-point 'symbol)))))
 
               (find-file (substring (shell-command-to-string
                                      (format "kpsewhich %s" string))
@@ -191,18 +191,18 @@ closing the file if it was not already open."
                       (error "Sorry, no documentation found for %s" texdoc-query)
                     (let ((texdoc-file (nth 2 (split-string texdoc-output))))
                       (if (file-readable-p texdoc-file)
-			  (find-file-other-window new-file)
+                          (find-file-other-window new-file)
                         (error "Sorry, the file returned by texdoc for %s isn't readable"
                                texdoc-query)))))))
 
-	    (add-to-list
-	     'TeX-command-list
-	     '("Arara"
-	       "arara %(verbose)%s"
-	       TeX-run-command
-	       nil			; ask for confirmation
-	       t			; active in all modes
-	       :help "Run Arara")))
+            (add-to-list
+             'TeX-command-list
+             '("Arara"
+               "arara %(verbose)%s"
+               TeX-run-command
+               nil                      ; ask for confirmation
+               t                        ; active in all modes
+               :help "Run Arara")))
   :bind (("C-c ?" . *-TeX-find-texdoc)
          ("C-c M-?" . *-TeX-find-kpathsea)))
 
@@ -212,7 +212,7 @@ closing the file if it was not already open."
 (use-package god-mode
   :bind ("<escape>" . god-local-mode)
   :config (add-hook 'god-local-mode-hook
-		    #'*-god-mode-update-cursor))
+                    #'*-god-mode-update-cursor))
 
 (defcustom *-god-mode-update-cursor-affected-forms
   '(god-local-mode buffer-read-only)
@@ -227,8 +227,8 @@ closing the file if it was not already open."
 (defun *-god-mode-update-cursor ()
   (setq cursor-type
         (if (member t (mapcar #'eval *-god-mode-update-cursor-affected-forms))
-	    *-god-mode-cursor
-	  t)))
+            *-god-mode-cursor
+          t)))
 
 
 
@@ -346,21 +346,21 @@ closing the file if it was not already open."
   :ensure t)
 
 (mapc (lambda (f)
-	(add-hook 'emacs-lisp-mode-hook f))
+        (add-hook 'emacs-lisp-mode-hook f))
       '(paredit-mode
-	eldoc-mode
-	company-mode
-	show-paren-mode))
+        eldoc-mode
+        company-mode
+        show-paren-mode))
 
 (use-package lisp-mode
   :init (add-hook 'lisp-mode-hook #'erefactor-highlight-mode)
   :config (progn
-	    (font-lock-add-keywords
-	     'emacs-lisp-mode
-	     '(("\\_<\\.\\(?:\\sw\\|\\s_\\)+\\_>" 0
-		font-lock-builtin-face))))
+            (font-lock-add-keywords
+             'emacs-lisp-mode
+             '(("\\_<\\.\\(?:\\sw\\|\\s_\\)+\\_>" 0
+                font-lock-builtin-face))))
   :bind (("C-x C-e" . pp-eval-last-sexp)
-	 ("C-x M-e" . pp-macroexpand-last-sexp)))
+         ("C-x M-e" . pp-macroexpand-last-sexp)))
 
 
 ;; Twitter
@@ -368,13 +368,13 @@ closing the file if it was not already open."
 (defun *-twittering-update-status-from-minibuffer ()
   (interactive)
   (let ((twittering-update-status-function
-	 #'twittering-update-status-from-minibuffer))
+         #'twittering-update-status-from-minibuffer))
     (twittering-update-status)))
 
 (use-package twittering-mode
   :commands (twit twittering-mode twittering-update-status)
   :bind (("C-c m" . *-twittering-update-status-from-minibuffer)
-	 ("C-c n" . twittering-update-status-interactive))
+         ("C-c n" . twittering-update-status-interactive))
   :if window-system)
 
 
@@ -406,8 +406,8 @@ closing the file if it was not already open."
 (use-package ido
   :config (progn
             (use-package flx-ido
-	      :config (flx-ido-mode t))
-	    (ido-mode t)
+              :config (flx-ido-mode t))
+            (ido-mode t)
             (setq ido-everywhere t)))
 
 
@@ -432,19 +432,19 @@ closing the file if it was not already open."
 
 (let ((more-paths '("/usr/texbin" "/usr/local/bin")))
   (setenv "PATH"
-	  (mapconcat #'identity
-		     `(,@more-paths
-		       ,(getenv "PATH"))
-		     path-separator))
+          (mapconcat #'identity
+                     `(,@more-paths
+                       ,(getenv "PATH"))
+                     path-separator))
   (mapc (lambda (p) (add-to-list 'exec-path p))
-	more-paths))
+        more-paths))
 
 
 ;; Dired
 
 (use-package dired-aux
   :config (add-to-list 'dired-compress-file-suffixes
-		       '("\\.zip\\'" ".zip" "unzip")))
+                       '("\\.zip\\'" ".zip" "unzip")))
 
 (use-package dired
   :init (bind-key "z" #'*-dired-zip-files dired-mode-map))
@@ -460,16 +460,16 @@ closing the file if it was not already open."
   "Create an archive containing the marked files."
   (interactive "sEnter name of zip file: ")
   (let ((zip-file
-	 (if (string-match ".zip$" zip-file)
-	     zip-file
-	   (concat zip-file ".zip"))))
+         (if (string-match ".zip$" zip-file)
+             zip-file
+           (concat zip-file ".zip"))))
     (shell-command
      (concat "zip "
              zip-file
              " "
-	     (mapconcat (lambda (filename)
-			  (file-name-nondirectory filename))
-			(dired-get-marked-files) " "))))
+             (mapconcat (lambda (filename)
+                          (file-name-nondirectory filename))
+                        (dired-get-marked-files) " "))))
 
   ;; remove the mark on all the files  "*" to " "
   (revert-buffer)
@@ -525,14 +525,14 @@ closing the file if it was not already open."
 (use-package ace-jump-mode
   :ensure t
   :config (progn
-	    (define-prefix-command 'my:ace-jump-map)
-	    (mapc (lambda (x) (define-key my:ace-jump-map
-				(car x) (cadr x)))
-		  '(("j" ace-jump-mode)
-		    ("k" ace-jump-char-mode)
-		    ("l" ace-jump-line-mode)))
-	    (setq ace-jump-mode-move-keys
-		  (loop for i from ?a to ?z collect i)))
+            (define-prefix-command 'my:ace-jump-map)
+            (mapc (lambda (x) (define-key my:ace-jump-map
+                                (car x) (cadr x)))
+                  '(("j" ace-jump-mode)
+                    ("k" ace-jump-char-mode)
+                    ("l" ace-jump-line-mode)))
+            (setq ace-jump-mode-move-keys
+                  (loop for i from ?a to ?z collect i)))
   :bind (("C-c j" . my:ace-jump-map)))
 
 (use-package ace-window
@@ -545,3 +545,6 @@ closing the file if it was not already open."
   ;; Use M-x racr to use `rvm-activate-corresponding-ruby'
   :init (use-package rvm :ensure t)
   :ensure t)
+;; Local Variables:
+;; indent-tabs-mode: nil
+;; End:
