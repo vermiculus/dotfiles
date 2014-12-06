@@ -311,10 +311,13 @@ closing the file if it was not already open."
 
 (use-package helm
   :ensure t
-  :config
+  :init
   (progn
-    (use-package helm-command))
-  :bind ("s-x" . helm-M-x))
+    (require 'helm-config)
+    (helm-mode))
+  :bind (("s-x"   . helm-M-x)
+         ("C-c g" . helm-google-suggest)
+         ("C-c y" . helm-show-kill-ring)))
 
 (use-package helm-ag
   :ensure t
