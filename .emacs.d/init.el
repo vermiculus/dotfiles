@@ -262,6 +262,7 @@ closing the file if it was not already open."
 
 (use-package yasnippet
   :ensure t
+  :if window-system
   :idle (yas-global-mode)
   :idle-priority 99)
 
@@ -278,6 +279,7 @@ closing the file if it was not already open."
 
 (use-package company
   :ensure t
+  :if window-system
   :commands company-mode)
 
 
@@ -309,14 +311,12 @@ closing the file if it was not already open."
 
 (use-package helm
   :ensure t
-  :if window-system
   :config
   (progn
     (use-package helm-command))
   :bind ("s-x" . helm-M-x))
 
 (use-package helm-ag
-  :if window-system
   :ensure t
   :bind ("s-f" . helm-do-ag))
 
@@ -348,10 +348,12 @@ closing the file if it was not already open."
 (use-package org
   :ensure t
   :if window-system
-  :bind ("C-c c" . org-capture))
+  :bind (("C-c c" . org-capture)
+         ("C-c a" . org-agenda)))
 
 (use-package outorg
   :ensure t
+  :if window-system
   :config
   (progn
     (use-package outshine :ensure t))
@@ -369,7 +371,8 @@ closing the file if it was not already open."
     (setq inferior-lisp-program "clisp")))
 
 (use-package erefactor
-  :ensure t)
+  :ensure t
+  :if window-system)
 
 (use-package lisp-mode
   :config
@@ -531,6 +534,7 @@ closing the file if it was not already open."
 (use-package projectile
   :ensure t
   :defer t
+  :if window-system
   :config
   (progn
     (projectile-global-mode)
@@ -552,7 +556,8 @@ closing the file if it was not already open."
 ;;; Impatient Mode
 
 (use-package impatient-mode
-  :ensure t)
+  :ensure t
+  :if window-system)
 
 
 ;;; Expand Region by Semantic Units
@@ -564,6 +569,7 @@ closing the file if it was not already open."
 ;;; Speedbar
 (use-package speedbar
   :ensure t
+  :if window-system
   :bind ("C-c C-SPC" . speedbar-get-focus))
 
 (use-package ace-jump-mode
@@ -582,6 +588,7 @@ closing the file if it was not already open."
 
 (use-package ace-window
   :ensure t
+  :if window-system
   :bind ("C-x o" . ace-window))
 
 
