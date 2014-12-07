@@ -414,7 +414,10 @@ closing the file if it was not already open."
         (bind-key "M-i" #'helm-swoop-from-isearch isearch-mode-map))))
   :bind (("s-x"   . helm-M-x)
          ("C-c g" . helm-google-suggest)
-         ("C-c y" . helm-show-kill-ring)))
+         ("C-x b" . helm-mini)
+         ;; use `ag' for recursive grep?  is it possible?
+         ("C-x C-f" . helm-find-files)
+         ("M-y"   . helm-show-kill-ring)))
 
 (use-package helm-ag
   :ensure t
