@@ -404,6 +404,8 @@ closing the file if it was not already open."
     (helm-mode))
   :config
   (progn
+    (when (executable-find "curl")
+      (setq helm-google-suggest-use-curl-p t))
     (use-package helm-swoop
       :ensure t
       :bind ("C-S-s" . helm-swoop)
