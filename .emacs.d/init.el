@@ -513,7 +513,7 @@ closing the file if it was not already open."
          ("C-x M-e" . pp-macroexpand-last-sexp)))
 
 (use-package ielm
-  :ensure t
+  ;; :ensure fails
   :if window-system
   :config
   (progn
