@@ -357,9 +357,9 @@ closing the file if it was not already open."
 (use-package company
   :ensure t
   :if window-system
-  :commands company-mode
+  :commands (company-mode company-mode-on)
   :diminish company-mode
-  :config
+  :init
   (progn
     (add-hook 'prog-mode-hook #'company-mode-on)
     (mapc (lambda (s) (add-hook s #'company-mode-on))
