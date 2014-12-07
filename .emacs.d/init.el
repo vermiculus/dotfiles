@@ -662,6 +662,7 @@ closing the file if it was not already open."
   :if window-system
   :config
   (progn
+    (setq projectile-completion-system 'helm)
     (projectile-global-mode)))
 
 (use-package ag
