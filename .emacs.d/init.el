@@ -397,7 +397,6 @@ closing the file if it was not already open."
 
 (use-package helm-config
   :ensure helm
-  :diminish helm-mode
   :init
   (progn
     (require 'helm-config)
