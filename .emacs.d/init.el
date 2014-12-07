@@ -401,7 +401,7 @@ closing the file if it was not already open."
   :init
   (progn
     (require 'helm-config)
-    (helm-mode))
+    (helm-mode 1))
   :config
   (progn
     (when (executable-find "curl")
