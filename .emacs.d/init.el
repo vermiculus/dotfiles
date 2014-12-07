@@ -363,6 +363,7 @@ closing the file if it was not already open."
   :diminish company-mode
   :config
   (progn
+    (add-hook 'prog-mode-hook #'company-mode-on)
     (mapc (lambda (s) (add-hook s #'company-mode-on))
           '(emacs-lisp-mode-hook
             lisp-interaction-mode-hook
