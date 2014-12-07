@@ -733,6 +733,13 @@ closing the file if it was not already open."
         (add-hook 'projectile-mode-hook
                   #'projectile-rails-on)))))
 
+(use-package twittering-mode
+  :ensure t
+  :if window-system
+  :config
+  (progn
+    (setq twittering-use-master-password t)))
+
 ;; Local Variables:
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
