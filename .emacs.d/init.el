@@ -341,9 +341,7 @@ closing the file if it was not already open."
   :ensure t
   :if window-system
   :diminish yas-minor-mode
-  :commands yas-global-mode
-  :idle (yas-global-mode)
-  :idle-priority 99)
+  :commands yas-global-mode)
 
 
 ;; C Modes
