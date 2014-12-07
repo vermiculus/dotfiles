@@ -407,9 +407,10 @@ closing the file if it was not already open."
     (use-package helm-swoop
       :ensure t
       :bind ("C-S-s" . helm-swoop)
-      :config
+      :commands (helm-swoop helm-swoop-from-isearch)
+      :init
       (progn
-        (bind-key "C-s" #'helm-swoop helm-map)
+        (bind-key "C-s" #'helm-swoop helm-command-prefix)
         (bind-key "M-i" #'helm-swoop-from-isearch isearch-mode-map))))
   :bind (("s-x"   . helm-M-x)
          ("C-c g" . helm-google-suggest)
