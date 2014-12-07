@@ -95,26 +95,8 @@ minor modes the checking happens for all pairs in
 
 ;; Files and Buffers
 
-(defun *-copy-buffer-file-name-as-kill (choice)
-  "Copy the buffer-file-name to the kill-ring"
-  (interactive "cCopy Buffer Name (f)ull, (d)irectory, (b)asename:")
-  (let ((new-kill-string)
-        (name (if (eq major-mode 'dired-mode)
-                  (dired-get-filename)
-                (or (buffer-file-name) ""))))
-    (setq new-kill-string
-          (cond ((eq choice ?f) name)
-                ((eq choice ?d) (file-name-directory name))
-                ((eq choice ?b) (file-name-nondirectory name))
-                (t (message "Quit") nil)))
-    (when new-kill-string
-      (message "%s copied" new-kill-string)
-      (kill-new new-kill-string))))
-
-(ignore
- (quote
-  (defun *-copy-buffer-file-name-as-kill (&optional scope pos-style)
-    "Copy the buffer-file-name to the kill-ring.
+(defun *-copy-buffer-file-name-as-kill (&optional scope pos-style)
+  "Copy the buffer-file-name to the kill-ring.
 
 SCOPE must be one of
 
@@ -140,53 +122,62 @@ POS-STYLE must be one of
      Get both the line and column number (file:505c30)
 
   `point'
-     Get the value of point (file:40053)"
-    (interactive
-     (cdr (assoc (prompt user for char)
-                 '((?f . full)
-                   (?d . directory)
-                   (?b . basename))))
-     (when prefix-arg
-       (cdr (assoc (prompt user for char)
-                   '((?n . nil)
-                     (?l . line)
-                     (?c . line-column)
-                     (?p . point))))))
-    ;; @todo error up here
+     Get the value of point (file:40053)
 
-    (let* ((name (if (eq major-mode 'dired-mode)
-                     (dired-get-filename)
-                   (or (buffer-file-name)
-                       (user-error "Invalid context"))))
-           (file-part
-            (cond ((equal scope 'full)
-                   name)
-                  ((equal scope 'directory)
-                   (file-name-directory name))
-                  ((equal scope 'basename)
-                   (file-name-nondirectory name))
-                  ((null scope) nil)
-                  (t (error "Invalid scope %S" scope))))
-           ;; @todo can make this whole part a lot easier with a clever use of
-           ;; assoc.  (when pos-style (cdr (assoc pos-style ...)))
-           (pos-part
-            (when pos-style
-              (concat
-               ":"
-               (cond ((equal pos-style 'line)
-                   ;; @todo return absolute line number
-                      (line-number-at-pos))
-                     ((equal pos-style 'line-column)
-                      (concat (line-number-at-pos)
-                              "c"
-                              (current-column)))
-                     ((equal pos-style 'point)
-                      (point))
-                     (t (error "Invalid style %S" pos-style))))))
-           (new-kill-string (concat file-part pos-part)))
-      (when new-kill-string
-        (message "%s copied" new-kill-string)
-        (kill-new new-kill-string))))))
+POS-STYLE has no effect when SCOPE is `directory'."
+  (interactive
+   (let ((scope
+          (cdr
+           (assoc
+            (read-char-choice
+             "Copy (f)ull name, (d)irectory, or just the (b)asename? "
+             '(?f ?d ?b))
+            '((?f . full)
+              (?d . directory)
+              (?b . basename))))))
+     (list scope
+           (and (not (equal scope 'directory)) current-prefix-arg
+                (cdr (assoc (read-char-choice
+                             "Style: (n)one, (l)ine, (c)olumn, or (p)oint? "
+                             '(?n ?l ?c ?p))
+                            '((?n . nil)
+                              (?l . line)
+                              (?c . line-column)
+                              (?p . point))))))))
+  ;; @todo error up here
+
+  (let* ((name (if (eq major-mode 'dired-mode)
+                   (dired-get-filename)
+                 (or (buffer-file-name)
+                     (user-error "Invalid context"))))
+         (file-part
+          (cond ((equal scope 'full)
+                 name)
+                ((equal scope 'directory)
+                 (file-name-directory name))
+                ((equal scope 'basename)
+                 (file-name-nondirectory name))
+                ((null scope) nil)
+                (t (error "Invalid scope %S" scope))))
+         ;; @todo can make this whole part a lot easier with a clever use of
+         ;; assoc.  (when pos-style (cdr (assoc pos-style ...)))
+         (pos-part
+          (when pos-style
+            (concat ":"
+                    (cond ((equal pos-style 'line)
+                           ;; @todo return absolute line number
+                           (format "%d" (line-number-at-pos)))
+                          ((equal pos-style 'line-column)
+                           (format "%dc%d"
+                                   (line-number-at-pos)
+                                   (current-column)))
+                          ((equal pos-style 'point)
+                           (format "p%d" (point)))
+                          (t (error "Invalid style %S" pos-style))))))
+         (new-kill-string (concat file-part pos-part)))
+    (when new-kill-string
+      (message "%s copied" new-kill-string)
+      (kill-new new-kill-string))))
 
 (global-set-key (kbd "C-c x") #'*-copy-buffer-file-name-as-kill)
 
