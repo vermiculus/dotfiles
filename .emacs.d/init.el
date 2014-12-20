@@ -301,7 +301,10 @@ closing the file if it was not already open."
       (setq cursor-type
             (if (member t (mapcar #'eval *-god-mode-update-cursor-affected-forms))
                 *-god-mode-cursor
-              t)))))
+              t)))
+
+    (bind-key "[" #'backward-page god-local-mode-map)
+    (bind-key "]" #'forward-page god-local-mode-map)))
 
 
 
