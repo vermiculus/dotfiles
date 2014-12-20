@@ -234,38 +234,37 @@ closing the file if it was not already open."
           (concat prompt (if default (format " (default `%s')" default)) ": "))))
     (if response response default)))
 
+(defun *-TeX-find-kpathsea (string)
+  (interactive
+   (list
+    (let ((default (thing-at-point 'symbol t)))
+      (setq string
+            (*-read-from-minibuffer
+             "Find file in TeX distribution"
+             (thing-at-point 'symbol))))))
+  (find-file (substring (shell-command-to-string
+                         (format "kpsewhich %s" string))
+                        0 -1)))
+
+(defun *-TeX-find-texdoc (texdoc-query)
+  (interactive "sPackage: ")
+  (if (string-equal texdoc-query "")
+      (error "Cannot query texdoc against an empty string")
+    (let ((texdoc-output (shell-command-to-string
+                          (format "texdoc -l -M %s"
+                                  texdoc-query))))
+      (if (string-match texdoc-output "")
+          (error "Sorry, no documentation found for %s" texdoc-query)
+        (let ((texdoc-file (nth 2 (split-string texdoc-output))))
+          (if (file-readable-p texdoc-file)
+              (find-file-other-window new-file)
+            (error "Sorry, the file returned by texdoc for %s isn't readable"
+                   texdoc-query)))))))
+
 (use-package tex
   :ensure auctex
   :config
   (progn
-    (defun *-TeX-find-kpathsea (string)
-      (interactive)
-      (unless string
-        (let ((default (thing-at-point 'symbol t)))
-          (setq string
-                (*-read-from-minibuffer
-                 "Find file in TeX distribution"
-                 (thing-at-point 'symbol)))))
-
-      (find-file (substring (shell-command-to-string
-                             (format "kpsewhich %s" string))
-                            0 -1)))
-
-    (defun *-TeX-find-texdoc (texdoc-query)
-      (interactive "sPackage: ")
-      (if (string-equal texdoc-query "")
-          (error "Cannot query texdoc against an empty string")
-        (let ((texdoc-output (shell-command-to-string
-                              (format "texdoc -l -M %s"
-                                      texdoc-query))))
-          (if (string-match texdoc-output "")
-              (error "Sorry, no documentation found for %s" texdoc-query)
-            (let ((texdoc-file (nth 2 (split-string texdoc-output))))
-              (if (file-readable-p texdoc-file)
-                  (find-file-other-window new-file)
-                (error "Sorry, the file returned by texdoc for %s isn't readable"
-                       texdoc-query)))))))
-
     (add-to-list
      'TeX-command-list
      '("Arara"
