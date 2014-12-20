@@ -5,6 +5,7 @@
       '(
         LaTeX-babel-insert-hyphen
         LaTeX-close-environment
+        LaTeX-insert-left-brace
         LaTeX-insert-space
         LaTeX-mark-environment
         TeX-fold-env
@@ -64,6 +65,7 @@
         org-insert-heading-respect-content
         org-kill-line
         org-mark-subtree
+        org-meta-return
         org-metaleft
         org-metaright
         org-open-at-point
@@ -74,6 +76,7 @@
         org-yank
         paredit-backward-kill-word
         paredit-close-round
+        paredit-comment-dwim
         paredit-doublequote
         paredit-forward
         paredit-forward-barf-sexp
@@ -110,6 +113,7 @@
         count-words-region
         dired-do-copy
         god-local-mode
+        magit-status
         mc/mark-next-lines
         next-buffer
         ns-print-buffer
