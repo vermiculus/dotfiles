@@ -89,7 +89,7 @@ minor modes the checking happens for all pairs in
 ;; @TODO: to be released on GitHub and published on MELPA
 (use-package tempfile
   :load-path "~/github/vermiculus/tempfile.el"
-  :bind (("C-x t" . tempfile-find-temporary-file)
+  :bind (("C-c t" . tempfile-find-temporary-file)
          ("C-c k" . tempfile-delete-this-buffer-and-file)))
 
 
