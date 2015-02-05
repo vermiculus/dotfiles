@@ -1,15 +1,6 @@
 (add-to-list 'load-path ".")
 
 
-;; Windows
-
-(when window-system
- (tool-bar-mode -1)
- (scroll-bar-mode -1))
-(when (not window-system)
-  (menu-bar-mode -1))
-
-
 ;; Multi-Platform Support
 
 (defconst *-windows-p
@@ -30,6 +21,16 @@
     (*-windows-p "T:")
     (*-osx-p "~")))
   "Dropbox directory")
+
+
+;; Windows
+
+(when window-system
+ (tool-bar-mode -1)
+ (scroll-bar-mode -1))
+(when (or *-windows-p
+          (not window-system))
+  (menu-bar-mode -1))
 
 
 ;; Custom
