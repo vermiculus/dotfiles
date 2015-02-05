@@ -52,6 +52,10 @@
 
 (package-initialize)
 
+;; Bootstrap `use-package'
+(unless (featurep 'use-package)
+  (package-install 'use-package))
+
 (require 'use-package)
 
 
