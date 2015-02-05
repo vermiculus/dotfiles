@@ -35,9 +35,10 @@
 
 ;; Custom
 (let ((f (locate-user-emacs-file ".custom.el")))
-  (when (file-readable-p f)
-    (load-file
-     (setq custom-file f))))
+  (if (file-readable-p f)
+      (load-file
+       (setq custom-file f))
+    (message "Unable to find .custom.el")))
 
 
 ;; Package Management
