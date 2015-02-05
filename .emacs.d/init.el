@@ -34,10 +34,10 @@
 
 
 ;; Custom
-(load-file
- (setq custom-file
-       (expand-file-name ".custom.el"
-                         user-emacs-directory)))
+(let ((f (locate-user-emacs-file ".custom.el")))
+  (when (file-readable-p f)
+    (load-file
+     (setq custom-file f))))
 
 
 ;; Package Management
