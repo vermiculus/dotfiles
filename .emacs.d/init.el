@@ -55,6 +55,7 @@
 
 ;; Bootstrap `use-package'
 (unless (featurep 'use-package)
+  (package-refresh-contents)
   (package-install 'use-package))
 
 (require 'use-package)
