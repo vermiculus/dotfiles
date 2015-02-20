@@ -450,7 +450,7 @@ closing the file if it was not already open."
   :diminish magit-auto-revert-mode
   :bind ("M-m" . magit-status)
   :config
-  (setq magit-diff-refine-hunk 'all
+  (setq magit-diff-refine-hunk nil
         magit-use-overlays nil))
 
 
