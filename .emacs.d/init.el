@@ -448,7 +448,10 @@ closing the file if it was not already open."
   :ensure t
   :if window-system
   :diminish magit-auto-revert-mode
-  :bind ("M-m" . magit-status))
+  :bind ("M-m" . magit-status)
+  :config
+  (setq magit-diff-refine-hunk 'all
+        magit-use-overlays nil))
 
 
 ;; Python
