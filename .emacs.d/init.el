@@ -13,15 +13,6 @@
     (insert-char (or char ? ) (- (current-fill-column) eol))))
 
 
-;; Windows
-
-(when window-system
- (tool-bar-mode -1)
- (scroll-bar-mode -1))
-(when (not window-system)
-  (menu-bar-mode -1))
-
-
 ;; Multi-Platform Support
 
 (defconst *-windows-p
@@ -44,11 +35,22 @@
   "Dropbox directory")
 
 
+;; Windows
+
+(when window-system
+ (tool-bar-mode -1)
+ (scroll-bar-mode -1))
+(when (or *-windows-p
+          (not window-system))
+  (menu-bar-mode -1))
+
+
 ;; Custom
-(load-file
- (setq custom-file
-       (expand-file-name ".custom.el"
-                         user-emacs-directory)))
+(let ((f (locate-user-emacs-file ".custom.el")))
+  (if (file-readable-p f)
+      (load-file
+       (setq custom-file f))
+    (message "Unable to find .custom.el")))
 
 
 ;; Package Management
@@ -63,7 +65,8 @@
 
 (package-initialize)
 
-(unless (package-installed-p 'use-package)
+;; Bootstrap `use-package'
+(unless (featurep 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
@@ -72,32 +75,9 @@
 
 ;; Auto-Minor-Mode
 
-;; http://stackoverflow.com/a/13946304/1443496
-(defvar *-auto-minor-mode-alist ()
-  "Alist of filename patterns vs correpsonding minor mode functions,
-see `auto-mode-alist'. All elements of this alist are checked,
-meaning you can enable multiple minor modes for the same
-regexp.")
-
-(defun *-enable-minor-mode-based-on-extension ()
-  "check file name against `*-auto-minor-mode-alist' to enable
-minor modes the checking happens for all pairs in
-`*-auto-minor-mode-alist'"
-  (when buffer-file-name
-    (let ((name buffer-file-name)
-          (remote-id (file-remote-p buffer-file-name))
-          (alist *-auto-minor-mode-alist))
-      (setq name (file-name-sans-versions name))
-      (when (and (stringp remote-id)
-                 (string-match-p (regexp-quote remote-id) name))
-        (setq name (substring name (match-end 0))))
-      (while (and alist (caar alist) (cdar alist))
-        (if (string-match (caar alist) name)
-            (funcall (cdar alist) 1))
-        (setq alist (cdr alist))))))
-
-(add-hook 'find-file-hook
-          #'*-enable-minor-mode-based-on-extension)
+(use-package auto-minor-mode
+  :disabled t
+  :load-path "my-packages/")
 
 
 ;; Creating Temporary Files
