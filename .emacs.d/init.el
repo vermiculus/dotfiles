@@ -284,7 +284,7 @@ closing the file if it was not already open."
     (add-to-list
      'TeX-command-list
      '("Arara"
-       "arara %(verbose)%s"
+       "arara %s"
        TeX-run-command
        nil                              ; ask for confirmation
        t                                ; active in all modes
