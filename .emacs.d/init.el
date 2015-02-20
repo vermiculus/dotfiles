@@ -1,5 +1,17 @@
 (add-to-list 'load-path ".")
 
+(defun *-insert-hfill (char)
+  (interactive
+   (list (if current-prefix-arg
+             (let ((input (read-char "Fill char: ")))
+               (cond
+                ((eq input ?r) nil)
+                (t input))))))
+  (let* ((eol (save-excursion
+                (move-end-of-line nil)
+                (current-column))))
+    (insert-char (or char ? ) (- (current-fill-column) eol))))
+
 
 ;; Windows
 
@@ -50,6 +62,10 @@
  '("melpa" . "http://melpa.org/packages/") t)
 
 (package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
 (require 'use-package)
 
@@ -314,7 +330,8 @@ closing the file if it was not already open."
   :ensure t
   :bind (("C-<"   . mc/mark-previous-like-this)
          ("C->"   . mc/mark-next-like-this)
-         ("C-M->" . mc/mark-all-like-this-dwim)))
+         ("C-M->" . mc/mark-all-like-this-dwim)
+         ("M-i"   . mc/insert-numbers)))
 
 
 ;; Smex
@@ -447,7 +464,8 @@ closing the file if it was not already open."
   :ensure t
   :if window-system
   :bind (("C-c c" . org-capture)
-         ("C-c a" . org-agenda)))
+         ("C-c a" . org-agenda)
+         ("C-c l" . org-store-link)))
 
 (use-package outorg
   :ensure t
@@ -615,6 +633,10 @@ closing the file if it was not already open."
   :config
   (progn
     (use-package bf-mode)
+    (when *-osx-p
+      (customize-set-value
+       'insert-directory-program "gls"
+       "Use ls from core-utils"))
     (defun *-dired-for-each-marked-file (function)
       "Do stuff for each marked file, only works in dired window"
       (interactive)
@@ -674,8 +696,11 @@ closing the file if it was not already open."
     (bind-key "s-f" #'helm-projectile-ag projectile-command-map)))
 
 
-;;; Impatient Mode
+;;; Hyde and Jekyll
+(use-package hyde)
 
+
+;;; Impatient Mode
 (use-package impatient-mode
   :ensure t
   :if window-system)
@@ -694,6 +719,8 @@ closing the file if it was not already open."
   :if window-system
   :bind ("C-c C-SPC" . speedbar-get-focus))
 
+
+;;; Ace-Jump
 (use-package ace-jump-mode
   :ensure t
   :config
@@ -731,6 +758,8 @@ closing the file if it was not already open."
         (add-hook 'projectile-mode-hook
                   #'projectile-rails-on)))))
 
+
+;;; Twitter
 (use-package twittering-mode
   :ensure t
   :if window-system
@@ -738,7 +767,15 @@ closing the file if it was not already open."
   (progn
     (setq twittering-use-master-password t)))
 
+
+;;; Sunshine
+(use-package sunshine
+  (setq sunshine-location "Madison, WI"))
+
+(bind-key "C-S-j" #'join-line)
+
 ;; Local Variables:
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
 ;; End:
+(put 'narrow-to-region 'disabled nil)

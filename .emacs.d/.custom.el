@@ -13,6 +13,7 @@
      *-enable-minor-mode-based-on-extension global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
  '(indent-tabs-mode nil)
  '(magit-use-overlays nil)
+ '(org-agenda-files (quote ("~/epic.org")))
  '(org-capture-templates
    (quote
     (("T" "Stack ToDo" entry

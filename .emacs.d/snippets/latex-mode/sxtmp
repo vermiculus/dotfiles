@@ -1,0 +1,18 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: sxtmp
+# key: sxtmp
+# --
+% arara: pdflatex
+% arara: clean: { files: [ `
+(let ((basename (file-name-base
+                 (or (buffer-file-name) ""))))
+  (mapconcat (lambda (ext) (concat basename "." ext))
+             '("aux" "log" "out") ", "))` ] }
+
+\documentclass{article}
+\pagenumbering{gobble}
+
+\usepackage{mwe}
+\begin{document}
+$0
+\end{document}

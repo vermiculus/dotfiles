@@ -15,3 +15,6 @@
 /.emacs.d/url/
 /.emacs.d/var/
 /init.el
+/.emacs.d/games/
+/.emacs.d/caches/
+/.emacs.d/sensitive.el.gpg

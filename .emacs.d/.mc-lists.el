@@ -42,9 +42,13 @@
         electric-newline-and-maybe-indent
         end-of-buffer
         end-of-visual-line
+        erefactor-highlight-next-symbol
+        erefactor-highlight-previous-symbol
+        eval-defun
         eval-last-sexp
         fill-paragraph
         forward-sexp
+        ibuffer-mark-for-delete
         indent-for-tab-command
         kill-region
         kill-sentence
@@ -55,6 +59,7 @@
         markdown-insert-list-item
         markdown-promote
         message-beginning-of-line
+        mouse-save-then-kill
         nxml-electric-slash
         nxml-forward-element
         org-beginning-of-line
@@ -62,7 +67,9 @@
         org-delete-char
         org-end-of-line
         org-force-self-insert
+        org-forward-sentence
         org-insert-heading-respect-content
+        org-insert-todo-heading
         org-kill-line
         org-mark-subtree
         org-meta-return
@@ -72,23 +79,33 @@
         org-return
         org-return-indent
         org-self-insert-command
-        org-shiftmetaright
+        org-shiftleft
+        org-shiftright
+        org-transpose-words
         org-yank
+        package-menu-mark-unmark
+        paredit-backward
         paredit-backward-kill-word
+        paredit-backward-up
         paredit-close-round
+        paredit-close-square
         paredit-comment-dwim
         paredit-doublequote
         paredit-forward
         paredit-forward-barf-sexp
         paredit-forward-delete
+        paredit-forward-down
         paredit-forward-kill-word
         paredit-forward-slurp-sexp
+        paredit-forward-up
         paredit-kill
         paredit-newline
         paredit-open-round
+        paredit-open-square
         paredit-reindent-defun
         paredit-semicolon
         paredit-splice-sexp-killing-backward
+        paredit-split-sexp
         pp-eval-last-sexp
         python-indent-electric-colon
         python-nav-backward-up-list
@@ -97,10 +114,12 @@
         sgml-slash
         sh-assignment
         slime-space
-        smex
         string-rectangle
+        tab-to-tab-stop
+        transpose-sexps
         transpose-words
         upcase-region
+        wdired-downcase-word
         yaml-electric-backspace
         yaml-electric-dash-and-dot
         yas-expand
@@ -110,14 +129,18 @@
       '(
         LaTeX-environment
         TeX-view
+        abort-recursive-edit
         count-words-region
         dired-do-copy
         god-local-mode
+        helm-show-kill-ring
         magit-status
         mc/mark-next-lines
         next-buffer
         ns-print-buffer
+        org-shiftmetaright
         previous-buffer
         python-shell-send-buffer
         shell-command
+        smex
         ))
