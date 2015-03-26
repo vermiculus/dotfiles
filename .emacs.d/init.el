@@ -13,6 +13,14 @@
   (eq system-type 'gnu/linux)
   "Predicate indicating if this is a Redhat environment.")
 
+(when *-windows-p
+  ;; Fix default directory for non-*nix platforms
+  (setq-default
+   default-directory
+   (expand-file-name
+    "../.."
+    (getenv "HOME"))))
+
 ;; Dropbox
 (defconst *-dropbox-directory
   (expand-file-name
@@ -392,7 +400,8 @@ closing the file if it was not already open."
         (bind-key "M-i" #'helm-swoop-from-isearch isearch-mode-map)))
     (use-package helm-ag
       :ensure t
-      :bind ("s-f" . helm-do-ag)))
+      :bind (("<f12>" . helm-do-ag)
+             ("s-f" . helm-do-ag))))
   :bind (("s-x"   . helm-M-x)
          ("C-c g" . helm-google-suggest)
          ("C-x b" . helm-mini)
