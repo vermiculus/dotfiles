@@ -15,3 +15,10 @@
 /.emacs.d/url/
 /.emacs.d/var/
 /init.el
+/.emacs.d/abbrev_defs
+/.emacs.d/ido.last
+/.emacs.d/molly.el
+/.emacs.d/recentf
+/.emacs.d/server/
+/.emacs.d/smex-items
+/blah.sh

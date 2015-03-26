@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: type
+# key: type
+# --
+Public Type $1Type
+   $0
+End Type

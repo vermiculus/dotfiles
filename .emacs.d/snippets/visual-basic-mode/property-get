@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: property-get
+# key: pg
+# --
+`(yas-completing-prompt "Type? " '("Public" "Private"))` Property Get $1 As ${2:`(yas-completing-prompt "Type? " (mapcar #'car *-yas-vb-hungtypes-alist))`}
+   Return m_${2:$(cdr (assoc (yas-field-value 2) *-yas-vb-hungtypes-alist))}$1
+End Property
+$0
