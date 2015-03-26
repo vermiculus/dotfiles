@@ -48,6 +48,8 @@
        (setq custom-file f))
     (message "Unable to find .custom.el")))
 
+(prefer-coding-system 'utf-8)
+
 
 ;; Package Management
 
@@ -436,11 +438,26 @@ closing the file if it was not already open."
 
 ;; Org
 
+(defun *-org-agenda-next-items ()
+  (interactive)
+  (org-agenda nil "d"))
+
 (use-package org
   :ensure t
   :if window-system
+  :config
+  (progn
+    (require 'org-agenda)
+    (org-add-agenda-custom-command
+     '("d" "Agenda + Next Actions"
+       ((agenda) (todo "NEXT"))))
+    (add-to-list 'org-file-apps
+                 (cons (rx "." (or "doc" "xls" "ppt") (opt "x") string-end)
+                       'default)))
   :bind (("C-c c" . org-capture)
-         ("C-c a" . org-agenda)))
+         ("C-c a" . org-agenda)
+         ("C-c l" . org-store-link)
+         ("<apps>" . *-org-agenda-next-items)))
 
 (use-package outorg
   :ensure t
@@ -731,7 +748,29 @@ closing the file if it was not already open."
   (progn
     (setq twittering-use-master-password t)))
 
+(use-package sunshine
+  :ensure t)
+
+
+;;; visual basic
+(use-package visual-basic-mode
+  :load-path "c:/Users/sallred/AppData/Roaming/dotfiles/.emacs.d/my-packages/"
+  :config
+  (progn
+    (add-to-list
+     'auto-mode-alist
+     (cons "\\.frm\\'" 'visual-basic-mode))
+    (defvar *-yas-vb-hungtypes-alist
+      '(("Double" . "d")
+        ("Long" . "l")
+        ("Currency" . "cur")
+        ("String" . "s")
+        ("Date" . "dt")
+        ("Boolean" . "Is")))))
+
 ;; Local Variables:
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
 ;; End:
+(put 'narrow-to-region 'disabled nil)
+(put 'upcase-region 'disabled nil)

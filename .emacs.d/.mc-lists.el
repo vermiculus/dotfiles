@@ -45,6 +45,7 @@
         eval-last-sexp
         fill-paragraph
         forward-sexp
+        ignore
         indent-for-tab-command
         kill-region
         kill-sentence
@@ -72,8 +73,13 @@
         org-return
         org-return-indent
         org-self-insert-command
+        org-shiftdown
+        org-shiftleft
         org-shiftmetaright
+        org-shiftright
+        org-shiftup
         org-yank
+        paredit-backward
         paredit-backward-kill-word
         paredit-close-round
         paredit-comment-dwim
@@ -99,8 +105,11 @@
         slime-space
         smex
         string-rectangle
+        tab-to-tab-stop
         transpose-words
         upcase-region
+        visual-basic-indent-line
+        visual-basic-newline-and-indent
         yaml-electric-backspace
         yaml-electric-dash-and-dot
         yas-expand
@@ -120,4 +129,5 @@
         previous-buffer
         python-shell-send-buffer
         shell-command
+        suspend-frame
         ))
