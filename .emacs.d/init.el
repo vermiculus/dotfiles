@@ -4,13 +4,13 @@
 ;; Multi-Platform Support
 
 (defconst *-windows-p
-  (equal system-type 'windows-nt)
+  (eq system-type 'windows-nt)
   "Predicate indicating if this is a Windows environment.")
 (defconst *-osx-p
-  (equal system-type 'darwin)
+  (eq system-type 'darwin)
   "Predicate indicating if this is a OS X environment.")
 (defconst *-redhat-p
-  (equal system-type 'gnu/linux)
+  (eq system-type 'gnu/linux)
   "Predicate indicating if this is a Redhat environment.")
 
 ;; Dropbox
