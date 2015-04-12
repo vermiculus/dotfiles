@@ -2,11 +2,19 @@
 
 sudo -v
 
+function nocomments {
+    sed 's/ *#.*//' "$1" | sed '/^$/d'
+}
+
+function oneline {
+    $(nocomments "$1") | tr '\n' ' '
+}
+
 # install homebrew
-ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
 # run brewfile
-brew bundle
+nocomments Brewfile | xargs -toL1 brew
 
 # install rvm
 curl -sSL https://get.rvm.io | bash -s stable
@@ -15,4 +23,5 @@ curl -sSL https://get.rvm.io | bash -s stable
 sudo gem update --system
 
 # install gems
+# gem install $(oneline Gemfile)
 gem install $(tr '\n' ' ' < Gemfile)

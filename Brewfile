@@ -2,24 +2,26 @@
 # -*- mode: sh; fill-column: 72 -*-
 
 # Cask
-install brew-cask               # install standard OSX-bundled apps,
-tap caskroom/cask               # no compilation necessary
+install caskroom/cask/brew-cask # install standard OSX-bundled apps, no
+                                # compilation necessary
 
 # tap homebrew/dupes            # I'm not sure these are necessary
 # tap homebrew/science
 
-# PRogramming Languages
+# Programming Languages
 install clisp                   # common lisp
 install haskell-platform
 install m4
 install lua
 install mysql
+install sqlite
 install node                    # node.js
 install python
 install python3
 install ruby
 install scala
 install leiningen               # clojure
+install objective-caml
 
 # UNIX Tools
 install coreutils
@@ -35,14 +37,14 @@ install the_silver_searcher
 install tree
 install watch
 install wget
+install bash
+install tmux
 
 # VCS Systems
 install mercurial
 
 install gmp                     # fast math
 install gource                  # VCS visualization
-install macvim
-cask install macvim
 
 # Emacs
 install ispell
@@ -52,9 +54,10 @@ install libtiff
 install gnupg
 install gnupg2
 install gnutls
-install emacs
+# install emacs # handled by evm
 cask install emacs
 install doxymacs
+install cask                    # the emacs package dep automater
 
 # TeX
 cask install mactex
@@ -73,7 +76,6 @@ cask install silverlight
 cask install the-unarchiver
 
 # End-User Software (Work)
-cask install sublime-text
 cask install dropbox
 cask install lighttable
 cask install skype
