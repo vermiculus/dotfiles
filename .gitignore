@@ -18,3 +18,4 @@
 /.emacs.d/games/
 /.emacs.d/caches/
 /.emacs.d/sensitive.el.gpg
+/.emacs.d/projectile.cache
