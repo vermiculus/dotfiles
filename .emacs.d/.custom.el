@@ -12,6 +12,9 @@
            3]
      global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
  '(indent-tabs-mode nil)
+ '(magit-use-overlays nil)
+ '(neo-dont-be-alone t)
+ '(neo-vc-integration (quote (face char)))
  '(org-agenda-files (quote ("~/epic.org")))
  '(org-capture-templates
    (quote
@@ -21,15 +24,19 @@
  '(org-export-backends
    (quote
     (ascii beamer html icalendar latex man md odt org texinfo)))
+ '(org-src-fontify-natively t)
+ '(reftex-plug-into-AUCTeX t)
  '(safe-local-variable-values
    (quote
     ((org-export-date-timestamp-format . "$B %e %Y")
      (user-mail-address . "code@seanallred.com")
-     (column-number-mode . t)))))
+     (column-number-mode . t))))
+ '(sunshine-location "Madison, WI"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(erefactor-highlight-face ((t (:inherit match :foreground "yellow1"))))
+ '(org-verbatim ((t (:inherit (default shadow)))))
  '(sx-question-mode-tags ((t (:inherit font-lock-function-name-face :underline nil :slant normal)))))

@@ -253,7 +253,7 @@ closing the file if it was not already open."
           (error "Sorry, no documentation found for %s" texdoc-query)
         (let ((texdoc-file (nth 2 (split-string texdoc-output))))
           (if (file-readable-p texdoc-file)
-              (find-file-other-window new-file)
+              (find-file-other-window texdoc-file)
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
 
@@ -261,6 +261,10 @@ closing the file if it was not already open."
   :ensure auctex
   :config
   (progn
+    (use-package reftex
+      :ensure t
+      :config
+      (setq reftex-plug-into-AUCTeX t))
     (add-to-list
      'TeX-command-list
      '("Arara"
@@ -393,6 +397,8 @@ closing the file if it was not already open."
     (helm-mode 1))
   :config
   (progn
+    (setq
+     helm-M-x-fuzzy-match t)
     (when (executable-find "curl")
       (setq helm-google-suggest-use-curl-p t))
     (use-package helm-swoop
@@ -721,7 +727,14 @@ closing the file if it was not already open."
 (use-package ace-window
   :ensure t
   :if window-system
-  :bind ("C-x o" . ace-window))
+  :bind ("C-x o" . ace-window)
+  :config (ace-window-display-mode))
+
+
+;;; Golden Ratio
+(use-package golden-ratio
+  :ensure t
+  :config (add-to-list 'golden-ratio-extra-commands 'aw--callback))
 
 
 ;;; Ruby
@@ -753,9 +766,37 @@ closing the file if it was not already open."
 
 ;;; Sunshine
 (use-package sunshine
+  :config
   (setq sunshine-location "Madison, WI"))
 
-(bind-key "C-S-j" #'join-line)
+
+;;; Basic Config and Keybindings
+(use-package emacs
+  :config
+  (setq save-interprogram-paste-before-kill t)
+  :bind ("C-S-j" . join-line))
+
+
+;;; Neotree
+(use-package neotree
+  :bind ("s-d" . neotree)
+  :config
+  (progn
+    (setq neo-dont-be-alone t
+          neo-theme 'ascii)
+    (bind-keys :map neotree-mode-map
+               ("u" . neotree-select-up-node)
+               ;;("d" . *-neo-down-and-next)
+               ("i" . neotree-enter)
+               ("K" . neotree-delete-node))
+    (neotree)))
+
+(defun *-neo-down-and-next ()
+  (interactive)
+  (neotree-enter)
+  (neotree-next-node))
+
+
 
 ;; Local Variables:
 ;; fill-column: 80

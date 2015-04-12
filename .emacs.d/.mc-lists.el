@@ -15,6 +15,7 @@
         TeX-insert-quote
         TeX-insert-sub-or-superscript
         TeX-newline
+        backward-sentence
         backward-sexp
         backward-up-list
         beginning-of-buffer
@@ -40,6 +41,7 @@
         dired-previous-line
         downcase-region
         electric-newline-and-maybe-indent
+        electric-pair-delete-pair
         end-of-buffer
         end-of-visual-line
         erefactor-highlight-next-symbol
@@ -50,6 +52,7 @@
         forward-sexp
         ibuffer-mark-for-delete
         indent-for-tab-command
+        indent-new-comment-line
         kill-region
         kill-sentence
         kill-visual-line
@@ -102,6 +105,7 @@
         paredit-newline
         paredit-open-round
         paredit-open-square
+        paredit-raise-sexp
         paredit-reindent-defun
         paredit-semicolon
         paredit-splice-sexp-killing-backward
