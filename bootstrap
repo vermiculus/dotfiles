@@ -25,3 +25,6 @@ sudo gem update --system
 # install gems
 # gem install $(oneline Gemfile)
 gem install $(tr '\n' ' ' < Gemfile)
+
+tlmgr update --self
+tlmgr update --all
