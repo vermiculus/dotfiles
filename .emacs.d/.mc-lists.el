@@ -3,8 +3,10 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        *-eval-and-replace
         LaTeX-babel-insert-hyphen
         LaTeX-close-environment
+        LaTeX-insert-item
         LaTeX-insert-left-brace
         LaTeX-insert-space
         LaTeX-mark-environment
@@ -39,25 +41,32 @@
         dired-mark
         dired-next-line
         dired-previous-line
+        down-list
         downcase-region
         electric-newline-and-maybe-indent
         electric-pair-delete-pair
         end-of-buffer
         end-of-visual-line
+        erc-bol
         erefactor-highlight-next-symbol
         erefactor-highlight-previous-symbol
         eval-defun
         eval-last-sexp
         fill-paragraph
+        forward-sentence
         forward-sexp
         ibuffer-mark-for-delete
         indent-for-tab-command
         indent-new-comment-line
+        indent-region
+        isearch-forward-regexp
+        isearch-printing-char
         kill-region
         kill-sentence
         kill-visual-line
         markdown-cycle
         markdown-demote
+        markdown-enter-key
         markdown-exdent-or-delete
         markdown-insert-list-item
         markdown-promote
@@ -65,11 +74,13 @@
         mouse-save-then-kill
         nxml-electric-slash
         nxml-forward-element
+        org-backward-element
         org-beginning-of-line
         org-cycle
         org-delete-char
         org-end-of-line
         org-force-self-insert
+        org-forward-element
         org-forward-sentence
         org-insert-heading-respect-content
         org-insert-todo-heading
@@ -79,14 +90,17 @@
         org-metaleft
         org-metaright
         org-open-at-point
+        org-open-line
         org-return
         org-return-indent
         org-self-insert-command
         org-shiftleft
+        org-shiftmetaleft
         org-shiftright
         org-transpose-words
         org-yank
         package-menu-mark-unmark
+        paredit-backslash
         paredit-backward
         paredit-backward-kill-word
         paredit-backward-up
@@ -125,6 +139,7 @@
         upcase-region
         wdired-downcase-word
         yaml-electric-backspace
+        yaml-electric-bar-and-angle
         yaml-electric-dash-and-dot
         yas-expand
         ))
@@ -134,8 +149,15 @@
         LaTeX-environment
         TeX-view
         abort-recursive-edit
+        ace-window
         count-words-region
+        describe-key
         dired-do-copy
+        edebug-go-mode
+        edebug-step-mode
+        eshell
+        eval-expression
+        ggtags-navigation-mode-done
         god-local-mode
         helm-show-kill-ring
         magit-status

@@ -30,3 +30,15 @@ gem install $(tr '\n' ' ' < Gemfile)
 
 tlmgr update --self
 tlmgr update --all
+
+sudo cpan Tk
+
+#---
+git clone https://github.com/jgeboski/bitlbee-facebook.git
+cd bitlbee-facebook
+./autogen.sh
+make
+make install
+sudo make install
+libtool --finish /usr/local/Cellar/bitlbee/3.4/lib/bitlbee/
+#...
