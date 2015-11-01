@@ -451,7 +451,7 @@ ROOT-DIRECTORY."
 
 ;; Helm
 
-(use-package helm-config
+(use-package helm
   :ensure t
   :init
   (require 'helm-config)
@@ -1196,6 +1196,16 @@ ROOT-DIRECTORY."
    (setq gc-cons-threshold 1000000)
    (message "gc-cons-threshold restored to %S"
             gc-cons-threshold)))
+
+(use-package magit
+  :ensure t
+  :if window-system
+  :config
+  (setq magit-last-seen-setup-instructions "1.4.0")
+  (when *-windows-p
+    (setq magit-git-executable "git.exe")
+    (add-to-list 'exec-path "C:/cygwin64/bin"))
+  :bind ("M-m" . magit-status))
 
 ;; Local Variables:
 ;; fill-column: 80

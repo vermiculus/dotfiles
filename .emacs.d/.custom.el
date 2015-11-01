@@ -161,7 +161,7 @@
      (360 . "#66D9EF"))))
  '(vc-annotate-very-old-color nil)
  '(weechat-color-list
-   (unspecified "#272822" "#49483E" "#A20C41" "#F92672" "#67930F" "#A6E22E" "#968B26" "#E6DB74" "#21889B" "#66D9EF" "#A41F99" "#FD5FF0" "#349B8D" "#A1EFE4" "#F8F8F2" "#F8F8F0")))
+   (unspecified "#272822" "#49483E" "#A20C41" "#F92672" "#67930F" "#A6E22E" "#968B26" "#E6DB74" "#21889B" "#66D9EF" "#A41F99" "#FD5FF0" "#349B8D" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
  '(magit-use-overlays nil t)
  '(neo-dont-be-alone t)
  '(neo-vc-integration (quote (face char)))
@@ -199,7 +199,7 @@
  ;; If there is more than one, they won't work right.
  '(org-code ((t (:foreground "gold2"))))
  '(org-verbatim ((t (:inherit shadow :foreground "gold1"))))
- '(variable-pitch ((t (:weight bold)))))
+ '(variable-pitch ((t (:weight bold))))
  '(erefactor-highlight-face ((t (:inherit match :foreground "yellow1"))))
  '(org-level-1 ((t (:inherit variable-pitch :foreground "#FD971F" :height 1.3))))
  '(org-verbatim ((t (:inherit shadow))))
