@@ -20,6 +20,21 @@
  '(display-time-mode t)
  '(emc2:assume-training-is-ok t)
  '(fci-rule-color "#49483E")
+ '(avy-goto-char-style (quote at))
+ '(avy-style (quote at))
+ '(cider-repl-use-pretty-printing t)
+ '(confirm-kill-emacs
+   (lambda
+     (prompt)
+     (or
+      (not window-system)
+      (yes-or-no-p prompt))))
+ '(erc-minibuffer-notice t)
+ '(erc-notifications-mode t)
+ '(erc-track-enable-keybindings t)
+ '(erc-track-minor-mode t)
+ '(erc-track-mode t)
+ '(erc-track-showcount nil)
  '(find-file-hook
    (quote
     (auto-insert
@@ -147,6 +162,36 @@
  '(vc-annotate-very-old-color nil)
  '(weechat-color-list
    (unspecified "#272822" "#49483E" "#A20C41" "#F92672" "#67930F" "#A6E22E" "#968B26" "#E6DB74" "#21889B" "#66D9EF" "#A41F99" "#FD5FF0" "#349B8D" "#A1EFE4" "#F8F8F2" "#F8F8F0")))
+ '(magit-use-overlays nil t)
+ '(neo-dont-be-alone t)
+ '(neo-vc-integration (quote (face char)))
+ '(org-agenda-files (quote ("~/epic.org")))
+ '(org-capture-templates
+   (quote
+    (("T" "Stack ToDo" entry
+      (file "~/github/vermiculus/sx.el/todo.org")
+      "")
+     ("w" "work" entry
+      (file "~/work.org")
+      ""))))
+ '(org-export-backends
+   (quote
+    (ascii beamer html icalendar latex man md odt org texinfo)))
+ '(org-src-fontify-natively t)
+ '(projectile-globally-ignored-file-suffixes (quote ("~")))
+ '(reftex-plug-into-AUCTeX t)
+ '(safe-local-variable-values
+   (quote
+    ((org-html-doctype . "xhtml5")
+     (org-html-html5-fancy . t)
+     (org-id-link-to-org-use-id . t)
+     (org-export-date-timestamp-format . "$B %e %Y")
+     (user-mail-address . "code@seanallred.com")
+     (column-number-mode . t))))
+ '(save-interprogram-paste-before-kill t)
+ '(send-mail-function (quote smtpmail-send-it))
+ '(sunshine-location "Madison, WI")
+ '(truncate-lines t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -155,3 +200,8 @@
  '(org-code ((t (:foreground "gold2"))))
  '(org-verbatim ((t (:inherit shadow :foreground "gold1"))))
  '(variable-pitch ((t (:weight bold)))))
+ '(erefactor-highlight-face ((t (:inherit match :foreground "yellow1"))))
+ '(org-level-1 ((t (:inherit variable-pitch :foreground "#FD971F" :height 1.3))))
+ '(org-verbatim ((t (:inherit shadow))))
+ '(sx-question-mode-tags ((t (:inherit font-lock-function-name-face :underline nil :slant normal))))
+ '(variable-pitch ((t nil))))

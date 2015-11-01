@@ -1,0 +1,10 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: split-macro
+# key: mac
+# binding: C-c m
+# --
+%    \end{macrocode}
+% \end{macro}
+% $0
+% \begin{macro}{$1}
+%    \begin{macrocode}

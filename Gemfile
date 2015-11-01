@@ -9,3 +9,10 @@ sass
 test-unit
 ronn
 github
+evm
+rails
+jekyll
+kramdown
+hub
+heroku
+guard

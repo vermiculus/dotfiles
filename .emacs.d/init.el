@@ -1,4 +1,28 @@
+(defun find-obsolete (list-of-functions &optional so-far)
+  (if list-of-functions
+      (let* ((f (first list-of-functions))
+             (obsolete (plist-get (symbol-plist f) 'byte-obsolete-info)))
+        (find-obsolete
+         (rest list-of-functions)
+         (if obsolete
+             (cons (cons f (car obsolete)) so-far)
+           so-far)))
+    so-far))
+
+(setq gc-cons-threshold 100000000)
 (add-to-list 'load-path ".")
+
+(defun *-insert-hfill (char)
+  (interactive
+   (list (if current-prefix-arg
+             (let ((input (read-char "Fill char: ")))
+               (cond
+                ((eq input ?r) nil)
+                (t input))))))
+  (let* ((eol (save-excursion
+                (move-end-of-line nil)
+                (current-column))))
+    (insert-char (or char ? ) (- (current-fill-column) eol))))
 
 
 ;; Multi-Platform Support
@@ -42,11 +66,17 @@
 
 
 ;; Custom
-(let ((f (locate-user-emacs-file ".custom.el")))
-  (if (file-readable-p f)
-      (load-file
-       (setq custom-file f))
-    (message "Unable to find .custom.el")))
+(defun *-load-customizations ()
+  (interactive)
+  (let ((f (locate-user-emacs-file ".custom.el")))
+    (if (file-readable-p f)
+        (load-file (setq custom-file f))
+      (warn "Unable to read .custom.el"))))
+(if window-system
+    (*-load-customizations)
+  (package-initialize)
+  (require 'bind-key)
+  (bind-key "C-c L" #'*-load-customizations))
 
 (prefer-coding-system 'utf-8)
 
@@ -64,11 +94,9 @@
 (package-initialize)
 
 ;; Bootstrap `use-package'
-(unless (featurep 'use-package)
+(unless (require 'use-package nil t)
   (package-refresh-contents)
   (package-install 'use-package))
-
-(require 'use-package)
 
 
 ;; Auto-Minor-Mode
@@ -185,22 +213,40 @@ POS-STYLE has no effect when SCOPE is `directory'."
   (when *-delete-trailing-whitespace-on-save
     (delete-trailing-whitespace)))
 
+(defun *-delete-empty-directories (root-directory)
+  "Recursively delete empty directories in ROOT-DIRECTORY.
+
+When called from dired, `dired-current-directory' is used for
+ROOT-DIRECTORY."
+
+  ;; Interface
+  (interactive (list (if (eq major-mode 'dired-mode)
+                         (expand-file-name (dired-current-directory))
+                       (read-from-minibuffer "Root directory: "))))
+  (when (or (null root-directory) (string= "" root-directory))
+    (user-error "No root directory provided"))
+  (when (called-interactively-p 'interactive)
+    (unless (yes-or-no-p (format "Delete all non-empty directories in `%s'? "
+                                 root-directory))
+      (user-error "Directory `%s' has been left untouched" root-directory)))
+
+  ;; Implementation
+  (require 'f)
+  (let ((entries (f-directories root-directory)))
+    (while entries
+      (let ((curdir (car entries)))
+        (when (f-directories curdir)
+          (*-delete-empty-directories curdir))
+        (unless (f-entries curdir)
+          (delete-directory curdir)
+          (message "Directory deleted: `%s'" curdir))
+        (setq entries (cdr entries))))))
+
 
 (defun unfill-region (beg end)
   (interactive "*r")
   (let ((fill-column (point-max)))
     (fill-region beg end)))
-
-
-;; TODO: (if (buffer-is-visiting file) don't close
-(defun file-string (file)
-  "Read the contents of a file and return as a string,
-closing the file if it was not already open."
-  (with-temp-buffer (find-file-noselect file)
-    (buffer-string)))
-
-(defun file-lines (file)
-  (split-string (file-string file) "\n"))
 
 
 (use-package m4-mode
@@ -225,16 +271,16 @@ closing the file if it was not already open."
   (let ((response
          (read-from-minibuffer
           (concat prompt (if default (format " (default `%s')" default)) ": "))))
-    (if response response default)))
+    (if (string= response "") default response)))
 
 (defun *-TeX-find-kpathsea (string)
   (interactive
    (list
-    (let ((default (thing-at-point 'symbol t)))
+    (let ((default (concat (thing-at-point 'symbol t) ".sty")))
       (setq string
             (*-read-from-minibuffer
              "Find file in TeX distribution"
-             (thing-at-point 'symbol))))))
+             default)))))
   (find-file (substring (shell-command-to-string
                          (format "kpsewhich %s" string))
                         0 -1)))
@@ -250,13 +296,17 @@ closing the file if it was not already open."
           (error "Sorry, no documentation found for %s" texdoc-query)
         (let ((texdoc-file (nth 2 (split-string texdoc-output))))
           (if (file-readable-p texdoc-file)
-              (find-file-other-window new-file)
+              (find-file-other-window texdoc-file)
             (error "Sorry, the file returned by texdoc for %s isn't readable"
                    texdoc-query)))))))
 
 (use-package tex
   :ensure auctex
   :config
+  (use-package reftex
+    :ensure t
+    :config
+    (setq reftex-plug-into-AUCTeX t))
   (add-to-list
    'TeX-command-list
    '("Arara"
@@ -265,8 +315,16 @@ closing the file if it was not already open."
      nil                              ; ask for confirmation
      t                                ; active in all modes
      :help "Run Arara"))
+  (when *-osx-p
+    (load "/Users/sean/github/auctex/expl3.el"))
+
   :bind (("C-c ?" . *-TeX-find-texdoc)
          ("C-c M-?" . *-TeX-find-kpathsea)))
+
+(use-package latex
+  :config
+  (add-to-list 'LaTeX-font-list
+               '(?\C-a "\\Algorithm{" "}")))
 
 
 ;; God-Mode
@@ -305,12 +363,9 @@ closing the file if it was not already open."
   :ensure t
   :bind (("C-<"   . mc/mark-previous-like-this)
          ("C->"   . mc/mark-next-like-this)
-         ("C-M->" . mc/mark-all-like-this-dwim)
-;         ("<C-mouse-1>" . mc/create-fake-cursor-at-point)
-         )
+         ("C-M->" . mc/mark-all-like-this-dwim))
   :config
   (require 'mc-cycle-cursors)
-  :config
   (bind-keys :map mc/keymap
              ("M-i" . mc/insert-numbers)
              ("C-v" . mc/cycle)))
@@ -340,8 +395,13 @@ closing the file if it was not already open."
 (use-package cc-mode
   :ensure t
   :bind (("C-c RET" . ff-find-related-file)
-;         ("C-c C-'" . compile)
-         ))
+         ("C-c C-'" . compile))
+  :config
+  (require 'ggtags)
+  (add-hook 'c-mode-common-hook
+            (lambda ()
+              (when (derived-mode-p 'c-mode 'c++-mode)
+                (ggtags-mode 1)))))
 
 
 ;; Company
@@ -353,6 +413,13 @@ closing the file if it was not already open."
   :diminish company-mode
   :init
   (add-hook 'prog-mode-hook #'company-mode-on)
+  (mapc (lambda (s) (add-hook s #'company-mode-on))
+        '(emacs-lisp-mode-hook
+          lisp-interaction-mode-hook
+          ielm-mode-hook
+          ruby-mode-hook
+          clojure-mode-hook
+          cider-repl-mode-hook))
   :config
   (bind-keys :map company-active-map
              ("C-n" . company-select-next-or-abort)
@@ -385,20 +452,9 @@ closing the file if it was not already open."
 ;; Helm
 
 (use-package helm-config
-  :ensure helm
+  :ensure t
   :init
   (require 'helm-config)
-  (helm-mode 1)
-  :config
-  (when (executable-find "curl")
-    (setq helm-google-suggest-use-curl-p t))
-  (use-package helm-swoop
-    :ensure t
-    :bind ("C-S-s" . helm-swoop)
-    :commands (helm-swoop helm-swoop-from-isearch)
-    :init
-    (bind-key "C-s" #'helm-swoop helm-command-prefix)
-    (bind-key "M-i" #'helm-swoop-from-isearch isearch-mode-map))
   (use-package helm-ag
     :ensure t
     :bind (("<f12>" . helm-do-ag)
@@ -407,34 +463,23 @@ closing the file if it was not already open."
     (when *-windows-p
       (custom-set-variables
        '(helm-ag-base-command "pt --nocolor --nogroup"))))
-  :bind (("s-x"   . helm-M-x)
-         ("C-x C-a" . helm-command-prefix)
-         ("C-c g" . helm-google-suggest)
-         ("C-x b" . helm-mini)
-         ;; use `ag' for recursive grep?  is it possible?
-         ;; ("C-x C-f" . helm-find-files)
-         ;; ^^ I don't seem to like it as much as ido-find-file with flx-ido
-         ("M-y"   . helm-show-kill-ring)
-         ("C-x c C-o" . helm-org-in-buffer-headings)))
-
-
-;; HTMLize
-
-(use-package htmlize
-  :ensure t
-  :commands (htmlize-buffer htmlize-file))
-
-
-;; Magit
-
-(use-package magit
-  :ensure t
-  :if window-system
-;  :diminish magit-auto-revert-mode
-  :config (setq magit-last-seen-setup-instructions "1.4.0"
-                magit-git-executable "git.exe")
-  :config (add-to-list 'exec-path "C:/cygwin64/bin")
-  :bind ("M-m" . magit-status))
+  (when (executable-find "curl")
+    (setq helm-google-suggest-use-curl-p t))
+  (when (executable-find "curl")
+    (setq helm-google-suggest-use-curl-p t))
+  (setq helm-M-x-fuzzy-match t)
+  :bind
+  (("s-x"   . helm-M-x)
+   ("C-x C-a" . helm-command-prefix)
+   ("C-x C-a C-o" . helm-org-in-buffer-headings)
+   ("C-x C-a C-s" . helm-swoop)
+   ("C-c g" . helm-google-suggest)
+   ("C-x b" . helm-mini)
+   ;; use `ag' for recursive grep?  is it possible?
+   ;; ("C-x C-f" . helm-find-files)
+   ;; ^^ I don't seem to like it as much as ido-find-file with flx-ido
+   ("M-y"   . helm-show-kill-ring)
+   ("C-x c C-o" . helm-org-in-buffer-headings)))
 
 
 ;; Python
@@ -532,10 +577,12 @@ closing the file if it was not already open."
   :if window-system
   :diminish eldoc-mode
   :config
-  (mapc (lambda (s) (add-hook s #'turn-on-eldoc-mode))
+  (mapc (lambda (s) (add-hook s #'eldoc-mode))
         '(emacs-lisp-mode-hook
           lisp-interaction-mode-hook
-          ielm-mode-hook)))
+          ielm-mode-hook
+          clojure-mode-hook
+          cider-repl-mode-hook)))
 
 (use-package paredit
   :ensure t
@@ -544,7 +591,25 @@ closing the file if it was not already open."
   (mapc (lambda (s) (add-hook s #'paredit-mode))
         '(emacs-lisp-mode-hook
           lisp-interaction-mode-hook
-          ielm-mode-hook)))
+          lisp-mode-hook
+          ielm-mode-hook
+          clojure-mode-hook
+          cider-repl-mode-hook)))
+
+(use-package aggressive-indent
+  :ensure t
+  :config
+  (aggressive-indent-global-mode))
+
+(use-package clj-refactor
+  :ensure t
+  :config
+  (setq cljr-suppress-middleware-warnings t)
+  (add-hook 'clojure-mode-hook
+            (lambda ()
+              (clj-refactor-mode 1)
+              (yas-minor-mode 1)
+              (cljr-add-keybindings-with-prefix "C-c C-m"))))
 
 (use-package lisp-mode
   :config
@@ -592,7 +657,32 @@ closing the file if it was not already open."
 
 (use-package markdown-mode
   :ensure t
-  :defer t)
+  :defer t
+  :config
+  (defun *-insert-post-url (bare)
+  (interactive "P")
+  (require 'f)
+  (require 'cl-lib)
+  (let* ((basedir (expand-file-name "~/blog/_posts/"))
+         (files (f-files basedir
+                         (lambda (f)
+                           (string= (file-name-extension f)
+                                    "markdown"))
+                         t))
+         (candidates (cl-remove-duplicates
+                      (mapcar
+                       (lambda (f) (s-chop-prefix
+                                    basedir
+                                    (s-chop-suffix
+                                     ".markdown"
+                                     (s-chop-suffix "~" f))))
+                       files)
+        :test #'string=)))
+    (insert
+     (format
+      (if bare "%s" "{%% post_url %s %%}")
+      (file-name-base (completing-read "Post: " candidates))))))
+  (bind-key "M-M" #'*-insert-post-url markdown-mode-map))
 
 
 ;; Evil
@@ -654,11 +744,16 @@ closing the file if it was not already open."
                '("\\.zip\\'" ".zip" "unzip")))
 
 (use-package dired
-  :init
-  (bind-key "z" #'*-dired-zip-files dired-mode-map)
-  (bind-key "[" #'dired-up-directory dired-mode-map)
   :config
   (use-package bf-mode)
+  (bind-keys :map dired-mode-map
+             ("/" . dired-up-directory)
+             ("z" . *-dired-zip-files))
+  (when *-osx-p
+    (customize-set-value
+     'insert-directory-program "gls"
+     "Use ls from core-utils"))
+
   (defun *-dired-for-each-marked-file (function)
     "Do stuff for each marked file, only works in dired window"
     (interactive)
@@ -677,8 +772,7 @@ closing the file if it was not already open."
        (concat "zip "
                zip-file
                " "
-               (mapconcat (lambda (filename)
-                            (file-name-nondirectory filename))
+               (mapconcat #'file-name-nondirectory
                           (dired-get-marked-files) " "))))
 
     ;; remove the mark on all the files  "*" to " "
@@ -703,6 +797,9 @@ closing the file if it was not already open."
   :bind ("C-c p" . projectile-command-map)
   :config
   (setq projectile-completion-system 'helm)
+  (when *-osx-p
+    (setq projectile-generic-command
+          (concat "g" projectile-generic-command)))
   (projectile-global-mode))
 
 (use-package helm-projectile
@@ -715,14 +812,14 @@ closing the file if it was not already open."
   :ensure t
   :commands (ag-regexp)
   :config
-  (when *-windows-p
-    ;; (setq ag-executable "pt"
-    ;;       ag-arguments '("/nogroup" "/nocolor"))
-    ))
+  (bind-key "s-f" #'helm-projectile-ag projectile-command-map))
+
+
+;;; Hyde and Jekyll
+(use-package hyde)
 
 
 ;;; Impatient Mode
-
 (use-package impatient-mode
   :ensure t
   :if window-system)
@@ -741,6 +838,8 @@ closing the file if it was not already open."
   :if window-system
   :bind ("C-c C-SPC" . speedbar-get-focus))
 
+
+;;; Ace-Jump
 (use-package ace-jump-mode
   :ensure t
   :disabled t
@@ -750,7 +849,6 @@ closing the file if it was not already open."
              ("j" . ace-jump-mode)
              ("k" . ace-jump-char-mode)
              ("l" . ace-jump-line-mode))
-  :config
   (setq ace-jump-mode-move-keys
         (loop for i from ?a to ?z collect i)))
 
@@ -762,7 +860,6 @@ closing the file if it was not already open."
              ("C-;" . avy-goto-char)
              ("C-l" . avy-goto-line)
              ("C-w" . avy-goto-word-0))
-  :config
   (setq avy-style 'at-full))
 
 (use-package key-chord
@@ -774,11 +871,26 @@ closing the file if it was not already open."
   (key-chord-define-global ";l" #'avy-goto-line)
   (key-chord-mode 1))
 
-(use-package ace-window
+(use-package avy
   :ensure t
-  :disabled t
-  :if window-system
-  :bind ("C-x o" . ace-window))
+  :config
+  (setq avy-style 'at-full)
+  (bind-keys :prefix-map my:avy-jump-map
+             :prefix "C-c C-'"
+             ("C-'" . avy-goto-word-0)
+             ("C-;" . avy-goto-char)
+             ("C-k" . avy-goto-char-2)
+             ("C-l" . avy-goto-line))
+  :config
+  (bind-key "C-'" #'avy-isearch isearch-mode-map)
+  :config
+  (setq avy-style 'at-full))
+
+
+;;; Golden Ratio
+(use-package golden-ratio
+  :ensure t
+  :config (add-to-list 'golden-ratio-extra-commands 'aw--callback))
 
 
 ;;; Ruby
@@ -793,17 +905,15 @@ closing the file if it was not already open."
   (use-package projectile-rails
     :ensure t
     :config
-    (add-hook 'projectile-mode-hook
-              #'projectile-rails-on)))
+    (add-hook 'projectile-mode-hook #'projectile-rails-on)))
 
+
+;;; Twitter
 (use-package twittering-mode
   :ensure t
   :if window-system
   :config
   (setq twittering-use-master-password t))
-
-(use-package sunshine
-  :ensure t)
 
 
 ;;; visual basic
@@ -906,11 +1016,6 @@ ROOT-DIRECTORY."
 (use-package swiper
   :bind ("C-s" . swiper))
 
-  ;; Local Variables:
-  ;; fill-column: 80
-  ;; indent-tabs-mode: nil
-  ;; End:
-
 (require 'evil)
 (setq evil-symbol-word-search t)
 (global-set-key (kbd "C-#") #'evil-search-word-forward)
@@ -921,12 +1026,6 @@ ROOT-DIRECTORY."
 (when *-windows-p
   (setq find-program "cygwin-find"))
 (put 'narrow-to-page 'disabled nil)
-(defun yuxuan-save-and-compile (extended)
-  "With a prefix argument, just run `TeX-command-master'."
-  (interactive "P")
-  (save-buffer)
-  (if extended (call-interactively #'TeX-command-master)
-    (TeX-command TeX-command-default #'TeX-master-file nil)))
 
 (defun *-tsv-paste ()
   (interactive)
@@ -946,3 +1045,159 @@ ROOT-DIRECTORY."
 (auto-fill-mode)
 
 (put 'scroll-left 'disabled nil)
+
+
+;;; Sunshine
+(use-package sunshine
+  :config
+  (setq sunshine-location "Madison, WI"))
+
+
+;;; Basic Config and Keybindings
+(bind-keys ("C-S-j" . join-line))
+
+
+;;; Neotree
+(use-package neotree
+  :bind ("s-d" . neotree)
+  :config
+  (setq neo-dont-be-alone t
+        neo-theme 'ascii)
+  (bind-keys :map neotree-mode-map
+             ("u" . neotree-select-up-node)
+             ;;("d" . *-neo-down-and-next)
+             ("i" . neotree-enter)
+             ("K" . neotree-delete-node))
+  (defun *-neo-down-and-next ()
+    (interactive)
+    (neotree-enter)
+    (neotree-next-node)))
+
+
+(use-package eshell
+  :bind ("s-s" . eshell))
+
+(defun *-erc-bitlbee ()
+  (interactive)
+  (erc :server "localhost"
+       :port 6667
+       :nick "sean"))
+
+(use-package erc
+  :bind ("s-e" . *-erc-bitlbee)
+  :config
+  (bind-key "s-." (lambda () (interactive)
+                    (insert "identify ecce-gratum")
+                    (erc-send-current-line))
+            erc-mode-map))
+
+(use-package sx
+  :config
+  (bind-keys :prefix-map *-sx-map
+             :prefix "s-x"
+             ("i" . sx-inbox)
+             ("s" . sx-tab-frontpage)))
+
+(use-package swiper
+  :init (require 'ivy)
+  :bind ("C-s" . swiper))
+
+(use-package help
+  :config
+  (bind-keys :map help-mode-map
+             ("[" . help-go-back)
+             ("]" . help-go-forward)))
+
+(defun *-eval-and-replace ()
+  (interactive)
+  (save-excursion
+    (eval-last-sexp t))
+  (backward-kill-sexp)
+  (forward-sexp))
+(bind-key "C-x C-M-r" #'*-eval-and-replace)
+
+(column-number-mode 1)
+
+(bind-key "C-M-="
+          (lambda ()
+            (interactive)
+            (save-window-excursion
+              (list-packages)
+              (package-menu-mark-upgrades)
+              (package-menu-execute t))))
+
+
+(defvar *-devlog-hooks nil)
+(defvar *-devlog-major-mode nil)
+(defvar *-devlog-ext nil)
+(defun *-devlog-new-entry ()
+  (interactive)
+  (require 'magit)
+  (require 'f)
+  (let* ((default-directory (projectile-project-root))
+         (rev (magit-rev-parse "HEAD"))
+         (dir "devlog")
+         (devlog (f-expand (concat rev *-devlog-ext) dir)))
+    (unless (f-exists? dir)
+      (make-directory dir))
+    (with-current-buffer (find-file devlog)
+      (funcall (or *-devlog-major-mode #'text-mode))
+      (run-hooks *-devlog-hooks))))
+
+(use-package projectile
+  :config
+  (bind-key "[" #'*-devlog-new-entry projectile-command-map))
+
+(setq *-devlog-major-mode #'markdown-mode
+      *-devlog-ext ".md")
+
+(defun *-make-scope ()
+  (interactive)
+  (let (needed-exchange)
+    (if (region-active-p)
+        (progn
+          (when (< (mark) (point))
+            (setq needed-exchange t)
+            (exchange-point-and-mark))
+          (insert "{\n")
+          (exchange-point-and-mark)
+          (insert "\n}")
+          (indent-region
+           (save-excursion
+             (goto-char (mark))
+             (forward-line -1)
+             (point))
+           (save-excursion
+             (forward-line 1)
+             (point)))
+          (unless needed-exchange
+            (exchange-point-and-mark))
+          (deactivate-mark))
+      (insert "\n{")
+      (indent-for-tab-command)
+      (newline-and-indent)
+      (save-excursion
+        (insert "\n}")
+        (indent-for-tab-command)))))
+
+(use-package ediff
+  :config
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+
+(require 'cc-mode)
+(define-key c-mode-map (kbd "C-{") #'*-make-scope)
+
+(put 'narrow-to-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+
+(run-with-idle-timer
+ 5 nil
+ (lambda ()
+   (setq gc-cons-threshold 1000000)
+   (message "gc-cons-threshold restored to %S"
+            gc-cons-threshold)))
+
+;; Local Variables:
+;; fill-column: 80
+;; indent-tabs-mode: nil
+;; End:

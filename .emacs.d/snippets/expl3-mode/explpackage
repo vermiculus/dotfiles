@@ -1,0 +1,13 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: explpackage
+# key: explpackage
+# --
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\RequirePackage{expl3,l3keys2e}
+\ProvidesExplPackage
+{${1:Name}}
+{${2:Date}}
+{${3:Version}}
+{${4:Description}}
+
+$0

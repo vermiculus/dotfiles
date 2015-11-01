@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: src
+# key: src
+# binding: C-c s
+# --
+{% highlight ${1:tex} %}
+$0
+{% endhighlight %}

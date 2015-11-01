@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: texsrc
+# key: texsrc
+# --
+{% highlight tex %}
+$0
+{% endhighlight %}
