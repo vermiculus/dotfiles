@@ -317,6 +317,7 @@ Note: shall not contain any \\( \\) (use \\(?: if need be)."
   (modify-syntax-entry ?\n ">" visual-basic-mode-syntax-table)
   (modify-syntax-entry ?\\ "w" visual-basic-mode-syntax-table)
   (modify-syntax-entry ?_ "_" visual-basic-mode-syntax-table)
+  (modify-syntax-entry ?. "_" visual-basic-mode-syntax-table)
   ; Make operators puncutation so that regexp search \_< and \_> works properly
   (modify-syntax-entry ?+ "." visual-basic-mode-syntax-table)
   (modify-syntax-entry ?- "." visual-basic-mode-syntax-table)
@@ -490,7 +491,9 @@ Note: shall not contain any \\( \\) (use \\(?: if need be)."
       "TableDef" "TableDefs" "Tan" "Then" "Time" "TimeSerial" "TimeValue"
       "Timer" "To" "Trim" "True" "Type" "TypeName" "UBound" "UCase" "Unload"
       "Unlock" "Val" "Variant" "VarType" "Verb" "Weekday" "Wend"
-      "While" "Width" "With" "Workspace" "Workspaces" "Write" "Year")))
+      "While" "Width" "With" "Workspace" "Workspaces" "Write" "Year"
+
+      "In")))
 
 (defvar visual-basic-font-lock-keywords-1
   (eval-when-compile
@@ -817,7 +820,6 @@ changed files."
            (suspend-frame)
            (win-exec visual-basic-ide-pathname 'win-show-normal file))
           ((fboundp 'start-process)
-           (iconify-frame (selected-frame))
            (start-process "*VisualBasic*" nil visual-basic-ide-pathname file))
           (t
            (error "No way to spawn process!")))))
@@ -1799,12 +1801,18 @@ This function is under construction"
 			(when (y-or-n-p (concat (pop next-se)
 						", solve it ? "))
 			  (funcall (pop next-se)))
-			t; loop again
-			))))) )
+			t))))))
 	;; error handlers
 	(delete-overlay hl-style-error))
       (delete-overlay hl-style-error)))
   (message "Done Visual Basic style check"))
+
+(defun visual-basic-narrow-to-sub ()
+  (interactive)
+  (save-excursion
+    (narrow-to-region
+     (progn (search-backward "NAME:") (forward-line -1) (beginning-of-line) (point))
+     (progn (search-forward "End Sub") (forward-line  1) (point)))))
 
 (provide 'visual-basic-mode)
 

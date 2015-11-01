@@ -22,3 +22,4 @@
 /.emacs.d/server/
 /.emacs.d/smex-items
 /blah.sh
+/.emacs.d/projectile.cache

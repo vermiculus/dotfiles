@@ -18,6 +18,7 @@
         backward-sexp
         backward-up-list
         beginning-of-buffer
+        beginning-of-defun
         beginning-of-visual-line
         c-electric-brace
         c-electric-colon
@@ -28,6 +29,7 @@
         c-electric-slash
         c-electric-star
         c-indent-line-or-region
+        capitalize-region
         center-line
         coffee-dedent-line-backspace
         comment-dwim
@@ -36,6 +38,7 @@
         delete-horizontal-space
         dired-flag-file-deletion
         dired-mark
+        dired-maybe-insert-subdir
         dired-next-line
         dired-previous-line
         downcase-region
@@ -47,29 +50,39 @@
         forward-sexp
         ignore
         indent-for-tab-command
+        indent-region
         kill-region
         kill-sentence
         kill-visual-line
+        mark-paragraph
         markdown-cycle
         markdown-demote
         markdown-exdent-or-delete
         markdown-insert-list-item
         markdown-promote
         message-beginning-of-line
+        mouse-save-then-kill
         nxml-electric-slash
         nxml-forward-element
+        org-backward-element
         org-beginning-of-line
+        org-ctrl-c-ctrl-c
+        org-ctrl-c-ret
         org-cycle
         org-delete-char
         org-end-of-line
+        org-epic:brainbow:open-course-by-id
         org-force-self-insert
+        org-forward-element
         org-insert-heading-respect-content
         org-kill-line
         org-mark-subtree
         org-meta-return
+        org-metadown
         org-metaleft
         org-metaright
         org-open-at-point
+        org-open-line
         org-return
         org-return-indent
         org-self-insert-command
@@ -77,8 +90,11 @@
         org-shiftleft
         org-shiftmetaright
         org-shiftright
+        org-shifttab
         org-shiftup
+        org-toggle-comment
         org-yank
+        paredit-backslash
         paredit-backward
         paredit-backward-kill-word
         paredit-close-round
@@ -92,6 +108,7 @@
         paredit-kill
         paredit-newline
         paredit-open-round
+        paredit-raise-sexp
         paredit-reindent-defun
         paredit-semicolon
         paredit-splice-sexp-killing-backward
@@ -100,16 +117,20 @@
         python-nav-backward-up-list
         reftex-citation
         reindent-then-newline-and-indent
+        repeat
         sgml-slash
         sh-assignment
         slime-space
         smex
         string-rectangle
         tab-to-tab-stop
+        transpose-sexps
         transpose-words
+        undefined
         upcase-region
         visual-basic-indent-line
         visual-basic-newline-and-indent
+        wdired-next-line
         yaml-electric-backspace
         yaml-electric-dash-and-dot
         yas-expand
@@ -119,15 +140,26 @@
       '(
         LaTeX-environment
         TeX-view
+        bf-mode
+        bf-mode-next
         count-words-region
         dired-do-copy
         god-local-mode
+        helm-show-kill-ring
         magit-status
         mc/mark-next-lines
         next-buffer
         ns-print-buffer
+        org-cycle-agenda-files
+        org-edit-src-save
+        org-insert-link
+        overwrite-mode
         previous-buffer
         python-shell-send-buffer
+        scroll-other-window
+        set-goal-column
         shell-command
         suspend-frame
+        swiper
+        toggle-input-method
         ))
