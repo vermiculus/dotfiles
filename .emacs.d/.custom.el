@@ -7,18 +7,13 @@
    ["#272822" "#F92672" "#A6E22E" "#E6DB74" "#66D9EF" "#FD5FF0" "#A1EFE4" "#F8F8F2"])
  '(avy-word-punc-regexp "[!-/:-@[-`{-~]")
  '(blink-matching-delay 0.25)
- '(calendar-latitude 43.008447)
- '(calendar-longitude -89.508943)
- '(caps-lock-mode nil)
  '(compilation-message-face (quote default))
- '(confirm-kill-emacs (quote yes-or-no-p))
  '(custom-enabled-themes (quote (monokai)))
  '(custom-safe-themes
    (quote
     ("05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
  '(default-input-method "TeX")
  '(display-time-mode t)
- '(emc2:assume-training-is-ok t)
  '(fci-rule-color "#49483E")
  '(avy-goto-char-style (quote at))
  '(avy-style (quote at))
@@ -53,28 +48,9 @@
     ("#A41F99" . 85)
     ("#49483E" . 100)))
  '(indent-tabs-mode nil)
- '(ispell-program-name "c:\\Program Files (x86)\\Aspell\\bin\\aspell.exe")
  '(magit-diff-use-overlays nil)
  '(magit-use-overlays nil)
  '(neo-theme (quote ascii))
- '(org-agenda-files
-   (quote
-    ("~/tasks" "c:/Users/sallred/admin" "c:/Users/sallred/tasks")))
- '(org-capture-templates
-   (quote
-    (("a" "Epic QA Note" entry
-      (file "~/../../captured-qans")
-      (file "~/.emacs.d/org/capture-templates/qa-note.org"))
-     ("d" "Idea" entry
-      (file "~/../../ideas")
-      (file "~/.emacs.d/org/capture-templates/idea.org"))
-     ("m" "Question for Mehmet" entry
-      (file+headline "~/../../admin" "Weekly Check-In with Mehmet")
-      (file "~/.emacs.d/org/capture-templates/question.org")))))
- '(org-epic-unique-properties "")
- '(org-export-backends
-   (quote
-    (ascii beamer html icalendar latex man md odt org texinfo)))
  '(org-structure-template-alist
    (quote
     (("s" "#+BEGIN_SRC ?
@@ -126,17 +102,6 @@
      ("i" "#+INDEX: ?" "#+INDEX: ?")
      ("I" "#+INCLUDE: %file ?" "<include file=%file markup=\"?\">")
      ("n" "#+NAME: ?" ""))))
- '(reftex-plug-into-AUCTeX t)
- '(safe-local-variable-values
-   (quote
-    ((org-id-link-to-org-use-id . t)
-     (org-log-into-drawer . t)
-     (org-attach-directory . "c:/users/sallred/data/")
-     (visual-basic-mode-indent . 2)
-     (org-export-date-timestamp-format . "$B %e %Y")
-     (user-mail-address . "code@seanallred.com")
-     (column-number-mode . t))))
- '(sunshine-location "Madison, Wisconsin")
  '(truncate-lines t)
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
@@ -162,18 +127,8 @@
  '(vc-annotate-very-old-color nil)
  '(weechat-color-list
    (unspecified "#272822" "#49483E" "#A20C41" "#F92672" "#67930F" "#A6E22E" "#968B26" "#E6DB74" "#21889B" "#66D9EF" "#A41F99" "#FD5FF0" "#349B8D" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
- '(magit-use-overlays nil t)
  '(neo-dont-be-alone t)
  '(neo-vc-integration (quote (face char)))
- '(org-agenda-files (quote ("~/epic.org")))
- '(org-capture-templates
-   (quote
-    (("T" "Stack ToDo" entry
-      (file "~/github/vermiculus/sx.el/todo.org")
-      "")
-     ("w" "work" entry
-      (file "~/work.org")
-      ""))))
  '(org-export-backends
    (quote
     (ascii beamer html icalendar latex man md odt org texinfo)))
@@ -182,15 +137,15 @@
  '(reftex-plug-into-AUCTeX t)
  '(safe-local-variable-values
    (quote
-    ((org-html-doctype . "xhtml5")
+    ((org-log-into-drawer . t)
+     (visual-basic-mode-indent . 2)
+     (org-html-doctype . "xhtml5")
      (org-html-html5-fancy . t)
      (org-id-link-to-org-use-id . t)
      (org-export-date-timestamp-format . "$B %e %Y")
-     (user-mail-address . "code@seanallred.com")
      (column-number-mode . t))))
  '(save-interprogram-paste-before-kill t)
  '(send-mail-function (quote smtpmail-send-it))
- '(sunshine-location "Madison, WI")
  '(truncate-lines t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

@@ -26,3 +26,5 @@
 /.emacs.d/caches/
 /.emacs.d/sensitive.el.gpg
 /.emacs.d/projectile.cache
+/.emacs.d/osx.custom.el
+/.emacs.d/windows.custom.el

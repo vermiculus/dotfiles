@@ -66,12 +66,26 @@
 
 
 ;; Custom
+(defun *-get-custom.el (&optional prefix)
+  (locate-user-emacs-file
+   (concat (or prefix
+               ;; these files are not tracked by git!
+               ;; such settings can be considered private
+               (cond (*-windows-p "windows")
+                     (*-osx-p "osx")))
+           ".custom.el")))
+
+(defun *-try-load (file)
+  (if (file-readable-p file)
+      (load-file file)
+    (warn "Unable to read %S" file)
+    nil))
+
 (defun *-load-customizations ()
   (interactive)
-  (let ((f (locate-user-emacs-file ".custom.el")))
-    (if (file-readable-p f)
-        (load-file (setq custom-file f))
-      (warn "Unable to read .custom.el"))))
+  (*-try-load (*-get-custom.el))
+  (*-try-load (setq custom-file (*-get-custom.el))))
+
 (if window-system
     (*-load-customizations)
   (package-initialize)
