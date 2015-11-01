@@ -84,7 +84,7 @@
 (defun *-load-customizations ()
   (interactive)
   (*-try-load (*-get-custom.el))
-  (*-try-load (setq custom-file (*-get-custom.el))))
+  (*-try-load (setq custom-file (*-get-custom.el ""))))
 
 (if window-system
     (*-load-customizations)
@@ -411,7 +411,9 @@ ROOT-DIRECTORY."
   :bind (("C-c RET" . ff-find-related-file)
          ("C-c C-'" . compile))
   :config
-  (require 'ggtags)
+  (use-package ggtags
+    :ensure t
+    :if *-osx-p)
   (add-hook 'c-mode-common-hook
             (lambda ()
               (when (derived-mode-p 'c-mode 'c++-mode)
@@ -536,8 +538,6 @@ ROOT-DIRECTORY."
   :if window-system
   :config
   (require 'org-id)
-  (use-package org-epic
-    :load-path "c:/Users/sallred/git/org-epic")
   (add-hook 'org-src-mode-hook #'hack-local-variables)
   (require 'org-agenda)
   (org-add-agenda-custom-command
@@ -962,6 +962,7 @@ ROOT-DIRECTORY."
   :load-path "~/dotfiles/.emacs.d/my-packages/")
 
 (use-package org-epic
+  :if *-windows-p
   :load-path "c:/users/sallred/git/org-epic/"
   :bind (("C-c e" . org-epic:emc2:edit-from-org-task)
          ("C-c E" . org-epic:emc2:edit)
@@ -969,6 +970,7 @@ ROOT-DIRECTORY."
          ("C-c B" . org-epic:brainbow:open-course-by-id)))
 
 (use-package epic-vb6
+  :if *-windows-p
   :load-path "c:/Users/sallred/git/epic-vb6/")
 
 (use-package caps-lock
