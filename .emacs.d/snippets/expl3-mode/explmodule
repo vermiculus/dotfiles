@@ -1,0 +1,9 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: explmodule
+# key: explmodule
+# --
+\nonstopmode \input expl3-generic \relax \ExplSyntaxOn % -*- expl3 -*-
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+$0

@@ -17,6 +17,7 @@
         TeX-insert-quote
         TeX-insert-sub-or-superscript
         TeX-newline
+        antlr-electric-character
         backward-sentence
         backward-sexp
         backward-up-list
@@ -32,6 +33,9 @@
         c-electric-star
         c-indent-line-or-region
         center-line
+        cider-eval-defun-at-point
+        cljr-slash
+        cljr-splice-sexp-killing-backward
         coffee-dedent-line-backspace
         comment-dwim
         completion-at-point
@@ -72,6 +76,7 @@
         markdown-promote
         message-beginning-of-line
         mouse-save-then-kill
+        move-to-window-line-top-bottom
         nxml-electric-slash
         nxml-forward-element
         org-backward-element
@@ -97,6 +102,7 @@
         org-shiftleft
         org-shiftmetaleft
         org-shiftright
+        org-shifttab
         org-transpose-words
         org-yank
         package-menu-mark-unmark
@@ -117,6 +123,7 @@
         paredit-forward-up
         paredit-kill
         paredit-newline
+        paredit-open-curly
         paredit-open-round
         paredit-open-square
         paredit-raise-sexp
@@ -153,6 +160,7 @@
         count-words-region
         describe-key
         dired-do-copy
+        dired-toggle-marks
         edebug-go-mode
         edebug-step-mode
         eshell

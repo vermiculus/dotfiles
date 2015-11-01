@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: doc
+# key: doc
+# binding: direct-keybinding
+# --
+%    \end{macrocode}
+% $0
+%    \begin{macrocode}

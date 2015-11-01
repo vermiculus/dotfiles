@@ -1,3 +1,14 @@
+(defun find-obsolete (list-of-functions &optional so-far)
+  (if list-of-functions
+      (let* ((f (first list-of-functions))
+             (obsolete (plist-get (symbol-plist f) 'byte-obsolete-info)))
+        (find-obsolete
+         (rest list-of-functions)
+         (if obsolete
+             (cons (cons f (car obsolete)) so-far)
+           so-far)))
+    so-far))
+
 (setq gc-cons-threshold 100000000)
 (add-to-list 'load-path ".")
 
@@ -474,7 +485,6 @@ ROOT-DIRECTORY."
 (use-package magit
   :ensure t
   :if window-system
-  :diminish magit-auto-revert-mode
   :bind ("M-m" . magit-status)
   :config
   (setq magit-diff-refine-hunk nil
@@ -544,6 +554,10 @@ ROOT-DIRECTORY."
           ielm-mode-hook
           clojure-mode-hook
           cider-repl-mode-hook)))
+(use-package aggressive-indent
+  :ensure t
+  :config
+  (aggressive-indent-global-mode))
 
 (use-package clj-refactor
   :ensure t
@@ -688,7 +702,10 @@ ROOT-DIRECTORY."
                '("\\.zip\\'" ".zip" "unzip")))
 
 (use-package dired
-  :init (bind-key "z" #'*-dired-zip-files dired-mode-map)
+  :init
+  (bind-keys :map dired-mode-map
+             ("/" . dired-up-directory)
+             ("z" . *-dired-zip-files))
   :config
   (use-package bf-mode)
   (when *-osx-p
@@ -713,8 +730,7 @@ ROOT-DIRECTORY."
        (concat "zip "
                zip-file
                " "
-               (mapconcat (lambda (filename)
-                            (file-name-nondirectory filename))
+               (mapconcat #'file-name-nondirectory
                           (dired-get-marked-files) " "))))
 
     ;; remove the mark on all the files  "*" to " "
@@ -926,8 +942,7 @@ ROOT-DIRECTORY."
 (defun flash-active-buffer ()
   (interactive)
   (run-at-time "50 millisec" nil
-               (lambda (remap-cookie)
-                 (face-remap-remove-relative remap-cookie))
+               #'face-remap-remove-relative
                (face-remap-add-relative 'default 'flash-active-buffer-face)))
 
 (defun *-eval-and-replace ()
@@ -1002,6 +1017,10 @@ ROOT-DIRECTORY."
         (insert "\n}")
         (indent-for-tab-command)))))
 
+(use-package ediff
+  :config
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+
 (require 'cc-mode)
 (define-key c-mode-map (kbd "C-{") #'*-make-scope)
 
@@ -1011,6 +1030,10 @@ ROOT-DIRECTORY."
 ;; End:
 (put 'narrow-to-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
-;(setq gc-cons-threshold 800000)
 
-
+(run-with-idle-timer
+ 5 nil
+ (lambda ()
+   (setq gc-cons-threshold 1000000)
+   (message "gc-cons-threshold restored to %S"
+            gc-cons-threshold)))

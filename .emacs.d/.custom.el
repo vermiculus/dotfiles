@@ -26,7 +26,7 @@
            3]
      global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
  '(indent-tabs-mode nil)
- '(magit-use-overlays nil)
+ '(magit-use-overlays nil t)
  '(neo-dont-be-alone t)
  '(neo-vc-integration (quote (face char)))
  '(org-agenda-files (quote ("~/epic.org")))
@@ -46,7 +46,10 @@
  '(reftex-plug-into-AUCTeX t)
  '(safe-local-variable-values
    (quote
-    ((org-export-date-timestamp-format . "$B %e %Y")
+    ((org-html-doctype . "xhtml5")
+     (org-html-html5-fancy . t)
+     (org-id-link-to-org-use-id . t)
+     (org-export-date-timestamp-format . "$B %e %Y")
      (user-mail-address . "code@seanallred.com")
      (column-number-mode . t))))
  '(save-interprogram-paste-before-kill t)
@@ -59,5 +62,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(erefactor-highlight-face ((t (:inherit match :foreground "yellow1"))))
+ '(org-level-1 ((t (:inherit variable-pitch :foreground "#FD971F" :height 1.3))))
  '(org-verbatim ((t (:inherit shadow))))
- '(sx-question-mode-tags ((t (:inherit font-lock-function-name-face :underline nil :slant normal)))))
+ '(sx-question-mode-tags ((t (:inherit font-lock-function-name-face :underline nil :slant normal))))
+ '(variable-pitch ((t nil))))

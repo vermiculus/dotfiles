@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: split-doc
+# key: sdoc
+# binding: C-c d
+# --
+%    \end{macrocode}
+% $0
+%    \begin{macrocode}
