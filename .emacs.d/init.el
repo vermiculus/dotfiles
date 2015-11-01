@@ -413,11 +413,12 @@ ROOT-DIRECTORY."
   :config
   (use-package ggtags
     :ensure t
-    :if *-osx-p)
-  (add-hook 'c-mode-common-hook
-            (lambda ()
-              (when (derived-mode-p 'c-mode 'c++-mode)
-                (ggtags-mode 1)))))
+    :if *-osx-p
+    :config
+    (add-hook 'c-mode-common-hook
+              (lambda ()
+                (when (derived-mode-p 'c-mode 'c++-mode)
+                  (ggtags-mode 1))))))
 
 
 ;; Company
@@ -559,7 +560,6 @@ ROOT-DIRECTORY."
   :ensure t
   :config
   (setq neo-theme 'nerd)
-  ;:config (bind-key "u" #'neo- neotree-mode-map)
   :bind (("<apps>" . neotree)))
 
 (use-package outorg
@@ -674,28 +674,28 @@ ROOT-DIRECTORY."
   :defer t
   :config
   (defun *-insert-post-url (bare)
-  (interactive "P")
-  (require 'f)
-  (require 'cl-lib)
-  (let* ((basedir (expand-file-name "~/blog/_posts/"))
-         (files (f-files basedir
-                         (lambda (f)
-                           (string= (file-name-extension f)
-                                    "markdown"))
-                         t))
-         (candidates (cl-remove-duplicates
-                      (mapcar
-                       (lambda (f) (s-chop-prefix
-                                    basedir
-                                    (s-chop-suffix
-                                     ".markdown"
-                                     (s-chop-suffix "~" f))))
-                       files)
-        :test #'string=)))
-    (insert
-     (format
-      (if bare "%s" "{%% post_url %s %%}")
-      (file-name-base (completing-read "Post: " candidates))))))
+    (interactive "P")
+    (require 'f)
+    (require 'cl-lib)
+    (let* ((basedir (expand-file-name "~/blog/_posts/"))
+           (files (f-files basedir
+                           (lambda (f)
+                             (string= (file-name-extension f)
+                                      "markdown"))
+                           t))
+           (candidates (cl-remove-duplicates
+                        (mapcar
+                         (lambda (f) (s-chop-prefix
+                                      basedir
+                                      (s-chop-suffix
+                                       ".markdown"
+                                       (s-chop-suffix "~" f))))
+                         files)
+                        :test #'string=)))
+      (insert
+       (format
+        (if bare "%s" "{%% post_url %s %%}")
+        (file-name-base (completing-read "Post: " candidates))))))
   (bind-key "M-M" #'*-insert-post-url markdown-mode-map))
 
 
@@ -1108,6 +1108,7 @@ ROOT-DIRECTORY."
             erc-mode-map))
 
 (use-package sx
+  :if *-osx-p
   :config
   (bind-keys :prefix-map *-sx-map
              :prefix "s-x"
