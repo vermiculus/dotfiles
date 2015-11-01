@@ -1224,6 +1224,10 @@ ROOT-DIRECTORY."
     (add-to-list 'exec-path "C:/cygwin64/bin"))
   :bind ("M-m" . magit-status))
 
+(when *-windows-p
+  (setq exec-path (add-to-list 'exec-path "C:/Program Files (x86)/Git/bin"))
+  (setenv "PATH" (concat "C:\\Program Files (x86)\\Git\\bin;" (getenv "PATH"))))
+
 ;; Local Variables:
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
