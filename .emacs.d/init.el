@@ -1029,12 +1029,8 @@ ROOT-DIRECTORY."
   (cd "c:/EpicSource/8.2/2015Q3 QA/Obstetrics/Delivery/")
   (find-name-dired))
 
-(use-package swiper
-  :bind ("C-s" . swiper))
-
 (require 'evil)
 (setq evil-symbol-word-search t)
-(global-set-key (kbd "C-#") #'evil-search-word-forward)
 
 (put 'narrow-to-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
@@ -1116,8 +1112,14 @@ ROOT-DIRECTORY."
              ("s" . sx-tab-frontpage)))
 
 (use-package swiper
-  :init (require 'ivy)
-  :bind ("C-s" . swiper))
+  :init
+  (require 'ivy)
+  (require 'thingatpt)
+  (defun *-swiper-thing-at-point (thing)
+    (interactive (list 'symbol))
+    (swiper (thing-at-point thing)))
+  :bind (("C-s" . swiper)
+         ("C-#" . *-swiper-thing-at-point)))
 
 (use-package help
   :config
