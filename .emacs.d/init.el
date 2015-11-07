@@ -485,6 +485,7 @@ ROOT-DIRECTORY."
   (when (executable-find "curl")
     (setq helm-google-suggest-use-curl-p t))
   (setq helm-M-x-fuzzy-match t)
+  (helm-mode t)
   :bind
   (("s-x"   . helm-M-x)
    ("C-x C-a" . helm-command-prefix)
