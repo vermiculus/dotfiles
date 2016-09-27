@@ -739,18 +739,6 @@ ROOT-DIRECTORY."
   :mode "\\.csv\\'")
 
 
-;; PATH Setup
-
-(let ((more-paths '("/usr/texbin" "/usr/local/bin")))
-  (setenv "PATH"
-          (mapconcat #'identity
-                     `(,@more-paths
-                       ,(getenv "PATH"))
-                     path-separator))
-  (mapc (lambda (p) (add-to-list 'exec-path p))
-        more-paths))
-
-
 ;; Dired
 
 (use-package dired-aux
@@ -1111,6 +1099,12 @@ ROOT-DIRECTORY."
              :prefix "s-x"
              ("i" . sx-inbox)
              ("s" . sx-tab-frontpage)))
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize)))
+
 
 (use-package swiper
   :init
