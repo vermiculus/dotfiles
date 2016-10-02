@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: documentation
+# key: doc
+# --
+/**
+ * ${1:@author ${2:Sean Allred}
+ * }@desc $3
+ * @example $0
+ */

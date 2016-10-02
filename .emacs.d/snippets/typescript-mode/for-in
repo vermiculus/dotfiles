@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: for-in
+# key: fi
+# --
+for (let ${1:key} in ${2:collection}) {
+    $0
+}

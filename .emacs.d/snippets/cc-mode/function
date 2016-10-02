@@ -1,0 +1,8 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: function
+# key: ff
+# --
+${1:void} ${2:function_name} (${5:int argument}) {
+  $0${3:
+  return${4: 0};}
+}
