@@ -24,20 +24,16 @@
 
 ;;; Code:
 
-(defvar mumps-mode-syntax-table
-  (let ((table (make-syntax-table
-                (standard-syntax-table))))
-    ;; change the standard string escape to be treated as a punctuation mark
-    (modify-syntax-entry ?\\ "." table)
-    ;; start comments with a semicolon
-    (modify-syntax-entry ?\; "<" table)
-    ;; end comments with a newline
-    (modify-syntax-entry ?\n ">" table)
-    table))
-
 (defgroup mumps nil
   "MUMPS editing"
   :group 'languages)
+
+(defvar mumps-mode-syntax-table
+  (let ((table (make-syntax-table (standard-syntax-table))))
+    (modify-syntax-entry ?\\ "." table)
+    (modify-syntax-entry ?\; "<" table)
+    (modify-syntax-entry ?\n ">" table)
+    table))
 
 (defcustom mumps-globals-alist
   nil
@@ -54,12 +50,7 @@ display."
   (setq mode-name "mumps-mode"
         major-mode 'mumps-mode)
   (make-local-variable 'font-lock-defaults)
-  ;; warning: syntactic analysis is needed for strings with semicolons to render properly
-  ;; uncomment the following line to disable syntactic analysis of strings and comments.
-  ;(setq font-lock-keywords-only t)
   (set-syntax-table mumps-mode-syntax-table)
-  ;; uncomment the following line to use an alternate comment-marking strategy
-  ;(setq comment-start-skip ";")
   (setq font-lock-defaults '(mumps-font-lock-keywords nil t))
   (font-lock-mode t))
 
@@ -80,36 +71,15 @@ display."
     ))
 
 (defvar mumps-font-lock-keywords
-  `(
-   ;; strings - if not done with syntactic analysis
-   ;'("\"[^\"]*\"" . font-lock-string-face)
-   ;; comments - if not done with syntactic analysis
-   ;'(";.*$" 0 font-lock-comment-face t)
-   ;; preprocessor tags and comments
-    (,(rx ";"
-          (* whitespace)
-          (group "#"
-                 (* (not (any "#")))
-                 "#"))
-     1 font-lock-preprocessor-face t)
-    ;; tags
-    (,(rx (+ (not (any "%" alphanumeric))))
-     . font-lock-function-name-face)
-    ;; function calls, match $$^ROU by not forcing a tag name
-    (,(rx "$$" (* (any "%" alphanumeric)))
-     . font-lock-function-name-face)
-    ;; built-in functions
-    (,(rx "$" (+ (any "%" alphanumeric)))
-     . font-lock-builtin-face)
-    ;; Globals, accounting for brackets (sloppy)
-    ( ;(rx "^" (+ (any "[" "]" "%" alphanumeric)))
-     ; I think the above is correct, but I'm not sure.
-     "\\^[]%[:alnum:][]+" . font-lock-constant-face)
-    ;; single-character commands
-    (,(rx (+ (any " " "."))
-          (group letter)
-          (group (| " " ":" "$")))
-     1 font-lock-keyword-face)
+  `((,(rx line-start (group (+ (any "%" alphanumeric))))    1 font-lock-function-name-face t)
+    (,(rx ";" (* whitespace) (group "#" (*? anything) "#")) 1 font-lock-preprocessor-face t)
+    (,(rx (group "$$")
+          (group (+ (any "%" alphanumeric))))
+     (1 font-lock-keyword-face)
+     (2 font-lock-function-name-face))
+    (,(rx "$" (+ alpha))                                    . font-lock-builtin-face)
+    (,(rx "^" (+ (any "[" "]" "%" alphanumeric)))           . font-lock-constant-face)
+    (,(rx letter (* letter))                                . font-lock-keyword-face)
     "Additional expressions to highlight in mumps mode."))
 
 (add-to-list 'auto-mode-alist

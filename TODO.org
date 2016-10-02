@@ -1,8 +1,0 @@
-This file contains packages and software solutions that I yet need to
-investigate.
-
-* Emacs
-- =irony-mode=
-
-* Programs
-- =surfraw=

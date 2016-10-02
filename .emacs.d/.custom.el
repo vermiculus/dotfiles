@@ -3,54 +3,73 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default bold shadow italic underline bold bold-italic bold])
  '(ansi-color-names-vector
    ["#272822" "#F92672" "#A6E22E" "#E6DB74" "#66D9EF" "#FD5FF0" "#A1EFE4" "#F8F8F2"])
- '(avy-word-punc-regexp "[!-/:-@[-`{-~]")
- '(blink-matching-delay 0.25)
- '(compilation-message-face (quote default))
- '(custom-enabled-themes (quote (monokai)))
- '(custom-safe-themes
-   (quote
-    ("05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
- '(default-input-method "TeX")
- '(display-time-mode t)
- '(fci-rule-color "#49483E")
  '(avy-goto-char-style (quote at))
  '(avy-style (quote at))
+ '(avy-word-punc-regexp "[!-/:-@[-`{-~]")
+ '(blink-cursor-mode nil)
+ '(blink-matching-delay 0.25)
+ '(c-mode-common-hook nil)
  '(cider-repl-use-pretty-printing t)
+ '(compilation-message-face (quote default))
  '(confirm-kill-emacs
    (lambda
      (prompt)
      (or
       (not window-system)
       (yes-or-no-p prompt))))
+ '(counsel-find-file-ignore-regexp nil)
+ '(custom-enabled-themes (quote (monokai)))
+ '(custom-safe-themes
+   (quote
+    ("628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
+ '(debug-on-error nil)
+ '(default-input-method "TeX")
+ '(display-time-mode t)
+ '(doc-view-resolution 100)
  '(erc-minibuffer-notice t)
  '(erc-notifications-mode t)
  '(erc-track-enable-keybindings t)
  '(erc-track-minor-mode t)
  '(erc-track-mode t)
  '(erc-track-showcount nil)
- '(find-file-hook
-   (quote
-    (auto-insert
-     #[nil "\302\301!\210\303\304!8\211\207"
-           [buffer-file-name auto-revert-tail-pos make-local-variable 7 file-attributes]
-           3]
-     global-font-lock-mode-check-buffers epa-file-find-file-hook vc-find-file-hook)))
- '(highlight-changes-colors ("#FD5FF0" "#AE81FF"))
+ '(fci-rule-color "#49483E")
+ '(highlight-changes-colors (quote ("#FD5FF0" "#AE81FF")))
  '(highlight-tail-colors
-   (("#49483E" . 0)
-    ("#67930F" . 20)
-    ("#349B8D" . 30)
-    ("#21889B" . 50)
-    ("#968B26" . 60)
-    ("#A45E0A" . 70)
-    ("#A41F99" . 85)
-    ("#49483E" . 100)))
+   (quote
+    (("#49483E" . 0)
+     ("#679A01" . 20)
+     ("#4BBEAE" . 30)
+     ("#1DB4D0" . 50)
+     ("#9A8F21" . 60)
+     ("#A75B00" . 70)
+     ("#F309DF" . 85)
+     ("#49483E" . 100))))
  '(indent-tabs-mode nil)
+ '(ivy-fixed-height-minibuffer nil)
+ '(ivy-format-function (quote ivy-format-function-arrow))
+ '(magit-commit-arguments nil)
  '(magit-diff-use-overlays nil)
+ '(magit-popup-show-common-commands nil)
+ '(magit-popup-show-help-echo nil)
+ '(magit-popup-use-prefix-argument (quote default))
  '(magit-use-overlays nil)
+ '(neo-dont-be-alone t)
  '(neo-theme (quote ascii))
+ '(neo-vc-integration (quote (face char)))
+ '(org-agenda-files (quote ("~/everything.org" "~/epic/lumps/doc/lumps.org")))
+ '(org-capture-templates
+   (quote
+    (("l" "Lumps Idea" entry
+      (file "~/epic/lumps/idea-bin.org")
+      ""))))
+ '(org-export-backends
+   (quote
+    (ascii beamer html icalendar latex man md odt org texinfo)))
+ '(org-src-fontify-natively t)
  '(org-structure-template-alist
    (quote
     (("s" "#+BEGIN_SRC ?
@@ -102,6 +121,26 @@
      ("i" "#+INDEX: ?" "#+INDEX: ?")
      ("I" "#+INCLUDE: %file ?" "<include file=%file markup=\"?\">")
      ("n" "#+NAME: ?" ""))))
+ '(package-selected-packages
+   (quote
+    (ample-theme exec-path-from-shell company-go guide-key free-keys cask-mode gh marshal s cl-lib with-editor git-commit unidecode wc-goal-mode tide go-mode counsel-osx-app sql-indent org-projectile counsel-projectile helm-projectile emmet-mode beacon org-bullets kpm-list vline bpr bitlbee zone-nyan yaml-mode xbm-life xahk-mode wgrep-ag vimish-fold use-package twittering-mode sx sunshine stash spotlight spotify smex slime scss-mode sass-mode rvm robe rainbow-mode rainbow-blocks psvn paredit-menu paredit-everywhere pacmacs ox-twbs outshine osx-lib org-jekyll oauth2 nyan-prompt nyan-mode nose neotree names monokai-theme mediawiki magit-svn magit-gitflow lua-mode lorem-ipsum key-chord json-rpc jekyll-modes indent-guide impatient-mode hyde helm-swoop helm-spotify helm-rails helm-package helm-gtags helm-commandlinefu helm-bibtex helm-ag gscholar-bibtex goto-last-change golden-ratio god-mode gitignore-mode github-clone github-browse-file gitconfig-mode git-link ggtags font-lock-studio flx-ido fish-mode expand-region evil erefactor erc-terminal-notifier emacsshot edbi-sqlite dirtree demo-it define-word debbugs darkroom csv-mode csharp-mode company-restclient company-c-headers company-anaconda color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clj-refactor chicken-scheme caps-lock btc-ticker bf-mode bbdb auctex aggressive-indent ag ace-window ace-jump-mode @ 4clojure 2048-game)))
+ '(pos-tip-background-color "#A6E22E")
+ '(pos-tip-foreground-color "#272822")
+ '(projectile-globally-ignored-file-suffixes (quote ("~")))
+ '(reftex-plug-into-AUCTeX t)
+ '(safe-local-variable-values
+   (quote
+    ((user-mail-address . "code@seanallred.com")
+     (org-log-into-drawer . t)
+     (visual-basic-mode-indent . 2)
+     (org-html-doctype . "xhtml5")
+     (org-html-html5-fancy . t)
+     (org-id-link-to-org-use-id . t)
+     (org-export-date-timestamp-format . "$B %e %Y")
+     (column-number-mode . t))))
+ '(save-interprogram-paste-before-kill t)
+ '(send-mail-function (quote smtpmail-send-it))
+ '(sunshine-location "Madison, WI")
  '(truncate-lines t)
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
@@ -125,38 +164,17 @@
      (340 . "#2790C3")
      (360 . "#66D9EF"))))
  '(vc-annotate-very-old-color nil)
+ '(visible-bell t)
  '(weechat-color-list
-   (unspecified "#272822" "#49483E" "#A20C41" "#F92672" "#67930F" "#A6E22E" "#968B26" "#E6DB74" "#21889B" "#66D9EF" "#A41F99" "#FD5FF0" "#349B8D" "#A1EFE4" "#F8F8F2" "#F8F8F0"))
- '(neo-dont-be-alone t)
- '(neo-vc-integration (quote (face char)))
- '(org-export-backends
-   (quote
-    (ascii beamer html icalendar latex man md odt org texinfo)))
- '(org-src-fontify-natively t)
- '(projectile-globally-ignored-file-suffixes (quote ("~")))
- '(reftex-plug-into-AUCTeX t)
- '(safe-local-variable-values
-   (quote
-    ((org-log-into-drawer . t)
-     (visual-basic-mode-indent . 2)
-     (org-html-doctype . "xhtml5")
-     (org-html-html5-fancy . t)
-     (org-id-link-to-org-use-id . t)
-     (org-export-date-timestamp-format . "$B %e %Y")
-     (column-number-mode . t))))
- '(save-interprogram-paste-before-kill t)
- '(send-mail-function (quote smtpmail-send-it))
- '(truncate-lines t))
+   (unspecified "#272822" "#49483E" "#F70057" "#F92672" "#86C30D" "#A6E22E" "#BEB244" "#E6DB74" "#40CAE4" "#66D9EF" "#FB35EA" "#FD5FF0" "#74DBCD" "#A1EFE4" "#F8F8F2" "#F8F8F0")))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-code ((t (:foreground "gold2"))))
- '(org-verbatim ((t (:inherit shadow :foreground "gold1"))))
- '(variable-pitch ((t (:weight bold))))
  '(erefactor-highlight-face ((t (:inherit match :foreground "yellow1"))))
+ '(org-code ((t (:foreground "gold2"))))
  '(org-level-1 ((t (:inherit variable-pitch :foreground "#FD971F" :height 1.3))))
- '(org-verbatim ((t (:inherit shadow))))
+ '(org-verbatim ((t (:inherit shadow :foreground "gold1"))))
  '(sx-question-mode-tags ((t (:inherit font-lock-function-name-face :underline nil :slant normal))))
- '(variable-pitch ((t nil))))
+ '(variable-pitch ((t (:weight bold)))))

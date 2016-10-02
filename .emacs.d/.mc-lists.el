@@ -3,317 +3,309 @@
 
 (setq mc/cmds-to-run-for-all
       '(
-        *-eval-and-replace
         LaTeX-babel-insert-hyphen
+        LaTeX-babel-insert-hyphen
+        LaTeX-close-environment
         LaTeX-close-environment
         LaTeX-insert-item
         LaTeX-insert-left-brace
+        LaTeX-insert-left-brace
+        LaTeX-insert-space
         LaTeX-insert-space
         LaTeX-mark-environment
+        LaTeX-mark-environment
+        TeX-fold-env
         TeX-fold-env
         TeX-font
+        TeX-font
+        TeX-insert-backslash
         TeX-insert-backslash
         TeX-insert-dollar
+        TeX-insert-dollar
+        TeX-insert-quote
         TeX-insert-quote
         TeX-insert-sub-or-superscript
+        TeX-insert-sub-or-superscript
+        TeX-newline
         TeX-newline
         antlr-electric-character
         backward-sentence
         backward-sexp
+        backward-sexp
+        backward-up-list
         backward-up-list
         beginning-of-buffer
+        beginning-of-buffer
+        beginning-of-defun
+        beginning-of-visual-line
         beginning-of-visual-line
         c-electric-brace
+        c-electric-brace
+        c-electric-colon
         c-electric-colon
         c-electric-delete-forward
+        c-electric-delete-forward
+        c-electric-lt-gt
         c-electric-lt-gt
         c-electric-paren
+        c-electric-paren
+        c-electric-semi&comma
         c-electric-semi&comma
         c-electric-slash
+        c-electric-slash
+        c-electric-star
         c-electric-star
         c-indent-line-or-region
+        c-indent-line-or-region
+        capitalize-region
+        center-line
         center-line
         cider-eval-defun-at-point
+        cider-eval-last-sexp
         cljr-slash
         cljr-splice-sexp-killing-backward
         coffee-dedent-line-backspace
+        coffee-dedent-line-backspace
         comment-dwim
+        comment-dwim
+        complete-symbol
         completion-at-point
+        completion-at-point
+        csharp-maybe-insert-codedoc
+        dabbrev-expand
         dabbrev-expand
         delete-horizontal-space
+        delete-horizontal-space
+        dired-flag-file-deletion
         dired-flag-file-deletion
         dired-mark
+        dired-mark
+        dired-maybe-insert-subdir
         dired-next-line
+        dired-next-line
+        dired-previous-line
         dired-previous-line
         down-list
         downcase-region
+        downcase-region
+        electric-newline-and-maybe-indent
         electric-newline-and-maybe-indent
         electric-pair-delete-pair
+        emmet-expand-line
         end-of-buffer
+        end-of-buffer
+        end-of-visual-line
         end-of-visual-line
         erc-bol
         erefactor-highlight-next-symbol
         erefactor-highlight-previous-symbol
         eval-defun
         eval-last-sexp
+        eval-last-sexp
+        fill-paragraph
         fill-paragraph
         forward-sentence
         forward-sexp
+        forward-sexp
         ibuffer-mark-for-delete
+        ignore
+        indent-for-tab-command
         indent-for-tab-command
         indent-new-comment-line
+        indent-region
         indent-region
         isearch-forward-regexp
         isearch-printing-char
         kill-region
+        kill-region
+        kill-sentence
         kill-sentence
         kill-visual-line
+        kill-visual-line
+        mark-paragraph
+        mark-sexp
         markdown-cycle
+        markdown-cycle
+        markdown-demote
         markdown-demote
         markdown-enter-key
         markdown-exdent-or-delete
+        markdown-exdent-or-delete
+        markdown-forward-paragraph
+        markdown-insert-list-item
         markdown-insert-list-item
         markdown-promote
+        markdown-promote
         message-beginning-of-line
+        message-beginning-of-line
+        mouse-save-then-kill
         mouse-save-then-kill
         move-to-window-line-top-bottom
         nxml-electric-slash
-        nxml-forward-element
-        org-backward-element
-        org-beginning-of-line
-        org-cycle
-        org-delete-char
-        org-end-of-line
-        org-force-self-insert
-        org-forward-element
-        org-forward-sentence
-        org-insert-heading-respect-content
-        org-insert-todo-heading
-        org-kill-line
-        org-mark-subtree
-        org-meta-return
-        org-metaleft
-        org-metaright
-        org-open-at-point
-        org-open-line
-        org-return
-        org-return-indent
-        org-self-insert-command
-        org-shiftleft
-        org-shiftmetaleft
-        org-shiftright
-        org-shifttab
-        org-transpose-words
-        org-yank
-        package-menu-mark-unmark
-        paredit-backslash
-        paredit-backward
-        paredit-backward-kill-word
-        paredit-backward-up
-        paredit-close-round
-        paredit-close-square
-        paredit-comment-dwim
-        paredit-doublequote
-        paredit-forward
-        paredit-forward-barf-sexp
-        paredit-forward-delete
-        paredit-forward-down
-        paredit-forward-kill-word
-        paredit-forward-slurp-sexp
-        paredit-forward-up
-        paredit-kill
-        paredit-newline
-        paredit-open-curly
-        paredit-open-round
-        paredit-open-square
-        paredit-raise-sexp
-        paredit-reindent-defun
-        paredit-semicolon
-        paredit-splice-sexp-killing-backward
-        paredit-split-sexp
-        pp-eval-last-sexp
-        python-indent-electric-colon
-        python-nav-backward-up-list
-        reftex-citation
-        reindent-then-newline-and-indent
-        sgml-slash
-        sh-assignment
-        slime-space
-        string-rectangle
-        tab-to-tab-stop
-        transpose-sexps
-        transpose-words
-        upcase-region
-        wdired-downcase-word
-        yaml-electric-backspace
-        yaml-electric-bar-and-angle
-        yaml-electric-dash-and-dot
-        yas-expand
-        LaTeX-babel-insert-hyphen
-        LaTeX-close-environment
-        LaTeX-insert-left-brace
-        LaTeX-insert-space
-        LaTeX-mark-environment
-        TeX-fold-env
-        TeX-font
-        TeX-insert-backslash
-        TeX-insert-dollar
-        TeX-insert-quote
-        TeX-insert-sub-or-superscript
-        TeX-newline
-        backward-sexp
-        backward-up-list
-        beginning-of-buffer
-        beginning-of-defun
-        beginning-of-visual-line
-        c-electric-brace
-        c-electric-colon
-        c-electric-delete-forward
-        c-electric-lt-gt
-        c-electric-paren
-        c-electric-semi&comma
-        c-electric-slash
-        c-electric-star
-        c-indent-line-or-region
-        capitalize-region
-        center-line
-        coffee-dedent-line-backspace
-        comment-dwim
-        completion-at-point
-        dabbrev-expand
-        delete-horizontal-space
-        dired-flag-file-deletion
-        dired-mark
-        dired-maybe-insert-subdir
-        dired-next-line
-        dired-previous-line
-        downcase-region
-        electric-newline-and-maybe-indent
-        end-of-buffer
-        end-of-visual-line
-        eval-last-sexp
-        fill-paragraph
-        forward-sexp
-        ignore
-        indent-for-tab-command
-        indent-region
-        kill-region
-        kill-sentence
-        kill-visual-line
-        mark-paragraph
-        markdown-cycle
-        markdown-demote
-        markdown-exdent-or-delete
-        markdown-insert-list-item
-        markdown-promote
-        message-beginning-of-line
-        mouse-save-then-kill
         nxml-electric-slash
         nxml-forward-element
+        nxml-forward-element
         org-backward-element
+        org-backward-element
+        org-beginning-of-line
         org-beginning-of-line
         org-ctrl-c-ctrl-c
         org-ctrl-c-ret
         org-cycle
+        org-cycle
         org-delete-char
+        org-delete-char
+        org-end-of-line
         org-end-of-line
         org-epic:brainbow:open-course-by-id
         org-force-self-insert
+        org-force-self-insert
         org-forward-element
+        org-forward-element
+        org-forward-sentence
         org-insert-heading-respect-content
+        org-insert-heading-respect-content
+        org-insert-todo-heading
+        org-kill-line
         org-kill-line
         org-mark-subtree
+        org-mark-subtree
+        org-meta-return
         org-meta-return
         org-metadown
         org-metaleft
+        org-metaleft
+        org-metaright
         org-metaright
         org-open-at-point
+        org-open-at-point
+        org-open-line
         org-open-line
         org-return
+        org-return
         org-return-indent
+        org-return-indent
+        org-self-insert-command
         org-self-insert-command
         org-shiftdown
         org-shiftleft
+        org-shiftleft
+        org-shiftmetaleft
         org-shiftmetaright
         org-shiftright
+        org-shiftright
+        org-shifttab
         org-shifttab
         org-shiftup
         org-toggle-comment
+        org-transpose-words
         org-yank
+        org-yank
+        orgtbl-hijacker-command-100
+        package-menu-mark-unmark
+        paredit-backslash
         paredit-backslash
         paredit-backward
+        paredit-backward
         paredit-backward-kill-word
+        paredit-backward-kill-word
+        paredit-backward-up
         paredit-close-round
+        paredit-close-round
+        paredit-close-square
+        paredit-comment-dwim
         paredit-comment-dwim
         paredit-doublequote
+        paredit-doublequote
+        paredit-forward
         paredit-forward
         paredit-forward-barf-sexp
+        paredit-forward-barf-sexp
         paredit-forward-delete
+        paredit-forward-delete
+        paredit-forward-down
+        paredit-forward-kill-word
         paredit-forward-kill-word
         paredit-forward-slurp-sexp
+        paredit-forward-slurp-sexp
+        paredit-forward-up
+        paredit-kill
         paredit-kill
         paredit-newline
+        paredit-newline
+        paredit-open-curly
         paredit-open-round
+        paredit-open-round
+        paredit-open-square
+        paredit-raise-sexp
         paredit-raise-sexp
         paredit-reindent-defun
+        paredit-reindent-defun
         paredit-semicolon
+        paredit-semicolon
+        paredit-splice-sexp
         paredit-splice-sexp-killing-backward
+        paredit-splice-sexp-killing-backward
+        paredit-split-sexp
+        pp-eval-last-sexp
         pp-eval-last-sexp
         python-indent-electric-colon
+        python-indent-electric-colon
+        python-nav-backward-up-list
         python-nav-backward-up-list
         reftex-citation
+        reftex-citation
+        reindent-then-newline-and-indent
         reindent-then-newline-and-indent
         repeat
         sgml-slash
+        sgml-slash
         sh-assignment
+        sh-assignment
+        slime-space
         slime-space
         smex
         string-rectangle
+        string-rectangle
+        tab-to-tab-stop
         tab-to-tab-stop
         transpose-sexps
+        transpose-sexps
         transpose-words
+        transpose-words
+        typescript-insert-and-indent
         undefined
+        upcase-region
         upcase-region
         visual-basic-indent-line
         visual-basic-newline-and-indent
+        wdired-downcase-word
         wdired-next-line
         yaml-electric-backspace
+        yaml-electric-backspace
+        yaml-electric-bar-and-angle
         yaml-electric-dash-and-dot
+        yaml-electric-dash-and-dot
+        yas-expand
         yas-expand
         ))
 
 (setq mc/cmds-to-run-once
       '(
         LaTeX-environment
-        TeX-view
-        bf-mode
-        bf-mode-next
-        count-words-region
-        dired-do-copy
-        god-local-mode
-        helm-show-kill-ring
-        magit-status
-        mc/mark-next-lines
-        next-buffer
-        ns-print-buffer
-        org-cycle-agenda-files
-        org-edit-src-save
-        org-insert-link
-        overwrite-mode
-        previous-buffer
-        python-shell-send-buffer
-        scroll-other-window
-        set-goal-column
-        shell-command
-        suspend-frame
-        swiper
-        toggle-input-method
         LaTeX-environment
+        TeX-view
         TeX-view
         abort-recursive-edit
         ace-window
+        bf-mode
+        bf-mode-next
+        bibtex-find-text
+        counsel-M-x
+        count-words-region
         count-words-region
         describe-key
+        dired-do-copy
         dired-do-copy
         dired-toggle-marks
         edebug-go-mode
@@ -322,14 +314,35 @@
         eval-expression
         ggtags-navigation-mode-done
         god-local-mode
+        god-local-mode
+        helm-do-ag
+        helm-show-kill-ring
         helm-show-kill-ring
         magit-status
+        magit-status
+        mc/cycle
+        mc/mark-next-lines
         mc/mark-next-lines
         next-buffer
+        next-buffer
         ns-print-buffer
+        ns-print-buffer
+        org-cycle-agenda-files
+        org-edit-src-save
+        org-insert-link
         org-shiftmetaright
+        overwrite-mode
+        previous-buffer
         previous-buffer
         python-shell-send-buffer
+        python-shell-send-buffer
+        scroll-other-window
+        set-goal-column
+        shell-command
         shell-command
         smex
+        suspend-frame
+        swiper
+        swiper-mc
+        toggle-input-method
         ))
