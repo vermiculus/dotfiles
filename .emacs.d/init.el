@@ -684,9 +684,7 @@
 
 (use-package monokai-theme
   :if window-system
-  :disabled t
-  :config
-  (enable-theme 'monokai))
+  :disabled t)
 
 (use-package ample-theme
   :init
@@ -695,7 +693,10 @@
   (load-theme 'ample-light t t)
   (enable-theme 'ample)
   :defer t
-  :ensure t)
+  :ensure t
+  :config
+  (set-face-background 'region "#484040")
+  (set-face-foreground 'dired-ignored "#4F4F4F"))
 
 ;; Local Variables:
 ;; fill-column: 80

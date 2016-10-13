@@ -6,7 +6,7 @@
  '(ansi-color-faces-vector
    [default bold shadow italic underline bold bold-italic bold])
  '(ansi-color-names-vector
-   ["#272822" "#F92672" "#A6E22E" "#E6DB74" "#66D9EF" "#FD5FF0" "#A1EFE4" "#F8F8F2"])
+   ["#757575" "#CD5542" "#4A8F30" "#7D7C21" "#4170B3" "#9B55C3" "#68A5E9" "gray43"])
  '(avy-goto-char-style (quote at))
  '(avy-style (quote at))
  '(avy-word-punc-regexp "[!-/:-@[-`{-~]")
@@ -22,10 +22,10 @@
       (not window-system)
       (yes-or-no-p prompt))))
  '(counsel-find-file-ignore-regexp nil)
- '(custom-enabled-themes (quote (monokai)))
+ '(custom-enabled-themes (quote (ample)))
  '(custom-safe-themes
    (quote
-    ("628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
+    ("5436e5df71047d1fdd1079afa8341a442b1e26dd68b35b7d3c5ef8bd222057d1" "a800120841da457aa2f86b98fb9fd8df8ba682cebde033d7dbf8077c1b7d677a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
  '(debug-on-error nil)
  '(default-input-method "TeX")
  '(display-time-mode t)
@@ -57,10 +57,15 @@
  '(magit-popup-show-help-echo nil)
  '(magit-popup-use-prefix-argument (quote default))
  '(magit-use-overlays nil)
+ '(mouse-scroll-delay 1)
+ '(mouse-wheel-progressive-speed nil)
+ '(mouse-wheel-scroll-amount (quote (3 ((shift) . 1) ((control)))))
  '(neo-dont-be-alone t)
  '(neo-theme (quote ascii))
  '(neo-vc-integration (quote (face char)))
- '(org-agenda-files (quote ("~/everything.org" "~/epic/lumps/doc/lumps.org")))
+ '(org-agenda-files
+   (quote
+    ("~/epic/automation.org" "~/everything.org" "~/epic/lumps/doc/lumps.org")))
  '(org-capture-templates
    (quote
     (("l" "Lumps Idea" entry
@@ -123,7 +128,7 @@
      ("n" "#+NAME: ?" ""))))
  '(package-selected-packages
    (quote
-    (ample-theme exec-path-from-shell company-go guide-key free-keys cask-mode gh marshal s cl-lib with-editor git-commit unidecode wc-goal-mode tide go-mode counsel-osx-app sql-indent org-projectile counsel-projectile helm-projectile emmet-mode beacon org-bullets kpm-list vline bpr bitlbee zone-nyan yaml-mode xbm-life xahk-mode wgrep-ag vimish-fold use-package twittering-mode sx sunshine stash spotlight spotify smex slime scss-mode sass-mode rvm robe rainbow-mode rainbow-blocks psvn paredit-menu paredit-everywhere pacmacs ox-twbs outshine osx-lib org-jekyll oauth2 nyan-prompt nyan-mode nose neotree names monokai-theme mediawiki magit-svn magit-gitflow lua-mode lorem-ipsum key-chord json-rpc jekyll-modes indent-guide impatient-mode hyde helm-swoop helm-spotify helm-rails helm-package helm-gtags helm-commandlinefu helm-bibtex helm-ag gscholar-bibtex goto-last-change golden-ratio god-mode gitignore-mode github-clone github-browse-file gitconfig-mode git-link ggtags font-lock-studio flx-ido fish-mode expand-region evil erefactor erc-terminal-notifier emacsshot edbi-sqlite dirtree demo-it define-word debbugs darkroom csv-mode csharp-mode company-restclient company-c-headers company-anaconda color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clj-refactor chicken-scheme caps-lock btc-ticker bf-mode bbdb auctex aggressive-indent ag ace-window ace-jump-mode @ 4clojure 2048-game)))
+    (minimap ample-theme exec-path-from-shell company-go guide-key free-keys cask-mode gh marshal s cl-lib with-editor git-commit unidecode wc-goal-mode tide go-mode counsel-osx-app sql-indent org-projectile counsel-projectile helm-projectile emmet-mode beacon org-bullets kpm-list vline bpr bitlbee zone-nyan yaml-mode xbm-life xahk-mode wgrep-ag vimish-fold use-package twittering-mode sx sunshine stash spotlight spotify smex slime scss-mode sass-mode rvm robe rainbow-mode rainbow-blocks psvn paredit-menu paredit-everywhere pacmacs ox-twbs outshine osx-lib org-jekyll oauth2 nyan-prompt nyan-mode nose neotree names monokai-theme mediawiki magit-svn magit-gitflow lua-mode lorem-ipsum key-chord json-rpc jekyll-modes indent-guide impatient-mode hyde helm-swoop helm-spotify helm-rails helm-package helm-gtags helm-commandlinefu helm-bibtex helm-ag gscholar-bibtex goto-last-change golden-ratio god-mode gitignore-mode github-clone github-browse-file gitconfig-mode git-link ggtags font-lock-studio flx-ido fish-mode expand-region evil erefactor erc-terminal-notifier emacsshot edbi-sqlite dirtree demo-it define-word debbugs darkroom csv-mode csharp-mode company-restclient company-c-headers company-anaconda color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clj-refactor chicken-scheme caps-lock btc-ticker bf-mode bbdb auctex aggressive-indent ag ace-window ace-jump-mode @ 4clojure 2048-game)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(projectile-globally-ignored-file-suffixes (quote ("~")))
