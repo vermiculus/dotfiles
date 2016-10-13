@@ -502,6 +502,13 @@ ROOT-DIRECTORY."
 (*-and-replace eval-and-replace (lambda (s) (eval (read s))))
 (*-and-replace calc-eval-region #'calc-eval)
 
+(defun *-epic-files ()
+  (interactive)
+  (let ((default-directory "~/epic/"))
+    (call-interactively #'*-super-completing-find-file)))
+
+(bind-key "C-c e" #'*-epic-files)
+
 (message "Loaded personal functions")
 
 (provide 'my-functions)
