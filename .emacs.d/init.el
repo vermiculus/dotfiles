@@ -47,7 +47,7 @@
 (add-to-list 'load-path ".")
 (prefer-coding-system 'utf-8)
 
-(require 'my-functions)
+(load (expand-file-name "my-functions.el" user-emacs-directory))
 (require 'bind-key)
 
 (when *-windows-p
