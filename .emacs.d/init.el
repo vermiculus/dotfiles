@@ -168,9 +168,7 @@
 
 (use-package cc-mode
   :bind (("C-c RET" . ff-find-related-file)
-         ("C-c C-'" . compile)
-         :map c-mode-map
-         ("C-{" . #'*-make-scope)))
+         ("C-c C-'" . compile)))
 
 (use-package ggtags
   :disabled t
@@ -427,6 +425,7 @@
 
 (use-package projectile
   :if window-system
+  :commands (projectile-project-p)
   :bind ("C-c p" . projectile-command-map)
   :config
   (setq projectile-completion-system 'ivy)
