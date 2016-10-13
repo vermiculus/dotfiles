@@ -7,7 +7,7 @@
 (setq gc-cons-threshold 100000000
       debug-on-error t)
 (run-with-idle-timer
- 5 nil
+ 0 nil
  (lambda ()
    (setq gc-cons-threshold 1000000
          debug-on-error nil)
