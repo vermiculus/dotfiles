@@ -74,9 +74,9 @@
 (bind-keys :map isearch-mode-map
            ("C-SPC" . *-isearch-yank-thing-at-point))
 
-(dolist (c (list upcase-region downcase-region
-                 narrow-to-region narrow-to-page
-                 scroll-left))
+(dolist (c (list 'upcase-region 'downcase-region
+                 'narrow-to-region 'narrow-to-page
+                 'scroll-left))
   (put c 'disabled nil))
 
 
