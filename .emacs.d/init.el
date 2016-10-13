@@ -1,3 +1,9 @@
+(global-set-key
+ (kbd "s-i")
+ (lambda ()
+   (interactive)
+   (find-file "~/.emacs.d/init.el")))
+
 (setq gc-cons-threshold 100000000
       debug-on-error t)
 (run-with-idle-timer
