@@ -130,7 +130,9 @@
   :after tex
   :config
   (add-to-list 'LaTeX-font-list
-               '(?\C-a "\\Algorithm{" "}")))
+               '(?\C-a "\\Algorithm{" "}"))
+  (dolist (e '("log" "nav" "out" "snm"))
+    (add-to-list 'completion-ignored-extensions e)))
 
 (use-package god-mode
   :bind (("<escape>" . god-local-mode)
