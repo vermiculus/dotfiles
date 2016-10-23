@@ -40,7 +40,8 @@
 ;;; General Setup
 (setq user-mail-address "code@seanallred.com"
       *-devlog-major-mode #'markdown-mode
-      *-devlog-ext ".md")
+      *-devlog-ext ".md"
+      inhibit-startup-screen t)
 
 (add-to-list 'load-path ".")
 (prefer-coding-system 'utf-8)
