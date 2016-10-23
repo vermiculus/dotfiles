@@ -507,6 +507,49 @@ ROOT-DIRECTORY."
   (let ((default-directory "~/epic/"))
     (call-interactively #'*-super-completing-find-file)))
 
+(defvar *-favorite-files
+  (ignore-errors
+    (with-temp-buffer
+      (insert-file-contents (expand-file-name "favorite-files" user-emacs-directory))
+      (split-string (buffer-substring-no-properties (point-min) (point-max)))))
+  "List of favorite files from `emacs.d/favorite-files'.")
+
+(defun *-common-string-prefix (a b)
+  "Return the common prefix of strings A and B."
+  (if (string-prefix-p a b)
+      a
+    (*-common-string-prefix (substring a 0 (1- (length a))) b)))
+
+(defun *-common-string-prefix-list (string-list)
+  "Return the common prefix of all strings in STRING-LIST."
+  (cl-case (length string-list)
+    (0 "")
+    (1 (car string-list))
+    (2 (*-common-string-prefix (car string-list)
+                               (cadr string-list)))
+    (t (*-common-string-prefix-list
+        (cons (*-common-string-prefix (car string-list)
+                                      (cadr string-list))
+              (cddr string-list))))))
+
+(defun *-find-favorite (save)
+  "Find a favorite file.  With prefix argument SAVE, add the
+current file to favorites."
+  (interactive "P")
+  (if save
+      (when-let ((f (buffer-file-name))
+                 (lf (expand-file-name "favorite-files" user-emacs-directory)))
+        (when (or (not (member f *-favorite-files))
+                  (y-or-n-p "File already in favorites.  Save anyway? "))
+          (with-temp-buffer
+            (insert (string-join (add-to-list '*-favorite-files f)
+                                 (char-to-string ?\n)))
+            (write-file lf)
+            (message "Added %s to %s" (file-name-nondirectory f) lf))))
+    (let* ((prefix (*-common-string-prefix-list *-favorite-files))
+           (files (mapcar (lambda (f) (substring f (length prefix) (length f)))
+                          *-favorite-files)))
+      (find-file (completing-read "Find favorite file: " files)))))
 
 (message "Loaded personal functions")
 
