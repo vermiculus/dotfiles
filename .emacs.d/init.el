@@ -35,7 +35,8 @@
   :config
   (setq package-archive-priorities
         '(("gnu" . 0)
-          ("melpa" . 10))))
+          ("melpa" . 10)))
+  :bind ("s-p" . list-packages))
 
 ;;; General Setup
 (setq user-mail-address "code@seanallred.com"
@@ -69,7 +70,10 @@
            ("C-x C-M-r" . *-eval-and-replace)
            ("C-c x" . *-copy-buffer-file-name-as-kill)
            ("C-x M-u" . capitalize-region)
-           ("C-c L" . *-load-customizations))
+           ("C-c L" . *-load-customizations)
+           ("C-c e" . *-epic-files)
+           ("s-n" . toggle-frame-fullscreen)
+           ("s-f" . *-find-favorite))
 (bind-keys :map isearch-mode-map
            ("C-SPC" . *-isearch-yank-thing-at-point))
 
