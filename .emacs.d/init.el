@@ -77,9 +77,8 @@
 (bind-keys :map isearch-mode-map
            ("C-SPC" . *-isearch-yank-thing-at-point))
 
-(dolist (c (list 'upcase-region 'downcase-region
-                 'narrow-to-region 'narrow-to-page
-                 'scroll-left))
+(dolist (c '(scroll-left upcase-region downcase-region
+                         narrow-to-region narrow-to-page))
   (put c 'disabled nil))
 
 
@@ -507,7 +506,8 @@
 
 (use-package avy
   :config
-  (setq avy-style 'at-full)
+  (setq avy-style 'at-full
+        avy-styles-alist nil)
   (bind-keys :prefix-map my:avy-jump-map
              :prefix "C-c C-'"
              ("C-'" . avy-goto-word-0)

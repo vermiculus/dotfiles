@@ -507,7 +507,6 @@ ROOT-DIRECTORY."
   (let ((default-directory "~/epic/"))
     (call-interactively #'*-super-completing-find-file)))
 
-(bind-key "C-c e" #'*-epic-files)
 
 (message "Loaded personal functions")
 
