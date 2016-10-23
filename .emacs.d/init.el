@@ -174,6 +174,24 @@
   :bind (("C-c RET" . ff-find-related-file)
          ("C-c C-'" . compile)))
 
+(use-package irony
+  ;; Shell command: "xcode-select --install"
+  ;; https://github.com/Sarcasm/irony-mode/issues/339
+  :config
+  (add-hook 'c++-mode-hook #'irony-mode)
+  (add-hook 'c-mode-hook #'irony-mode)
+  (add-hook 'objc-mode-hook #'irony-mode)
+
+  (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
+
+  (define-key irony-mode-map [remap completion-at-point] #'irony-completion-at-point-async)
+  (define-key irony-mode-map [remap complete-symbol] #'irony-completion-at-point-async))
+
+(use-package company-irony
+  :after company
+  :config
+  (add-to-list 'company-backends #'company-irony))
+
 (use-package ggtags
   :disabled t
   :after cc-mode
