@@ -200,7 +200,9 @@
           ielm-mode-hook
           ruby-mode-hook
           clojure-mode-hook
-          cider-repl-mode-hook)))
+          cider-repl-mode-hook))
+  :config
+  (setq company-tooltip-align-annotations t))
 
 (use-package bbdb
   :if window-system)
@@ -334,7 +336,11 @@
 
 (use-package aggressive-indent
   :config
-  (add-to-list 'aggressive-indent-excluded-modes 'sh-mode)
+  (setq aggressive-indent-excluded-modes
+        (append aggressive-indent-excluded-modes
+                '(c-mode
+                  sh-mode
+                  rust-mode)))
   (aggressive-indent-global-mode))
 
 (use-package clj-refactor
@@ -604,6 +610,7 @@
   :ensure t
   :config
   (add-to-list 'exec-path-from-shell-variables "GOPATH")
+  (add-to-list 'exec-path-from-shell-variables "RUST_SRC_PATH")
   (when *-windows-p
     (setq exec-path (add-to-list 'exec-path "C:/Program Files (x86)/Git/bin"))
     (setenv "PATH" (concat "C:\\Program Files (x86)\\Git\\bin;" (getenv "PATH"))))
@@ -682,6 +689,17 @@
          ("S-<left>" . windmove-left)
          ("S-<up>" . windmove-up)
          ("S-<down>" . windmove-down)))
+
+(use-package rust)
+
+(use-package racer-mode
+  :after rust-mode
+  :bind (:map rust-mode-map
+              ("TAB" . company-indent-or-complete-common))
+  :config
+  (add-hook 'rust-mode-hook #'racer-mode)
+  (add-hook 'racer-mode-hook #'eldoc-mode)
+  (add-hook 'racer-mode-hook #'company-mode-on))
 
 ;;; Themes
 
