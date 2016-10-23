@@ -14,8 +14,7 @@
    (message "gc-cons-threshold restored to %S"
             gc-cons-threshold)))
 
-
-;; Package Management
+;; Package Management
 
 ;; use order C-M-S-s-c
 (require 'package)
@@ -38,8 +37,7 @@
         '(("gnu" . 0)
           ("melpa" . 10))))
 
-
-;;; General Setup
+;;; General Setup
 (setq user-mail-address "code@seanallred.com"
       *-devlog-major-mode #'markdown-mode
       *-devlog-ext ".md")
@@ -84,8 +82,7 @@
 (auto-fill-mode)
 (column-number-mode 1)
 
-
-;;; Packages
+;;; Packages
 
 (use-package auto-minor-mode
   :disabled t
@@ -681,8 +678,7 @@
          ("S-<up>" . windmove-up)
          ("S-<down>" . windmove-down)))
 
-
-;;; Themes
+;;; Themes
 
 (use-package monokai-theme
   :if window-system
