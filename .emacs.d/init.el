@@ -678,7 +678,25 @@
   (when *-windows-p
     (setq magit-git-executable "git.exe")
     (add-to-list 'exec-path "C:/cygwin64/bin"))
-  :bind ("M-m" . magit-status))
+  (dolist (d '("/Users/sean/github/magithub"
+               "/Users/sean/github/magit"
+               "/Users/sean/github/emacs-libgit2"
+               "/Users/sean/github/hub"))
+    (add-to-list 'magit-repository-directories d))
+  (setq magit-repolist-columns
+        '(("Name" 25 magit-repolist-column-ident nil)
+          ("Version" 25 magit-repolist-column-version nil)
+          ("U⊄L" 3 magit-repolist-column-unpulled-from-upstream
+           (:right-align t))
+          ("L⊄U" 3 magit-repolist-column-unpushed-to-upstream
+           (:right-align t))
+          ("PRs" 5 magithub-repolist-column-pull-request
+           (:right-align t))
+          ("Iss" 5 magithub-repolist-column-issue
+           (:right-align t))
+          ("Path" 20 magit-repolist-column-path)))
+  :bind (("M-m" . magit-status)
+         ("s-r" . magit-list-repositories)))
 
 (use-package magithub
   :after magit
