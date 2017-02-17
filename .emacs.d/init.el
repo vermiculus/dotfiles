@@ -1,3 +1,6 @@
+(load "~/dotfiles/.emacs.d/elpa/benchmark-init-20150905.238/benchmark-init.el")
+(benchmark-init/activate)
+
 (global-set-key
  (kbd "s-i")
  (lambda ()
@@ -779,6 +782,23 @@
   :config
   (set-face-background 'region "#484040")
   (set-face-foreground 'dired-ignored "#4F4F4F"))
+
+(benchmark-init/deactivate)
+
+(fset 'benchmarking
+      (lambda (&optional arg)
+        "Keyboard macro."
+        (interactive "p")
+        (kmacro-exec-ring-item
+         (quote
+          ([18 19 91 return
+               5 134217826 67108896 134217734 23 16 5
+               134217826 41 43 backspace backspace 40
+               43 32 25 32 134217734 41 21 24 5 134217730
+               67108896 134217730 23 14 1 11 11]
+           0 "%d"))
+         arg)))
+
 
 ;; Local Variables:
 ;; fill-column: 80
