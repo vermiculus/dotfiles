@@ -14,7 +14,7 @@
    (message "gc-cons-threshold restored to %S"
             gc-cons-threshold)))
 
-;; Package Management
+;;; Package Management
 
 ;; use order C-M-S-s-c
 (require 'package)
@@ -42,6 +42,8 @@
 (setq user-mail-address "code@seanallred.com"
       *-devlog-major-mode #'markdown-mode
       *-devlog-ext ".md"
+      browse-url-browser-function '(("." . browse-url-default-browser))
+      use-dialog-box nil
       inhibit-startup-screen t)
 
 (add-to-list 'load-path ".")
@@ -73,7 +75,7 @@
            ("C-c L" . *-load-customizations)
            ("C-c e" . *-epic-files)
            ("s-n" . toggle-frame-fullscreen)
-           ("s-f" . *-find-favorite))
+           ("C-x s-f" . *-find-favorite))
 (bind-keys :map isearch-mode-map
            ("C-SPC" . *-isearch-yank-thing-at-point))
 
@@ -87,6 +89,8 @@
 (column-number-mode 1)
 
 ;;; Packages
+
+(use-package gh :load-path "~/github/gh.el")
 
 (use-package auto-minor-mode
   :disabled t
@@ -114,6 +118,7 @@
      nil                              ; ask for confirmation
      t                                ; active in all modes
      :help "Run Arara"))
+  ;;(defalias 'TeX-completing-read-multiple #'completing-read)
   :bind (("C-c ?" . *-TeX-find-texdoc)
          ("C-c M-?" . *-TeX-find-kpathsea)))
 
@@ -274,6 +279,7 @@
                                      :publishing-function org-twbs-export-to-html
                                      :with-sub-superscript nil))
         org-hide-emphasis-markers t
+        org-agenda-include-diary t
         org-export-async-debug nil)
   (require 'ox-twbs)
   :bind (("C-c c" . org-capture)
@@ -340,7 +346,7 @@
           cider-repl-mode-hook)))
 
 (use-package cider
-  :config
+  :if window-system
   :bind (:map cider-mode-map
               ("C-c C-c" . *-cider-connect)
               :map cider-inspector-mode-map
@@ -361,6 +367,7 @@
   (aggressive-indent-global-mode))
 
 (use-package clj-refactor
+  :if window-system
   :config
   (setq cljr-suppress-middleware-warnings t)
   (add-hook 'clojure-mode-hook
@@ -430,6 +437,7 @@
 
 (use-package dired
   :config
+  (setq dired-listing-switches "-alh")
   (bind-keys :map dired-mode-map
              ("/" . dired-up-directory)
              ("z" . *-dired-zip-files))
@@ -454,6 +462,7 @@
   :if window-system
   :commands (projectile-project-p)
   :bind ("C-c p" . projectile-command-map)
+  :diminish projectile-mode
   :config
   (setq projectile-completion-system 'ivy)
   (when *-osx-p
@@ -537,6 +546,7 @@
   (add-hook 'projectile-mode-hook #'projectile-rails-on))
 
 (use-package vb6-mode
+  :if window-system
   :load-path "~/dotfiles/.emacs.d/my-packages/"
   :config
   (add-to-list 'auto-mode-alist `(,(rx "EpicSource/" (* not-newline) (or "frm" "ctl" "bas" "cls")) 'visual-basic-mode))
@@ -555,7 +565,7 @@
          ("C-c B" . org-epic:brainbow:open-course-by-id)))
 
 (use-package epic-vb6
-  :if *-windows-p
+  :if (and *-windows-p window-system)
   :load-path "c:/Users/sallred/git/epic-vb6/")
 
 (use-package caps-lock
@@ -601,7 +611,11 @@
 
 (use-package sx
   :if *-osx-p
+  :load-path "/Users/sean/github/vermiculus/sx.el/"
   :config
+  (require 'sx-load)
+  (push '(".*\.stackexchange\.com" . sx-open-link)
+        browse-url-browser-function)
   (bind-keys :prefix-map *-sx-map
              :prefix "s-x"
              ("i" . sx-inbox)
@@ -625,6 +639,7 @@
   :bind (("C-x C-r" . counsel-recentf)))
 
 (use-package exec-path-from-shell
+  :if window-system
   :ensure t
   :config
   (add-to-list 'exec-path-from-shell-variables "GOPATH")
@@ -663,10 +678,6 @@
   :config
   (add-to-list 'company-backends #'company-go))
 
-(use-package projectile
-  :config
-  (bind-key "[" #'*-devlog-new-entry projectile-command-map))
-
 (use-package ediff
   :config
   (setq ediff-window-setup-function 'ediff-setup-windows-plain))
@@ -696,13 +707,19 @@
            (:right-align t))
           ("Path" 20 magit-repolist-column-path)))
   :bind (("M-m" . magit-status)
-         ("s-r" . magit-list-repositories)))
+         ("s-r" . magit-list-repositories))
+  :bind (:map magit-mode-map
+              ("[" . magit-section-backward-sibling)
+              ("]" . magit-section-forward-sibling)
+              ("=" . magit-section-up)))
 
 (use-package magithub
   :after magit
-  :init (shell-command "cd ~/github/magithub; make clean-elc")
   :load-path "~/github/magithub"
   :config
+  (magithub-feature-autoinject t)
+  (setq magithub-issue-sort-function
+        #'magithub-issue-sort-descending)
   (bind-key
    "s-."
    (lambda () (interactive)
@@ -726,16 +743,24 @@
          ("S-<up>" . windmove-up)
          ("S-<down>" . windmove-down)))
 
-(use-package rust)
+(use-package rust-mode)
+(use-package cargo
+  :after rust-mode
+  :bind (:map rust-mode-map
+              ("C-c C-c" . cargo-process-run)))
 
 (use-package racer-mode
   :after rust-mode
+  :after cargo
   :bind (:map rust-mode-map
               ("TAB" . company-indent-or-complete-common))
   :config
   (add-hook 'rust-mode-hook #'racer-mode)
   (add-hook 'racer-mode-hook #'eldoc-mode)
   (add-hook 'racer-mode-hook #'company-mode-on))
+
+(use-package omnisharp
+  :if (and window-system (executable-find "mono")))
 
 ;;; Themes
 
