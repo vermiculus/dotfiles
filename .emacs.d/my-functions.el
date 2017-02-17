@@ -5,6 +5,10 @@
        #'projectile-find-file
      #'counsel-find-file)))
 
+(defun *-goto-section ()
+  (interactive)
+  (swiper ""))
+
 (defun *-insert-hfill (char)
   (interactive
    (list (if current-prefix-arg
@@ -549,7 +553,11 @@ current file to favorites."
     (let* ((prefix (*-common-string-prefix-list *-favorite-files))
            (files (mapcar (lambda (f) (substring f (length prefix) (length f)))
                           *-favorite-files)))
-      (find-file (completing-read "Find favorite file: " files)))))
+      (find-file (concat prefix (completing-read "Find favorite file: " files))))))
+
+(defun range (min max incr)
+  (when (> max min)
+    (cons min (range (+ min incr) max incr))))
 
 (message "Loaded personal functions")
 
