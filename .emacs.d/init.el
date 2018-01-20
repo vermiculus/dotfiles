@@ -17,7 +17,7 @@
    (message "gc-cons-threshold restored to %S"
             gc-cons-threshold)))
 
-;;; Package Management
+ ;;; Package Management
 
 ;; use order C-M-S-s-c
 (require 'package)
@@ -41,15 +41,15 @@
           ("melpa" . 10)))
   :bind ("s-p" . list-packages))
 
-;;; General Setup
+ ;;; General Setup
 (setq user-mail-address "code@seanallred.com"
       *-devlog-major-mode #'markdown-mode
       *-devlog-ext ".md"
       browse-url-browser-function '(("." . browse-url-default-browser))
       use-dialog-box nil
+      load-prefer-newer t
       inhibit-startup-screen t)
 
-(add-to-list 'load-path ".")
 (prefer-coding-system 'utf-8)
 
 (load (expand-file-name "my-functions.el" user-emacs-directory))
@@ -78,7 +78,8 @@
            ("C-c L" . *-load-customizations)
            ("C-c e" . *-epic-files)
            ("s-n" . toggle-frame-fullscreen)
-           ("C-x s-f" . *-find-favorite))
+           ("C-x s-f" . *-find-favorite)
+           ("M-o" . other-window))
 (bind-keys :map isearch-mode-map
            ("C-SPC" . *-isearch-yank-thing-at-point))
 
@@ -91,9 +92,15 @@
 (auto-fill-mode)
 (column-number-mode 1)
 
-;;; Packages
+ ;;; Packages
 
-(use-package gh :load-path "~/github/gh.el")
+;;(use-package gh :load-path "~/github/gh.el")
+(use-package asm-mode
+  :config
+  (advice-add
+   'asm-mode :after
+   (lambda (&rest _)
+     (setq fill-prefix nil))))
 
 (use-package auto-minor-mode
   :disabled t
@@ -118,12 +125,15 @@
    '("Arara"
      "arara %s"
      TeX-run-command
-     nil                              ; ask for confirmation
-     t                                ; active in all modes
+     nil                       ; ask for confirmation
+     t                         ; active in all modes
      :help "Run Arara"))
   ;;(defalias 'TeX-completing-read-multiple #'completing-read)
   :bind (("C-c ?" . *-TeX-find-texdoc)
          ("C-c M-?" . *-TeX-find-kpathsea)))
+
+(use-package apiwrap
+  :load-path "~/github/apiwrap.el")
 
 (use-package expl3
   :after tex
@@ -182,6 +192,7 @@
          ("C-c C-'" . compile)))
 
 (use-package irony
+  :disabled t
   ;; Shell command: "xcode-select --install"
   ;; https://github.com/Sarcasm/irony-mode/issues/339
   :config
@@ -195,6 +206,7 @@
   (define-key irony-mode-map [remap complete-symbol] #'irony-completion-at-point-async))
 
 (use-package company-irony
+  :disabled t
   :after company
   :config
   (add-to-list 'company-backends #'company-irony))
@@ -229,10 +241,16 @@
   :config
   (setq company-tooltip-align-annotations t))
 
+(use-package lsp-mode
+  :config
+  (require 'lsp-rust)
+  (setq lsp-rust-rls-command '("rustup" "run" "nightly" "rls")))
+
 (use-package bbdb
   :if window-system)
 
 (use-package github-clone
+  :disabled t
   :if window-system)
 
 (use-package helm
@@ -290,11 +308,14 @@
          ("C-c l" . org-store-link)
          ("M-<apps>" . *-org-agenda-next-items)
          ("M-n" . org-metadown)
-         ("M-p" . org-metaup)))
+         ("M-p" . org-metaup)
+         :map org-mode-map
+         ([remap org-babel-goto-named-src-block]
+          . *-org-babel-goto-noweb-ref-at-point)))
 
 (use-package org-projectile
+  :disabled t
   :config
-  (org-projectile:per-repo)
   (mapc (lambda (todo) (add-to-list 'org-agenda-files todo))
         (org-projectile:todo-files))
   (add-to-list 'org-capture-templates
@@ -309,19 +330,23 @@
 (use-package outshine
   :after outorg)
 
-(use-package slime
-  :if window-system
-  :commands slime
+(use-package sly
+  :commands sly
   :config
-  (setq inferior-lisp-program "clisp"))
+  (setq inferior-lisp-program "sbcl"
+        ;;slime-contribs '(slime-autodoc slime-quicklisp)
+        ;;slime-autodoc-use-multiline-p t
+        ))
 
 (use-package undo-tree
+  :disabled t
   :diminish undo-tree-mode)
 
 (use-package erefactor
   :if window-system
   :bind (:map emacs-lisp-mode-map
-              ("C-c C-d" . erefactor-map))
+              ("C-c C-d" . erefactor-map)
+              ("C-c r" . erefactor-rename-symbol-in-buffer))
   :config
   (add-hook 'emacs-lisp-mode-hook #'erefactor-lazy-highlight-turn-on))
 
@@ -336,6 +361,19 @@
           clojure-mode-hook
           cider-repl-mode-hook)))
 
+(use-package nameless
+  :if window-system
+  :config
+  (setq nameless-affect-indentation-and-filling nil)
+  (mapc (lambda (s) (add-hook s #'nameless-mode))
+        '(emacs-lisp-mode-hook
+          lisp-interaction-mode-hook
+          ielm-mode-hook
+          clojure-mode-hook
+          cider-repl-mode-hook))
+  :bind (:map emacs-lisp-mode-map
+              ("_" . nameless-insert-name-or-self-insert)))
+
 (use-package paredit
   :diminish paredit-mode
   :config
@@ -346,6 +384,7 @@
           ielm-mode-hook
           cask-mode-hook
           clojure-mode-hook
+          sly-mode-hook
           cider-repl-mode-hook)))
 
 (use-package cider
@@ -362,14 +401,12 @@
 
 (use-package aggressive-indent
   :config
-  (setq aggressive-indent-excluded-modes
-        (append aggressive-indent-excluded-modes
-                '(c-mode
-                  sh-mode
-                  rust-mode)))
+  (dolist (m '(c-mode sh-mode comint-mode rust-mode text-mode))
+    (push m aggressive-indent-excluded-modes))
   (aggressive-indent-global-mode))
 
 (use-package clj-refactor
+  :disabled t
   :if window-system
   :config
   (setq cljr-suppress-middleware-warnings t)
@@ -411,10 +448,9 @@
   :defer t
   :config
   (add-hook 'markdown-mode-hook #'*-set-replacements)
+  (add-hook 'markdown-mode-hook #'visual-fill-column-mode)
+  (add-hook 'markdown-mode-hook #'visual-line-mode)
   (bind-key "M-M" #'*-insert-post-url markdown-mode-map))
-
-(use-package evil
-  :bind ("C-M-`" . evil-mode))
 
 (use-package fish-mode
   :mode "\\.fish\\'")
@@ -487,6 +523,7 @@
 (use-package hyde)
 
 (use-package impatient-mode
+  :disabled t
   :if window-system)
 
 (use-package expand-region
@@ -549,6 +586,7 @@
   (add-hook 'projectile-mode-hook #'projectile-rails-on))
 
 (use-package vb6-mode
+  :disabled t
   :if window-system
   :load-path "~/dotfiles/.emacs.d/my-packages/"
   :config
@@ -557,7 +595,11 @@
         visual-basic-ide-pathname "C:/Program Files (x86)/Microsoft Visual Studio/VB98/VB6.EXE"))
 
 (use-package mumps-mode
-  :load-path "~/dotfiles/.emacs.d/my-packages/")
+  :disabled t
+  :load-path "~/github/emacs-mumps/"
+  ;; :load-path "~/dotfiles/.emacs.d/my-packages/"
+  )
+(load-file "~/github/emacs-mumps/mumps.el")
 
 (use-package org-epic
   :if *-windows-p
@@ -582,8 +624,10 @@
   :bind ("M-'" . define-word-at-point))
 
 (use-package evil
+  :disabled t
   :config
-  (setq evil-symbol-word-search t))
+  (setq evil-symbol-word-search t)
+  :bind ("C-M-`" . evil-mode))
 
 (use-package sunshine
   :disabled t
@@ -624,6 +668,9 @@
              ("i" . sx-inbox)
              ("s" . sx-tab-all-questions)))
 
+(use-package diminish
+  :ensure t)
+
 (use-package ivy
   :diminish ivy-mode
   :config
@@ -639,6 +686,8 @@
   (setq counsel-find-file-ignore-regexp
         (rx (or (: bos (* any) "~" eos)
                 (: bos (* any) "." (or "tiff" "png") eos))))
+  (ivy-add-actions #'counsel-find-file
+                   '(("m" magit-status-internal "magit")))
   :bind (("C-x C-r" . counsel-recentf)))
 
 (use-package exec-path-from-shell
@@ -674,6 +723,15 @@
              ("[" . help-go-back)
              ("]" . help-go-forward)))
 
+(use-package helpful
+  :bind
+  (("C-h f" . helpful-callable)
+   ("C-h v" . helpful-variable)
+   ("C-h k" . helpful-key)
+   ("C-c C-d" . helpful-at-point)
+   ("C-h F" . helpful-function)
+   ("C-h C" . helpful-command)))
+
 (use-package go-mode)
 (use-package company-go
   :after go-mode company
@@ -685,17 +743,39 @@
   :config
   (setq ediff-window-setup-function 'ediff-setup-windows-plain))
 
-(use-package magit
-  :if window-system
+(use-package auto-compile
   :config
-  (setq magit-last-seen-setup-instructions "1.4.0")
+  (auto-compile-on-load-mode)
+  (auto-compile-on-save-mode))
+
+(use-package magit
+  :config
+  (unless (boundp 'magit-merge-into)
+    ;; waiting for magit branch jb/new-commands
+    (defun magit-merge-into (branch)
+      "Merge the current branch into BRANCH and remove the former."
+      (interactive (list (magit-read-branch (format "Merge `%s' into" (magit-get-current-branch)))))
+      (let ((current (magit-get-current-branch)))
+        (unless (zerop (magit-call-git "push" "origin" "-f" current))
+          (error "Failed to push `%s'" current))
+        (magit-call-git "checkout" branch)
+        (magit-call-git "merge" current)))
+    (require 'magit-popup)
+    (magit-define-popup-action 'magit-merge-popup
+      ?i "Merge into" #'magit-merge-into))
+
+  (setq magit-last-seen-setup-instructions "1.4.0"
+        magit-git-executable "~/bin/chatty-git")
   (when *-windows-p
     (setq magit-git-executable "git.exe")
     (add-to-list 'exec-path "C:/cygwin64/bin"))
   (dolist (d '("/Users/sean/github/magithub"
                "/Users/sean/github/magit"
                "/Users/sean/github/emacs-libgit2"
-               "/Users/sean/github/hub"))
+               "/Users/sean/github/ghub"
+               "/Users/sean/github/ghub+"
+               "/Users/sean/github/apiwrap.el"
+               "/Users/sean/github/random-git/emacs"))
     (add-to-list 'magit-repository-directories d))
   (setq magit-repolist-columns
         '(("Name" 25 magit-repolist-column-ident nil)
@@ -708,26 +788,44 @@
            (:right-align t))
           ("Iss" 5 magithub-repolist-column-issue
            (:right-align t))
-          ("Path" 20 magit-repolist-column-path)))
+          ("Path" 20 magit-repolist-column-path))
+        magit-status-show-hashes-in-headers t)
+  (add-hook 'git-commit-mode-hook #'flyspell-mode)
   :bind (("M-m" . magit-status)
          ("s-r" . magit-list-repositories))
   :bind (:map magit-mode-map
               ("[" . magit-section-backward-sibling)
               ("]" . magit-section-forward-sibling)
-              ("=" . magit-section-up)))
+              ("=" . magit-section-up)
+              ("M-u" . magit-section-up)))
 
+(use-package ghub+ :load-path "~/github/ghub+")
 (use-package magithub
-  :after magit
   :load-path "~/github/magithub"
+  :defer t
+  :init
+  (with-demoted-errors "Error loading autoloads: %s"
+    (load "~/github/magithub/magithub-autoloads" nil t))
+  :bind (("C-c D" . magithub-debug-section))
   :config
   (magithub-feature-autoinject t)
   (setq magithub-issue-sort-function
         #'magithub-issue-sort-descending)
-  (bind-key
-   "s-."
-   (lambda () (interactive)
-     (find-file "~/github/magithub/magithub.el")
-     (eval-buffer))))
+
+  (setq magithub-issue-issue-filter-functions
+        (list (lambda (issue)
+                (not
+                 (member "enhancement"
+                         (let-alist issue
+                           (ghubp-get-in-all '(name) .labels)))))))
+  (setq magithub-issue-issue-filter-functions nil))
+
+(bind-key
+ "s-."
+ (lambda () (interactive)
+   (setq magithub-cache t)
+   (find-file "~/github/magithub/magithub.el")
+   (eval-buffer)))
 
 (use-package imenu
   :bind (("C-c C-," . imenu)))
@@ -746,7 +844,10 @@
          ("S-<up>" . windmove-up)
          ("S-<down>" . windmove-down)))
 
-(use-package rust-mode)
+(use-package rust-mode
+  :config
+  (add-hook 'rust-mode-hook (if nil #'racer-mode
+                              #'lsp-rust-enable)))
 (use-package cargo
   :after rust-mode
   :bind (:map rust-mode-map
@@ -758,11 +859,11 @@
   :bind (:map rust-mode-map
               ("TAB" . company-indent-or-complete-common))
   :config
-  (add-hook 'rust-mode-hook #'racer-mode)
   (add-hook 'racer-mode-hook #'eldoc-mode)
   (add-hook 'racer-mode-hook #'company-mode-on))
 
 (use-package omnisharp
+  :disabled t
   :if (and window-system (executable-find "mono")))
 
 ;;; Themes
@@ -772,6 +873,7 @@
   :disabled t)
 
 (use-package ample-theme
+  :if window-system
   :init
   (load-theme 'ample t t)
   (load-theme 'ample-flat t t)
@@ -800,7 +902,23 @@
          arg)))
 
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(safe-local-variable-values
+   (quote
+    ((column-number-mode . t)
+     (user-mail-address . "code@seanallred.com")))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 ;; Local Variables:
 ;; fill-column: 80
 ;; indent-tabs-mode: nil
 ;; End:
+(put 'dired-find-alternate-file 'disabled nil)

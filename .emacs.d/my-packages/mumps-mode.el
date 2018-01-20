@@ -1,6 +1,6 @@
 ;;; mumps-mode.el --- mumps editing support
 
-;; Copyright (C) 2015  
+;; Copyright (C) 2015
 
 ;; Author: sallred
 ;; Keywords: languages
@@ -58,17 +58,41 @@ display."
   "Returns the possible abbreviations of COMMAND.
     For example, input of \"set\" would yield the list
       \(\"s\" \"se\" \"set\")"
-  (let ((case-insensitive-command-list
-         (mumps--case-insensitize command))))
   (if (= 1 (length command))
       (cons command stack)
     (mumps--command-variants
      (substring command 0 (1- (length command)))
      (cons command stack))))
 
+(defconst mumps-commands
+  '("break" "close" "do" "else" "for" "goto" "halt" "hang" "if" "job" "kill"
+    "lock" "merge" "new" "open" "quit" "read" "set" "use" "view" "write" "xecute"))
+(defconst mumps-intrinsics
+  '("ascii" "char" "data" "extract" "find" "fnumber" "get" "justify" "length" "name"
+    "order" "piece" "qlength" "qsubscript" "query" "random" "reverse" "select" "stack"
+    "text" "translate" "view"))
+(defconst mumps-variables
+  '("device" "ecode" "estack" "etrap" "horolog" "io" "job" "key" "principal" "quit"
+    "reference" "stack" "storage" "system" "test" "x" "y"))
+
+(defconst mumps-operators
+  '("_" "+" "-" "*" "/" "\\" "#" "**" "=" "<" ">" "]" "[" "'" "&" "!" "?" "@"))
+
+(defconst mumps-system-variables
+  '("global" "job" "lock" "routine" "system"))
+
+(apply #'append (mapcar #'mumps--command-variants mumps-commands))
+
 (defun mumps--case-insensitize (string)
-  (unless (string-equal "" string)
-    ))
+  (if (string-equal "" string) ""
+    (let ((l (mumps--case-insensitize (substring string 1)))
+          (c (lambda (f) (lambda (s) (string-to-char (funcall f (elt s 0)))))))
+      (list (mapcar (funcall c #'upcase) l)
+            (mapcar (funcall c #'downcase) l)))))
+
+(mumps--case-insensitize "if")
+
+(concat 56 "")
 
 (defvar mumps-font-lock-keywords
   `((,(rx line-start (group (+ (any "%" alphanumeric))))    1 font-lock-function-name-face t)
