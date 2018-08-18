@@ -1,12 +1,6 @@
 (load (car (file-expand-wildcards "~/dotfiles/.emacs.d/elpa/benchmark-init-*/benchmark-init.el")))
 (benchmark-init/activate)
 
-(global-set-key
- (kbd "s-i")
- (lambda ()
-   (interactive)
-   (find-file "~/.emacs.d/init.el")))
-
 (setq gc-cons-threshold 100000000
       debug-on-error t)
 (run-with-idle-timer
