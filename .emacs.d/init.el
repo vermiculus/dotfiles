@@ -690,6 +690,11 @@
                    '(("m" magit-status-internal "magit")))
   :bind (("C-x C-r" . counsel-recentf)))
 
+(use-package hydra
+  :ensure t)
+
+(use-package lispy :ensure t)
+
 (use-package exec-path-from-shell
   :if window-system
   :ensure t
