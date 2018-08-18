@@ -89,6 +89,9 @@
 
  ;;; Packages
 
+(use-package lumps-mode
+  :load-path "~/.emacs.d/my-packages")
+
 ;;(use-package gh :load-path "~/github/gh.el")
 (use-package asm-mode
   :config
@@ -219,22 +222,23 @@
 (use-package company
   :if window-system
   :commands (company-mode company-mode-on)
-  :diminish company-mode
   :bind (:map company-active-map
               ("C-n" . company-select-next-or-abort)
-              ("C-p" . company-select-previous-or-abort)
+              ("C-p" . company-select-previous-or-abort))
+  :bind (:map company-mode-map
               ("C-M-SPC" . company-complete))
   :init
-  (add-hook 'prog-mode-hook #'company-mode-on)
   (mapc (lambda (s) (add-hook s #'company-mode-on))
-        '(emacs-lisp-mode-hook
+        '(prog-mode-hook
+          emacs-lisp-mode-hook
           lisp-interaction-mode-hook
           ielm-mode-hook
           ruby-mode-hook
           clojure-mode-hook
           cider-repl-mode-hook))
   :config
-  (setq company-tooltip-align-annotations t))
+  (setq company-tooltip-align-annotations t
+        company-minimum-prefix-length 2))
 
 (use-package lsp-mode
   :config
@@ -671,13 +675,15 @@
   :if *-osx-p
   :load-path "/Users/sean/github/vermiculus/sx.el/"
   :config
-  (require 'sx-load)
-  (push '(".*\.stackexchange\.com" . sx-open-link)
-        browse-url-browser-function)
-  (bind-keys :prefix-map *-sx-map
-             :prefix "s-x"
-             ("i" . sx-inbox)
-             ("s" . sx-tab-all-questions)))
+  (progn
+    (ignore-errors
+      (require 'sx-load))
+    (push '(".*\.stackexchange\.com" . sx-open-link)
+          browse-url-browser-function)
+    (bind-keys :prefix-map *-sx-map
+               :prefix "s-x"
+               ("i" . sx-inbox)
+               ("s" . sx-tab-all-questions))))
 
 (use-package diminish
   :ensure t)
@@ -710,8 +716,9 @@
   :if window-system
   :ensure t
   :config
-  (add-to-list 'exec-path-from-shell-variables "GOPATH")
-  (add-to-list 'exec-path-from-shell-variables "RUST_SRC_PATH")
+  (dolist (v '("GOPATH" "RUST_SRC_PATH" "EMACS_VERSION"))
+    (add-to-list 'exec-path-from-shell-variables v))
+  (setq exec-path-from-shell-check-startup-files nil)
   (when *-windows-p
     (setq exec-path (add-to-list 'exec-path "C:/Program Files (x86)/Git/bin"))
     (setenv "PATH" (concat "C:\\Program Files (x86)\\Git\\bin;" (getenv "PATH"))))
@@ -807,25 +814,29 @@
               ("M-u" . magit-section-up)))
 
 (use-package ghub+ :load-path "~/github/ghub+")
+(add-to-list 'safe-local-variable-values
+             '(magithub-issue-issue-filter-functions . (my:issue-filter-out-enhancements)))
 (use-package magithub
   :load-path "~/github/magithub"
   :defer t
   :init
+  (defun my:issue-filter-out-enhancements  (issue)
+    (not (member "enhancement"
+                 (let-alist issue
+                   (ghubp-get-in-all '(name)
+                     .labels)))))
   (with-demoted-errors "Error loading autoloads: %s"
     (load "~/github/magithub/magithub-autoloads" nil t))
-  :bind (("C-c D" . magithub-debug-section))
-  :config
   (magithub-feature-autoinject t)
+  (setq magithub-debug-mode t)
+  :bind (("C-c D" . magithub-debug-section)
+         ("C-c H" . magithub-dispatch-popup))
+  :config
   (setq magithub-issue-sort-function
         #'magithub-issue-sort-descending)
 
-  (setq magithub-issue-issue-filter-functions
-        (list (lambda (issue)
-                (not
-                 (member "enhancement"
-                         (let-alist issue
-                           (ghubp-get-in-all '(name) .labels)))))))
-  (setq magithub-issue-issue-filter-functions nil))
+  (setq magithub-repo-directories
+        '(("api.github.com:vermiculus/magithub" . "~/github/magithub/"))))
 
 (bind-key
  "s-."
@@ -929,3 +940,5 @@
 ;; indent-tabs-mode: nil
 ;; End:
 (put 'dired-find-alternate-file 'disabled nil)
+
+(require 'vlf-setup)
