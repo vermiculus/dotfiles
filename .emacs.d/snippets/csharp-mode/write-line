@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: write-line
+# key: wl
+# --
+Console.WriteLine("$0");

@@ -1,0 +1,6 @@
+# key: impl
+# name: impl
+# --
+impl ${1:Trait} for ${2:Struct} {
+    $0
+}
