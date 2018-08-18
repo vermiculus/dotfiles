@@ -139,6 +139,7 @@
         markdown-cycle
         markdown-demote
         markdown-demote
+        markdown-electric-backquote
         markdown-enter-key
         markdown-exdent-or-delete
         markdown-exdent-or-delete
@@ -153,6 +154,7 @@
         mouse-save-then-kill
         mouse-save-then-kill
         move-to-window-line-top-bottom
+        nameless-insert-name-or-self-insert
         nxml-electric-slash
         nxml-electric-slash
         nxml-forward-element
@@ -170,6 +172,7 @@
         org-end-of-line
         org-end-of-line
         org-epic:brainbow:open-course-by-id
+        org-fill-paragraph
         org-force-self-insert
         org-force-self-insert
         org-forward-element
@@ -246,6 +249,7 @@
         paredit-forward-slurp-sexp
         paredit-forward-slurp-sexp
         paredit-forward-up
+        paredit-join-sexps
         paredit-kill
         paredit-kill
         paredit-newline
@@ -268,6 +272,7 @@
         pp-eval-last-sexp
         python-indent-electric-colon
         python-indent-electric-colon
+        python-indent-shift-left
         python-nav-backward-up-list
         python-nav-backward-up-list
         reftex-citation
@@ -368,6 +373,7 @@
         visual-basic-newline-and-indent
         wdired-downcase-word
         wdired-next-line
+        xref-find-definitions
         yaml-electric-backspace
         yaml-electric-backspace
         yaml-electric-bar-and-angle
@@ -413,7 +419,6 @@
         mc/cycle
         mc/mark-next-lines
         mc/mark-next-lines
-        nameless-insert-name-or-self-insert
         next-buffer
         next-buffer
         ns-print-buffer
@@ -436,4 +441,5 @@
         swiper
         swiper-mc
         toggle-input-method
+        wdired-finish-edit
         ))
