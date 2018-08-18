@@ -762,6 +762,8 @@
                "/Users/sean/github/ghub"
                "/Users/sean/github/ghub+"
                "/Users/sean/github/apiwrap.el"
+               "/Users/sean/github/vermiculus/sx.el"
+               "/Users/sean/github/emake.el"
                "/Users/sean/github/random-git/emacs"))
     (add-to-list 'magit-repository-directories d))
   (setq magit-repolist-columns
