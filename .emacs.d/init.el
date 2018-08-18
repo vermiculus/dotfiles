@@ -1,4 +1,4 @@
-(load "~/dotfiles/.emacs.d/elpa/benchmark-init-20150905.238/benchmark-init.el")
+(load (car (file-expand-wildcards "~/dotfiles/.emacs.d/elpa/benchmark-init-*/benchmark-init.el")))
 (benchmark-init/activate)
 
 (global-set-key
