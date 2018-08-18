@@ -751,6 +751,8 @@
 (use-package magit
   :config
 
+  (magit-define-popup-option 'magit-rebase-popup
+    ?S "Sign using gpg" "--gpg-sign=" #'magit-read-gpg-secret-key)
   (setq magit-last-seen-setup-instructions "1.4.0"
         magit-git-executable "~/bin/chatty-git")
   (when *-windows-p
