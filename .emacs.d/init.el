@@ -585,6 +585,22 @@
   :config
   (add-hook 'projectile-mode-hook #'projectile-rails-on))
 
+(use-package typescript-mode
+  :config
+  (add-hook 'typescript-mode-hook (lambda () (aggressive-indent-mode -1))))
+(use-package tide
+  :commands (:setup-tide)
+  :init
+  (add-hook 'typescript-mode-hook #':setup-tide)
+  :config
+  (defun :setup-tide ()
+    (tide-setup)
+    (flycheck-mode 1)
+    (setq-local flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode 1)
+    (tide-hl-identifier-mode 1)
+    (company-mode-on)))
+
 (use-package vb6-mode
   :disabled t
   :if window-system
