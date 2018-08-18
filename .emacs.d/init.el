@@ -750,19 +750,6 @@
 
 (use-package magit
   :config
-  (unless (boundp 'magit-merge-into)
-    ;; waiting for magit branch jb/new-commands
-    (defun magit-merge-into (branch)
-      "Merge the current branch into BRANCH and remove the former."
-      (interactive (list (magit-read-branch (format "Merge `%s' into" (magit-get-current-branch)))))
-      (let ((current (magit-get-current-branch)))
-        (unless (zerop (magit-call-git "push" "origin" "-f" current))
-          (error "Failed to push `%s'" current))
-        (magit-call-git "checkout" branch)
-        (magit-call-git "merge" current)))
-    (require 'magit-popup)
-    (magit-define-popup-action 'magit-merge-popup
-      ?i "Merge into" #'magit-merge-into))
 
   (setq magit-last-seen-setup-instructions "1.4.0"
         magit-git-executable "~/bin/chatty-git")
