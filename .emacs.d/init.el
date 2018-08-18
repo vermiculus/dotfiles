@@ -48,6 +48,7 @@
       browse-url-browser-function '(("." . browse-url-default-browser))
       use-dialog-box nil
       load-prefer-newer t
+      ns-use-thin-smoothing t
       inhibit-startup-screen t)
 
 (prefer-coding-system 'utf-8)
