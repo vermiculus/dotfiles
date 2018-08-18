@@ -26,8 +26,8 @@
  '(custom-enabled-themes (quote (ample)))
  '(custom-safe-themes
    (quote
-    ("ee89863f86247942d9fc404d47b2704475b146c079c1dcd2390d697ddfa9bdf4" "938d8c186c4cb9ec4a8d8bc159285e0d0f07bad46edf20aa469a89d0d2a586ea" "33969ab092ac7ab559e44bfbc1c4ec95f73c8230914ea18bb70e0044047967aa" "5436e5df71047d1fdd1079afa8341a442b1e26dd68b35b7d3c5ef8bd222057d1" "a800120841da457aa2f86b98fb9fd8df8ba682cebde033d7dbf8077c1b7d677a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
- '(debug-on-error t)
+    ("36ca8f60565af20ef4f30783aa16a26d96c02df7b4e54e9900a5138fb33808da" "ee89863f86247942d9fc404d47b2704475b146c079c1dcd2390d697ddfa9bdf4" "938d8c186c4cb9ec4a8d8bc159285e0d0f07bad46edf20aa469a89d0d2a586ea" "33969ab092ac7ab559e44bfbc1c4ec95f73c8230914ea18bb70e0044047967aa" "5436e5df71047d1fdd1079afa8341a442b1e26dd68b35b7d3c5ef8bd222057d1" "a800120841da457aa2f86b98fb9fd8df8ba682cebde033d7dbf8077c1b7d677a" "628278136f88aa1a151bb2d6c8a86bf2b7631fbea5f0f76cba2a0079cd910f7d" "bb08c73af94ee74453c90422485b29e5643b73b05e8de029a6909af6a3fb3f58" "1b8d67b43ff1723960eb5e0cba512a2c7a2ad544ddb2533a90101fd1852b426e" "05c3bc4eb1219953a4f182e10de1f7466d28987f48d647c01f1f0037ff35ab9a" "4e262566c3d57706c70e403d440146a5440de056dfaeb3062f004da1711d83fc" "e2ad5dd396cf0bb3250ece88f82389303c96db87bdf507deab63b0b53891f911" default)))
+ '(debug-on-error nil)
  '(default-input-method "TeX")
  '(display-time-mode t)
  '(doc-view-resolution 100)
@@ -52,7 +52,7 @@
  '(indent-tabs-mode nil)
  '(ivy-fixed-height-minibuffer nil)
  '(ivy-format-function (quote ivy-format-function-arrow))
- '(magit-commit-arguments nil)
+ '(magit-commit-arguments (quote ("--gpg-sign=1184707BCA088EBD")))
  '(magit-diff-section-arguments (quote ("--no-ext-diff")))
  '(magit-diff-use-overlays nil)
  '(magit-popup-show-common-commands nil)
@@ -141,14 +141,15 @@
      ("n" "#+NAME: ?" ""))))
  '(package-selected-packages
    (quote
-    (hierarchy emojify sudoku company-lsp lsp-rust counsel diminish flycheck-rust auto-compile visual-fill-column lispy yarn-mode edit-indirect pcache nameless helpful lively graphql-mode suggest dumb-jump dante haskell-mode ert-runner ghub flycheck-package vagrant vagrant-tramp xmlgen sly sly-company sly-quicklisp sly-repl-ansi-color package-lint help-fns+ feature-mode ediprolog geiser sicp sml-mode edit-server kaesar-file omnisharp benchmark-init markdownfmt markdown-mode markdown-mode+ markdown-preview-mode company-racer racer toml-mode package-build shut-up epl git commander f dash cargo cask cask-package-toolset caskxy rust-mode rustfmt fm cmake-mode company-irony company-irony-c-headers flycheck-irony irony minimap ample-theme exec-path-from-shell company-go guide-key free-keys cask-mode gh marshal s cl-lib with-editor git-commit unidecode wc-goal-mode tide go-mode counsel-osx-app sql-indent org-projectile counsel-projectile helm-projectile emmet-mode beacon org-bullets kpm-list vline bitlbee zone-nyan yaml-mode xbm-life xahk-mode wgrep-ag vimish-fold use-package twittering-mode sunshine stash smex slime scss-mode sass-mode rvm robe rainbow-mode rainbow-blocks psvn paredit-menu paredit-everywhere pacmacs ox-twbs osx-lib org-jekyll oauth2 nyan-prompt nyan-mode nose neotree names monokai-theme magit-svn magit-gitflow lua-mode lorem-ipsum key-chord json-rpc jekyll-modes indent-guide impatient-mode hyde helm-swoop helm-spotify helm-rails helm-package helm-gtags helm-commandlinefu helm-bibtex helm-ag gscholar-bibtex goto-last-change golden-ratio god-mode gitignore-mode github-clone github-browse-file gitconfig-mode git-link ggtags font-lock-studio flx-ido fish-mode expand-region evil erefactor erc-terminal-notifier emacsshot edbi-sqlite dirtree demo-it define-word debbugs darkroom csv-mode csharp-mode company-restclient company-c-headers company-anaconda color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clj-refactor chicken-scheme caps-lock btc-ticker bf-mode bbdb auctex aggressive-indent ag ace-window ace-jump-mode @ 4clojure 2048-game)))
+    (lsp-python package-build buttercup clojure-mode multiple-cursors helpful vlf lispy avy company counsel hydra magit org paredit projectile typescript-mode yasnippet easy-hugo hierarchy emojify sudoku company-lsp lsp-rust diminish auto-compile visual-fill-column yarn-mode edit-indirect pcache nameless lively graphql-mode suggest dumb-jump dante haskell-mode ert-runner flycheck-package vagrant vagrant-tramp xmlgen sly sly-company sly-quicklisp sly-repl-ansi-color package-lint help-fns+ feature-mode ediprolog sicp sml-mode edit-server kaesar-file omnisharp benchmark-init markdownfmt markdown-mode markdown-mode+ markdown-preview-mode company-racer racer toml-mode shut-up epl git commander f dash cargo cask cask-package-toolset caskxy rust-mode rustfmt fm cmake-mode company-irony company-irony-c-headers flycheck-irony irony minimap ample-theme exec-path-from-shell company-go guide-key free-keys cask-mode gh marshal s cl-lib git-commit unidecode wc-goal-mode go-mode counsel-osx-app sql-indent org-projectile counsel-projectile emmet-mode beacon org-bullets kpm-list vline bitlbee zone-nyan yaml-mode xbm-life xahk-mode wgrep-ag vimish-fold use-package twittering-mode sunshine stash smex slime scss-mode sass-mode rvm robe rainbow-mode rainbow-blocks psvn paredit-menu paredit-everywhere pacmacs ox-twbs osx-lib org-jekyll oauth2 nyan-prompt nyan-mode nose neotree names monokai-theme magit-svn lua-mode lorem-ipsum key-chord json-rpc jekyll-modes indent-guide impatient-mode hyde helm-swoop helm-spotify helm-rails helm-package helm-gtags helm-commandlinefu helm-bibtex helm-ag gscholar-bibtex goto-last-change golden-ratio god-mode gitignore-mode github-clone github-browse-file gitconfig-mode git-link ggtags font-lock-studio flx-ido fish-mode expand-region evil erefactor erc-terminal-notifier emacsshot edbi-sqlite dirtree demo-it define-word debbugs darkroom csv-mode csharp-mode company-restclient company-c-headers company-anaconda color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode chicken-scheme caps-lock btc-ticker bf-mode bbdb auctex aggressive-indent ag ace-window ace-jump-mode @ 4clojure 2048-game)))
  '(pos-tip-background-color "#A6E22E")
  '(pos-tip-foreground-color "#272822")
  '(projectile-globally-ignored-file-suffixes (quote ("~")))
  '(reftex-plug-into-AUCTeX t)
  '(safe-local-variable-values
    (quote
-    ((column-number-mode . t)
+    ((python-shell-interpreter . "python3")
+     (column-number-mode . t)
      (user-mail-address . "code@seanallred.com"))))
  '(save-interprogram-paste-before-kill t)
  '(send-mail-function (quote smtpmail-send-it))
