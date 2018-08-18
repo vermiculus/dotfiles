@@ -693,3 +693,35 @@ current file to favorites."
   (interactive "r\nsAlign regexp: ")
   (align-regexp start end
                 (concat "\\(\\s-*\\)" regexp) 1 1 t))
+
+(defun melpautil-where-is-melpa (package &optional force-refresh)
+  (interactive (list (intern (let-alist (magithub-repo) .name))
+                     current-prefix-arg))
+  (let ((commit (melpautil-commit-for-package package force-refresh)))
+    (unless commit
+      (error "Commit not found"))
+    (setq commit (magit-rev-parse "--short" commit))
+    (when (derived-mode-p 'magit-log-mode)
+      (goto-char 0)
+      (while (not (string= commit (magit-section-value (magit-current-section))))
+        (magit-section-forward-sibling)))
+    (message "MELPA is at %s" (magit-get-shortname commit))))
+
+(defconst melpautil-archive-url "http://melpa.org/archive.json")
+(defvar melpautil-archive nil)
+(defun melpautil--get-archive (refresh-now)
+  (let ((now (current-time))
+        (archive-url melpautil-archive-url))
+    (cdr (if (or (null melpautil-archive)
+                 refresh-now
+                 ;; auto refresh every five minutes
+                 (< 300 (time-to-seconds (time-subtract now (car melpautil-archive)))))
+             (setq melpautil-archive
+                   (cons now (with-current-buffer (url-retrieve-synchronously melpautil-archive-url)
+                               (search-forward "\n\n")
+                               (json-read))))
+           melpautil-archive))))
+
+(defun melpautil-commit-for-package (package &optional refresh-now)
+  (let-alist (alist-get package (melpautil--get-archive refresh-now))
+    .props.commit))
