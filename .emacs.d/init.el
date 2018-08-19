@@ -584,9 +584,9 @@
 (use-package tide
   :commands (:setup-tide)
   :init
-  (add-hook 'typescript-mode-hook #':setup-tide)
+  (add-hook 'typescript-mode-hook #'*-setup-tide)
   :config
-  (defun :setup-tide ()
+  (defun *-setup-tide ()
     (tide-setup)
     (flycheck-mode 1)
     (setq-local flycheck-check-syntax-automatically '(save mode-enabled))
@@ -596,7 +596,7 @@
 
 (use-package vb6-mode
   :disabled t
-  :if window-system
+  :if *-windows-p
   :load-path "~/dotfiles/.emacs.d/my-packages/"
   :config
   (add-to-list 'auto-mode-alist `(,(rx "EpicSource/" (* not-newline) (or "frm" "ctl" "bas" "cls")) 'visual-basic-mode))
@@ -608,7 +608,6 @@
   :load-path "~/github/emacs-mumps/"
   ;; :load-path "~/dotfiles/.emacs.d/my-packages/"
   )
-(load-file "~/github/emacs-mumps/mumps.el")
 
 (use-package org-epic
   :if *-windows-p
@@ -619,7 +618,7 @@
          ("C-c B" . org-epic:brainbow:open-course-by-id)))
 
 (use-package epic-vb6
-  :if (and *-windows-p window-system)
+  :if *-windows-p
   :load-path "c:/Users/sallred/git/epic-vb6/")
 
 (use-package caps-lock
@@ -627,6 +626,7 @@
   :bind ("C-]" . caps-lock-mode))
 
 (use-package xahk-mode
+  ;; autohotkey
   :if *-windows-p)
 
 (use-package define-word
@@ -637,11 +637,6 @@
   :config
   (setq evil-symbol-word-search t)
   :bind ("C-M-`" . evil-mode))
-
-(use-package sunshine
-  :disabled t
-  :config
-  (setq sunshine-location "Madison, WI"))
 
 (use-package neotree
   :bind ("s-d" . neotree)
@@ -667,7 +662,7 @@
 
 (use-package sx
   :if *-osx-p
-  :load-path "/Users/sean/github/vermiculus/sx.el/"
+  :load-path "~/github/vermiculus/sx.el/"
   :config
   (progn
     (ignore-errors
@@ -701,9 +696,7 @@
                    '(("m" magit-status-internal "magit")))
   :bind (("C-x C-r" . counsel-recentf)))
 
-(use-package hydra
-  :ensure t)
-
+(use-package hydra :ensure t)
 (use-package lispy :ensure t)
 
 (use-package exec-path-from-shell
