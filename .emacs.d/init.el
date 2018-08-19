@@ -50,18 +50,12 @@
 (load (expand-file-name "my-functions.el" user-emacs-directory))
 (require 'bind-key)
 
-(when *-windows-p
-  (setq-default default-directory (expand-file-name "../.." (getenv "HOME")))
-  (setq find-program "cygwin-find"))
-
-(when window-system
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (*-load-customizations))
-
-(when (or *-windows-p
-          (not window-system))
-  (menu-bar-mode -1))
+(let ((default-directory user-emacs-directory))
+  (when *-windows-p
+    (load (expand-file-name "windows.init.el")))
+  (if window-system
+      (load (expand-file-name "gui.init.el"))
+    (load (expand-file-name "tui.init.el"))))
 
 (bind-keys ("C-S-j" . join-line)
            ("C-x C-f" . *-super-completing-find-file)
